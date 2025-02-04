@@ -5,15 +5,19 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
 import { AuthService } from "@/services/auth.service"
-import { useAuth } from "@/contexts/auth.context"
-import type { AuthState, LoginFormData } from "@/types/auth"
+import type { AuthState, SignupFormData } from "@/types/auth"
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter()
-  const { setUser } = useAuth()
-  const [formData, setFormData] = useState<LoginFormData>({
+  const [formData, setFormData] = useState<SignupFormData>({
+    name: "",
     email: "",
+    country: "",
+    phone: "",
+    userType: "ADMIN",
     password: "",
   })
   const [authState, setAuthState] = useState<AuthState>({
@@ -26,15 +30,14 @@ export default function LoginPage() {
     setAuthState({ isLoading: true, error: null })
 
     try {
-      const response = await AuthService.login(formData)
-      if (response.success && response.user) {
-        setUser(response.user)
-        router.push("/dashboard")
+      const response = await AuthService.signup(formData)
+      if (response.success) {
+        router.push(`/verify-email?email=${formData.email}`)
       }
     } catch (error: any) {
       setAuthState({
         isLoading: false,
-        error: error.response?.data?.message || "Invalid credentials",
+        error: error.response?.data?.message || "An error occurred during signup",
       })
     }
   }
@@ -55,13 +58,24 @@ export default function LoginPage() {
               <div className="w-[181px] h-[70px] relative mb-8">
                 <Image src="/ressqx.png" alt="RESQ-X Logo" fill className="object-cover" priority />
               </div>
-              <h1 className="text-5xl text-dark-brown font-medium">Welcome!</h1>
-              <p className="mt-4 text-[13px] text-dark font-medium">
-                Authorized Personnel: Sign in to access the dashboard.
-              </p>
+              <h1 className="text-5xl text-dark-brown font-medium">Create Account</h1>
+              <p className="mt-4 text-[13px] text-dark font-medium">Join our team of authorized personnel.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Input
+                  id="name"
+                  className="w-full max-w-[400px] bg-orange bg-opacity-5 focus:ring-none focus:outline-none focus:border-orange h-[60px] rounded-[10px] border border-beige"
+                  name="name"
+                  type="text"
+                  required
+                  value={formData.name}
+                  placeholder="Full Name"
+                  onChange={handleChange}
+                />
+              </div>
+
               <div className="space-y-2">
                 <Input
                   id="email"
@@ -71,6 +85,32 @@ export default function LoginPage() {
                   required
                   value={formData.email}
                   placeholder="Email"
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Input
+                  id="country"
+                  className="w-full max-w-[400px] bg-orange bg-opacity-5 focus:ring-none focus:outline-none focus:border-orange h-[60px] rounded-[10px] border border-beige"
+                  name="country"
+                  type="text"
+                  required
+                  value={formData.country}
+                  placeholder="Country"
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Input
+                  id="phone"
+                  className="w-full max-w-[400px] bg-orange bg-opacity-5 focus:ring-none focus:outline-none focus:border-orange h-[60px] rounded-[10px] border border-beige"
+                  name="phone"
+                  type="tel"
+                  required
+                  value={formData.phone}
+                  placeholder="Phone Number"
                   onChange={handleChange}
                 />
               </div>
@@ -88,6 +128,26 @@ export default function LoginPage() {
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label>User Type</Label>
+                <RadioGroup
+                  defaultValue="ADMIN"
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, userType: value as "ADMIN" | "CUSTOMER" }))
+                  }
+                  className="flex gap-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="ADMIN" id="admin" />
+                    <Label htmlFor="admin">Admin</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="CUSTOMER" id="customer" />
+                    <Label htmlFor="customer">Customer</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
               {authState.error && <p className="text-sm text-red-500">{authState.error}</p>}
 
               <Button
@@ -95,17 +155,17 @@ export default function LoginPage() {
                 className="w-full max-w-[400px] h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200"
                 disabled={authState.isLoading}
               >
-                {authState.isLoading ? "Signing in..." : "Sign In"}
+                {authState.isLoading ? "Creating Account..." : "Create Account"}
               </Button>
 
               <p className="text-center text-sm text-gray-500">
-                Don't have an account?{" "}
+                Already have an account?{" "}
                 <Button
                   variant="link"
                   className="text-orange hover:text-orange/80"
-                  onClick={() => router.push("/signup")}
+                  onClick={() => router.push("/login")}
                 >
-                  Sign Up
+                  Sign In
                 </Button>
               </p>
             </form>
@@ -125,9 +185,9 @@ export default function LoginPage() {
           <div className="absolute inset-0 bg-black/60 z-10" />
 
           <div className="absolute inset-0 z-20 flex flex-col justify-center p-12 text-white">
-            <h2 className="text-4xl font-bold mb-4">Optimizing administrative workflow.</h2>
+            <h2 className="text-4xl font-bold mb-4">Join our administrative team.</h2>
             <p className="text-lg max-w-xl">
-              Enhancing efficiency, improving response times, and providing seamless operations for the team.
+              Be part of our mission to enhance efficiency and improve response times for seamless operations.
             </p>
           </div>
         </div>

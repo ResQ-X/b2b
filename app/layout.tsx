@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Raleway } from 'next/font/google';
 // import { Geist, Geist_Mono } from "next/font/google";
 import { LoadingProvider } from "@/providers/loading-providers"
+import { AuthProvider } from "@/contexts/auth.context"
 import "./globals.css";
 
 const raleway = Raleway({
@@ -93,7 +94,11 @@ export default function RootLayout({
       <body
         className={`antialiased`}
       >
-        <LoadingProvider>{children}</LoadingProvider>
+        <LoadingProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </LoadingProvider>
       </body>
     </html>
   );
