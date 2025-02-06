@@ -1,9 +1,14 @@
+"use client"
+
 import { Bell, Search } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/contexts/auth.context"
 
 export function DashboardNav() {
+  const { user } = useAuth()
+
   return (
     <div className="h-16 bg-white px-8 flex items-center justify-between">
       <div className="flex-1 max-w-md">
@@ -26,7 +31,7 @@ export function DashboardNav() {
             MJ
           </div>
           <div>
-            <p className="text-[14px] text-dark-brown font-medium">Moses Jason</p>
+            <p className="text-[14px] text-dark-brown font-medium">{user?.name}</p>
             <p className="text-xs text-[#565656]">Admin</p>
           </div>
         </div>
