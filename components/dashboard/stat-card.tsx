@@ -1,16 +1,14 @@
-import * as Icons from "lucide-react"
-// import { ArrowUp } from "lucide-react"
-
-import { cn } from "@/lib/utils"
-import type { StatCard } from "@/types/dashboard"
-import Image from "next/image"
+import * as Icons from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { StatCard } from "@/types/dashboard";
+import Image from "next/image";
 
 interface StatCardProps extends StatCard {
-  className?: string
+  className?: string;
 }
 
 export function StatCard({ title, value, change, icon, className }: StatCardProps) {
-  const Icon = Icons[icon as keyof typeof Icons] as React.ElementType
+  const Icon = Icons[icon as keyof typeof Icons] as React.ElementType;
 
   return (
     <div className={cn("bg-white rounded-xl p-6", className)}>
@@ -25,11 +23,9 @@ export function StatCard({ title, value, change, icon, className }: StatCardProp
       </div>
       <div className="flex items-center gap-1 mt-4">
         <Image src="/ic-trending-up-24px.svg" alt="arrow up" width={20} height={12} />
-        {/* <ArrowUp className="h-4 w-4 text-green-500" /> */}
         <span className="text-[00B69B] text-sm">{change.value}</span>
         <span className="text-dark text-sm">{change.timeframe}</span>
       </div>
     </div>
-  )
+  );
 }
-

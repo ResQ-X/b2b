@@ -1,13 +1,12 @@
 export interface StatCard {
-    title: string
-    value: string | number
-    change: {
-      value: string
-      timeframe: string
-      trend: "up" | "down"
-    }
-    icon: string
-  }
+  title: string;
+  value: number;
+  change: {
+    value: string;
+    timeframe: string;
+  };
+  icon: string;
+}
   
   export interface Incident {
     id: string
