@@ -28,7 +28,7 @@ export function DashboardNav() {
 
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-full bg-orange text-white flex items-center justify-center text-sm font-medium">
-            MJ
+            EA
           </div>
           <div>
             <p className="text-[14px] text-dark-brown font-medium">{user?.name}</p>
