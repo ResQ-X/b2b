@@ -39,7 +39,7 @@ export function Sidebar() {
                 )}
               />
               <Icon className="h-5 w-5" />
-              <span>{item.title}</span>
+              <span className="whitespace-nowrap text-[14px]">{item.title}</span>
             </Link>
           )
         })}

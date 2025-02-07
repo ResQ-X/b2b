@@ -1,6 +1,6 @@
 import axiosInstance from "@/lib/axios";
 import { Cookies } from "react-cookie";
-import type { LoginFormData, SignupFormData, VerifyEmailData, AuthResponse } from "@/types/auth";
+import type { LoginFormData, SignupFormData, VerifyEmailData, AuthResponse, CreateServiceData } from "@/types/auth";
 
 const cookies = new Cookies();
 
@@ -24,6 +24,11 @@ export const AuthService = {
       cookies.set("user", JSON.stringify(response.data.user), { path: "/" });
     }
 
+    return response.data;
+  },
+
+  async createService(data: CreateServiceData): Promise<{ success: boolean; message: string }> {
+    const response = await axiosInstance.post("/resqx-services/create", data);
     return response.data;
   },
 

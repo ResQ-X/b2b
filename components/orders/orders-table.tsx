@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CreateOrderDialog } from "./create-order/create-order-dialog";
+import { CreateServiceDialog } from "./create-order/create-service-dialog";
 import { cn } from "@/lib/utils";
 
 const statusStyles = {
@@ -51,7 +52,8 @@ const MOCK_ORDERS = [
 ] as const;
 
 export function OrdersTable() {
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
+  const [createServiceDialogOpen, setCreateServiceDialogOpen] = useState(false);
 
   return (
     <div className="bg-white rounded-xl p-6">
@@ -125,15 +127,26 @@ export function OrdersTable() {
         <Button
           variant="outline"
           className="border-orange text-orange hover:bg-orange/10"
-          onClick={() => setCreateDialogOpen(true)}
+          onClick={() => setCreateOrderDialogOpen(true)}
         >
           Add New Order
+        </Button>
+        <Button
+          variant="outline"
+          className="border-orange text-orange hover:bg-orange/10"
+          onClick={() => setCreateServiceDialogOpen(true)}
+        >
+          Add New Service
         </Button>
       </div>
 
       <CreateOrderDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
+        open={createOrderDialogOpen}
+        onOpenChange={setCreateOrderDialogOpen}
+      />
+      <CreateServiceDialog
+        open={createServiceDialogOpen}
+        onOpenChange={setCreateServiceDialogOpen}
       />
     </div>
   );

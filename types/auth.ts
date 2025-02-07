@@ -48,3 +48,9 @@ export interface User {
   updated_at: string
 }
 
+export interface CreateServiceData {
+  service_name: string
+  unit_price: number
+  delivery_price: number
+  service_price: number
+}
