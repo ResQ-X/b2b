@@ -10,6 +10,11 @@ export const SIDEBAR_ITEMS = [
       icon: "ClipboardList",
     },
     {
+      title: "Manage Services",
+      href: "/dashboard/services",
+      icon: "LayoutDashboard",
+    },
+    {
       title: "Live Operations",
       href: "/dashboard/operations",
       icon: "Activity",
