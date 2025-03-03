@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-
+import axiosInstance from "@/lib/axios";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -18,49 +18,39 @@ import { CreateServiceDialog } from "./create-order/create-service-dialog";
 import { cn } from "@/lib/utils";
 
 const statusStyles = {
-  "In Progress": "bg-[#fcbe2d]",
-  Canceled: "bg-[#f00]",
-  Resolved: "bg-[#00B69B]",
-  Unassigned: "bg-[#535353] bg-opacity-30",
+  PENDING: "bg-[#fcbe2d]",
+  CANCELED: "bg-[#f00]",
+  RESOLVED: "bg-[#00B69B]",
+  UNASSIGNED: "bg-[#535353] bg-opacity-30",
 };
 
-const MOCK_ORDERS = [
-  {
-    id: "INC-00123",
-    customerName: "Alex Johnson",
-    location: "12 Awolowo Way, Ikeja",
-    time: "12:53 PM",
-    responderId: "FR-045",
-    status: "Resolved",
-  },
-  {
-    id: "INC-00456",
-    customerName: "Sarah Miller",
-    location: "5 Admiralty Road, Lekki",
-    time: "12:53 PM",
-    responderId: "FR-112",
-    status: "In Progress",
-  },
-  {
-    id: "INC-00789",
-    customerName: "David Okafor",
-    location: "21 Herbert Mac Street, Yaba",
-    time: "12:53 PM",
-    responderId: "FR-078",
-    status: "Canceled",
-  },
-] as const;
-
 export function OrdersTable() {
+  const [orders, setOrders] = useState([]);
   const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
   const [createServiceDialogOpen, setCreateServiceDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await axiosInstance.get("/admin/get_all_orders");
+        setOrders(response.data);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  const shortenId = (id: string) => {
+    return `ord-${id.split("-")[0].substring(0, 5)}`;
+  };
 
   return (
     <div className="bg-white rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-[24px] pb-2 font-semibol">Today</h2>
-
+          <h2 className="text-[24px] pb-2 font-semibold">Today</h2>
           <div className="flex gap-1 items-center">
             <div className="h-[5px] w-[5px] rounded-full bg-blue-600" />
             <p className="text-sm text-dark-brown">January 12th</p>
@@ -74,7 +64,7 @@ export function OrdersTable() {
       <Table>
         <TableHeader className="w-full max-w-[1074px] mx-auto rounded-3xl bg-[#979797] bg-opacity-20">
           <TableRow>
-            <TableHead>Incident ID</TableHead>
+            <TableHead>Order ID</TableHead>
             <TableHead>Customer Name</TableHead>
             <TableHead>Location</TableHead>
             <TableHead>Time</TableHead>
@@ -84,20 +74,20 @@ export function OrdersTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {MOCK_ORDERS.map((order) => (
+          {orders.map((order) => (
             <TableRow key={order.id}>
               <TableCell>
                 <Link
-                  href={`/dashboard/incidents/${order.id}`}
+                  href={`/dashboard/orders/${order.id}`}
                   className="hover:text-orange"
                 >
-                  {order.id}
+                  {shortenId(order.id)}
                 </Link>
               </TableCell>
-              <TableCell>{order.customerName}</TableCell>
-              <TableCell>{order.location}</TableCell>
-              <TableCell>{order.time}</TableCell>
-              <TableCell>{order.responderId}</TableCell>
+              <TableCell>{order.user.name}</TableCell>
+              <TableCell>{order.from_address}</TableCell>
+              <TableCell>{new Date(order.created_at).toLocaleTimeString()}</TableCell>
+              <TableCell>{order.professional.id}</TableCell>
               <TableCell>
                 <span
                   className={cn(

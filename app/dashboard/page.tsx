@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { IncidentsTable } from "@/components/dashboard/incidents-table";
+import { OrdersTable } from "@/components/dashboard/incidents-table";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import axiosInstance from "@/lib/axios";
 
@@ -55,9 +55,9 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <IncidentsTable />
+      <OrdersTable />
 
-      <RevenueChart />
+      {/* <RevenueChart /> */}
 
       <footer className="text-center font-medium text-[16px] text-black">© 2025 ResQ-X. All Rights Reserved.</footer>
     </div>

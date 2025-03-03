@@ -13,7 +13,7 @@ import type { AuthState } from "@/types/auth"
 function VerifyEmailContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const email = searchParams.get("email")
+  const email = searchParams.get("email") 
   const [token, setToken] = useState("")
   const [authState, setAuthState] = useState<AuthState>({
     isLoading: false,

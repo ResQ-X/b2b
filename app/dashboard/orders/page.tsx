@@ -12,8 +12,8 @@ export default function OrdersPage() {
       </div>
 
       <OrdersTable />
-      <MonthlyOverview />
-      <OrderTrend />
+      {/* <MonthlyOverview />
+      <OrderTrend /> */}
 
       <footer className="text-center text-sm text-gray-500">© 2025 ResQ-X. All Rights Reserved.</footer>
     </div>
