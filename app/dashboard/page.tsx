@@ -48,18 +48,18 @@ export default function DashboardPage() {
       change: { value: "+0%", timeframe: "this week" },
       icon: "Dices",
     },
-    // {
-    //   title: "Avg Response Time",
-    //   value: metrics.professionals,
-    //   change: { value: "+0%", timeframe: "this week" },
-    //   icon: "Clock",
-    // },
-    // {
-    //   title: "Customer Satisfaction",
-    //   value: metrics.professionals,
-    //   change: { value: "+0%", timeframe: "this week" },
-    //   icon: "Star",
-    // },
+    {
+      title: "Avg Response Time",
+      value: metrics.professionals,
+      change: { value: "+0%", timeframe: "this week" },
+      icon: "Clock",
+    },
+    {
+      title: "Customer Satisfaction",
+      value: metrics.professionals,
+      change: { value: "+0%", timeframe: "this week" },
+      icon: "Star",
+    },
   ];
 
   return (
