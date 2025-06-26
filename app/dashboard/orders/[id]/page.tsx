@@ -32,6 +32,8 @@ export default function OrderDetailsPage({
     fetchOrder();
   }, [id]);
 
+  console.log("Order:", order);
+
   if (!order) {
     return <div>Loading...</div>;
   }

@@ -15,6 +15,8 @@ interface OrderViewProps {
 export function OrderView({ order, onEdit }: OrderViewProps) {
   const router = useRouter();
 
+  console.log("OrderView Props:", order);
+
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-4">
@@ -42,7 +44,7 @@ export function OrderView({ order, onEdit }: OrderViewProps) {
           <div className="space-y-2">
             <label className="text-sm text-gray-500">Customer Name</label>
             <Input
-              value={order?.user?.name || "N/A"}
+              value={order?.requester?.name || "N/A"}
               disabled
               className="bg-white"
             />
@@ -50,7 +52,7 @@ export function OrderView({ order, onEdit }: OrderViewProps) {
           <div className="space-y-2">
             <label className="text-sm text-gray-500">Contact Number</label>
             <Input
-              value={order?.user?.phone || "N/A"}
+              value={order?.requester?.phone || "N/A"}
               disabled
               className="bg-white"
             />
@@ -58,7 +60,7 @@ export function OrderView({ order, onEdit }: OrderViewProps) {
           <div className="space-y-2">
             <label className="text-sm text-gray-500">Email Address</label>
             <Input
-              value={order?.user?.email || "N/A"}
+              value={order?.requester?.email || "N/A"}
               disabled
               className="bg-white"
             />
@@ -86,13 +88,28 @@ export function OrderView({ order, onEdit }: OrderViewProps) {
               className="bg-white"
             />
           </div>
+
           <div className="relative h-[200px] rounded-lg overflow-hidden">
-            <Image
-              src="/map-placeholder.png"
-              alt="Location Map"
-              fill
-              className="object-cover"
-            />
+            <Button
+              variant="outline"
+              className="absolute top-2 right-2 z-10 bg-white text-gray-700 hover:bg-gray-100"
+              onClick={() =>
+                window.open(
+                  `https://www.google.com/maps/search/?api=1&query=${order.from_latitude},${order.from_longitude}`,
+                  "_blank"
+                )
+              }
+            >
+              View on Map
+            </Button>
+            {/* <iframe
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen
+              src={`https://www.google.com/maps/embed/v1/view?key=YOUR_API_KEY&center=${order.from_latitude},${order.from_longitude}&zoom=15`}
+            ></iframe> */}
           </div>
         </div>
       </div>
@@ -110,8 +127,8 @@ export function OrderView({ order, onEdit }: OrderViewProps) {
           <div className="space-y-2">
             <label className="text-sm text-gray-500">Assigned To</label>
             <Input
-              value={`${order?.professional?.name || "N/A"} | ${
-                order?.professional?.id || "N/A"
+              value={`${order?.assigned_first_responder?.name || "N/A"} | ${
+                order?.assigned_first_responder?.id || "N/A"
               }`}
               disabled
               className="bg-white"
