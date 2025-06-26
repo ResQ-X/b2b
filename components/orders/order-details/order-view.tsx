@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import Image from "next/image";
+// import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 // import type { OrderDetails } from "@/types/order";
@@ -79,25 +80,6 @@ export function OrderView({ order, onEdit }: OrderViewProps) {
               disabled
               className="bg-white"
             />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm text-gray-500">Drop Off Location</label>
-            <Input
-              value={order?.to_address || "N/A"}
-              disabled
-              className="bg-white"
-            />
-          </div>
-          {/* <div className="relative h-[200px] rounded-lg overflow-hidden">
-            <Image
-              src="/map-placeholder.png"
-              alt="Location Map"
-              fill
-              className="object-cover"
-            />
-          </div> */}
-
-          <div className="h-[200px] rounded-lg overflow-hidden w-full pt-8">
             <Button
               variant="outline"
               // className="absolute top-2 right-2 z-10 bg-white text-gray-700 hover:bg-gray-100"
@@ -110,6 +92,49 @@ export function OrderView({ order, onEdit }: OrderViewProps) {
             >
               View on Map
             </Button>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm text-gray-500">Drop Off Location</label>
+            <Input
+              value={order?.to_address || "N/A"}
+              disabled
+              className="bg-white"
+            />
+            <Button
+              variant="outline"
+              // className="absolute top-2 right-2 z-10 bg-white text-gray-700 hover:bg-gray-100"
+              onClick={() =>
+                window.open(
+                  `https://www.google.com/maps/search/?api=1&query=${order.to_latitude},${order.to_longitude}`,
+                  "_blank"
+                )
+              }
+            >
+              View on Map
+            </Button>
+          </div>
+          {/* <div className="relative h-[200px] rounded-lg overflow-hidden">
+            <Image
+              src="/map-placeholder.png"
+              alt="Location Map"
+              fill
+              className="object-cover"
+            />
+          </div> */}
+
+          <div className="h-[200px] rounded-lg overflow-hidden w-full pt-8">
+            {/* <Button
+              variant="outline"
+              // className="absolute top-2 right-2 z-10 bg-white text-gray-700 hover:bg-gray-100"
+              onClick={() =>
+                window.open(
+                  `https://www.google.com/maps/search/?api=1&query=${order.from_latitude},${order.from_longitude}`,
+                  "_blank"
+                )
+              }
+            >
+              View on Map
+            </Button> */}
             {/* <iframe
               width="100%"
               height="100%"
@@ -184,7 +209,7 @@ export function OrderView({ order, onEdit }: OrderViewProps) {
         </div>
       </div>
 
-      <div className="flex justify-end gap-4">
+      <div className="flex justify-center gap-4">
         <Button onClick={onEdit} className="bg-orange hover:bg-orange/90">
           Edit Order
         </Button>

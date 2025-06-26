@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import Image from "next/image";
+// import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,10 +31,15 @@ interface Responder {
 }
 
 interface OrderDetails {
+  to_address: string;
+  from_address: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  assigned_professional: any[];
   id: string;
   status: string;
   responder: Responder;
   requester: {
+    phone: string;
     name: string;
     contact: string;
     email: string;
@@ -59,8 +64,11 @@ export function OrderEdit({ order: initialOrder }: OrderEditProps) {
 
   const handleSave = async () => {
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setShowSuccess(true);
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    // setShowSuccess(true);
+    // console.log("Order saved:", order);
+    // console.log("Order ID:", order.id);
+    console.log("Edit order");
   };
 
   return (
@@ -90,12 +98,15 @@ export function OrderEdit({ order: initialOrder }: OrderEditProps) {
           </label>
           <Select defaultValue={order?.responder?.id}>
             <SelectTrigger>
-              <SelectValue placeholder="Select Responder" />
+              <SelectValue placeholder="" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={order?.responder?.id}>
-                {order?.responder?.name}
+                {order?.assigned_professional[0]?.name}
               </SelectItem>
+              {/* <SelectItem value="FR-045">
+                {order.assigned_professional[0]?.name}
+              </SelectItem> */}
               <SelectItem value="FR-046">John Doe</SelectItem>
               <SelectItem value="FR-047">Jane Smith</SelectItem>
             </SelectContent>
@@ -110,6 +121,7 @@ export function OrderEdit({ order: initialOrder }: OrderEditProps) {
               <SelectValue placeholder="Select Status" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="current status">{order.status}</SelectItem>
               <SelectItem value="In Progress">In Progress</SelectItem>
               <SelectItem value="Resolved">Resolved</SelectItem>
               <SelectItem value="Canceled">Canceled</SelectItem>
@@ -137,7 +149,7 @@ export function OrderEdit({ order: initialOrder }: OrderEditProps) {
           <div className="space-y-2">
             <label className="text-sm text-gray-500">Contact Number</label>
             <Input
-              value={order.requester.contact}
+              value={order.requester.phone || order.requester.contact}
               onChange={(e) =>
                 setOrder({
                   ...order,
@@ -181,7 +193,7 @@ export function OrderEdit({ order: initialOrder }: OrderEditProps) {
           <div className="space-y-2">
             <label className="text-sm text-gray-500">Drop Off Location</label>
             <Input
-              value={order?.location?.dropoff}
+              value={order.to_address || order?.location?.dropoff}
               onChange={(e) =>
                 setOrder({
                   ...order,
@@ -191,12 +203,12 @@ export function OrderEdit({ order: initialOrder }: OrderEditProps) {
             />
           </div>
           <div className="relative h-[200px] rounded-lg overflow-hidden">
-            <Image
+            {/* <Image
               src="/map-placeholder.png"
               alt="Location Map"
               fill
               className="object-cover"
-            />
+            /> */}
           </div>
         </div>
       </div>
@@ -220,7 +232,7 @@ export function OrderEdit({ order: initialOrder }: OrderEditProps) {
           <div className="space-y-2">
             <label className="text-sm text-gray-500">Assigned To</label>
             <Input
-              value={`${order?.responder?.name} | ${order?.responder?.id}`}
+              value={`${order?.assigned_professional[0]?.name} | ${order?.assigned_professional[0]?.id}`}
               disabled
               className="bg-white"
             />
@@ -228,11 +240,13 @@ export function OrderEdit({ order: initialOrder }: OrderEditProps) {
           <div className="space-y-2">
             <label className="text-sm text-gray-500">Role</label>
             <Input
-              value={order?.responder?.role}
+              value={order?.assigned_professional[0]?.userType}
               onChange={(e) =>
                 setOrder({
                   ...order,
-                  responder: { ...order.responder, role: e.target.value },
+                  assigned_professional: [
+                    { ...order.assigned_professional[0], role: e.target.value },
+                  ],
                 })
               }
             />
@@ -286,7 +300,7 @@ export function OrderEdit({ order: initialOrder }: OrderEditProps) {
         </div>
       </div> */}
 
-      <div className="flex justify-end">
+      <div className="flex justify-center">
         <Button onClick={handleSave} className="bg-orange hover:bg-orange/90">
           Save Changes
         </Button>
