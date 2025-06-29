@@ -7,7 +7,13 @@ interface StatCardProps extends StatCard {
   className?: string;
 }
 
-export function StatCard({ title, value, change, icon, className }: StatCardProps) {
+export function StatCard({
+  title,
+  value,
+  change,
+  icon,
+  className,
+}: StatCardProps) {
   const Icon = Icons[icon as keyof typeof Icons] as React.ElementType;
 
   return (
@@ -22,7 +28,12 @@ export function StatCard({ title, value, change, icon, className }: StatCardProp
         </div>
       </div>
       <div className="flex items-center gap-1 mt-4">
-        <Image src="/ic-trending-up-24px.svg" alt="arrow up" width={20} height={12} />
+        <Image
+          src="/ic-trending-up-24px.svg"
+          alt="arrow up"
+          width={20}
+          height={12}
+        />
         <span className="text-[00B69B] text-sm">{change.value}</span>
         <span className="text-dark text-sm">{change.timeframe}</span>
       </div>

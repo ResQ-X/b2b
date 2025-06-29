@@ -1,42 +1,49 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { X } from "lucide-react"
+import * as React from "react";
+import { X } from "lucide-react";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { CreateOrderForm } from "./create-order-form"
-import { CreateOrderLoading } from "./create-order-loading"
-import { CreateOrderSuccess } from "./create-order-success"
-import type { CreateOrderState } from "@/types/order-form"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { CreateOrderForm } from "./create-order-form";
+import { CreateOrderLoading } from "./create-order-loading";
+import { CreateOrderSuccess } from "./create-order-success";
+import type { CreateOrderState } from "@/types/order-form";
 
 export function CreateOrderDialog({
   open,
   onOpenChange,
 }: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
   const [state, setState] = React.useState<CreateOrderState>({
     step: "form",
     progress: 0,
-  })
+  });
 
   // Reset state when dialog closes
   React.useEffect(() => {
     if (!open) {
       setTimeout(() => {
-        setState({ step: "form", progress: 0 })
-      }, 300)
+        setState({ step: "form", progress: 0 });
+      }, 300);
     }
-  }, [open])
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="max-w-6xl">
         {state.step === "form" && (
           <>
             <DialogHeader>
-              <DialogTitle className="text-2xl font-semibold">Create New Order</DialogTitle>
+              <DialogTitle className="text-2xl font-bold text-[#332414]">
+                Create New Order
+              </DialogTitle>
             </DialogHeader>
             <button
               onClick={() => onOpenChange(false)}
@@ -47,25 +54,28 @@ export function CreateOrderDialog({
             </button>
             <CreateOrderForm
               onSubmit={async () => {
-                setState({ step: "creating", progress: 0 })
+                setState({ step: "creating", progress: 0 });
 
                 // Simulate progress
                 for (let i = 0; i <= 100; i += 20) {
-                  await new Promise((resolve) => setTimeout(resolve, 500))
-                  setState((prev) => ({ ...prev, progress: i }))
+                  await new Promise((resolve) => setTimeout(resolve, 500));
+                  setState((prev) => ({ ...prev, progress: i }));
                 }
 
-                setState({ step: "success", progress: 100 })
+                setState({ step: "success", progress: 100 });
               }}
             />
           </>
         )}
 
-        {state.step === "creating" && <CreateOrderLoading progress={state.progress} />}
+        {state.step === "creating" && (
+          <CreateOrderLoading progress={state.progress} />
+        )}
 
-        {state.step === "success" && <CreateOrderSuccess onClose={() => onOpenChange(false)} />}
+        {state.step === "success" && (
+          <CreateOrderSuccess onClose={() => onOpenChange(false)} />
+        )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-

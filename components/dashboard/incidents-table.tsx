@@ -25,13 +25,16 @@ const statusStyles = {
 export function OrdersTable() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  console.log("Orders:", orders);
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         setLoading(true);
         const response = await axiosInstance.get("/admin/get_all_orders");
-        setOrders(response.data);
+        // setOrders(response.data);
+        setLoading(false);
+        setOrders(response.data.data);
       } catch (error) {
         console.error("Error fetching orders:", error);
         // Fallback to mock data if API fails
@@ -42,18 +45,20 @@ export function OrdersTable() {
     };
 
     fetchOrders();
-    
+
     // Optional: Set up polling for real-time updates
-    const intervalId = setInterval(fetchOrders, 30000); // Refresh every 30 seconds
-    
-    return () => clearInterval(intervalId); // Clean up on unmount
+    // const intervalId = setInterval(fetchOrders, 30000); // Refresh every 30 seconds
+
+    // return () => clearInterval(intervalId); // Clean up on unmount
   }, []);
 
   // Format date to display only the current date
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
+  const currentDate = new Date().toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
   });
+
+  console.log("Orders:", orders);
 
   return (
     <div className="bg-white rounded-xl p-6">
@@ -87,23 +92,43 @@ export function OrdersTable() {
             </TableHeader>
             <TableBody>
               {orders.slice(0, 5).map((order) => (
-                <TableRow key={order.id}>
+                <TableRow key={order?.id}>
                   <TableCell>
-                    <Link href={`/dashboard/orders/${order.id}`} className="hover:text-orange">
-                      {order.id}
+                    <Link
+                      href={`/dashboard/orders/${order?.id}`}
+                      className="hover:text-orange"
+                    >
+                      {order?.id}
                     </Link>
                   </TableCell>
-                  <TableCell>{order.user?.name || order.customerName}</TableCell>
+                  {/* <TableCell>
+                    {order.user?.name || order.customerName}
+                  </TableCell> */}
+                  <TableCell>{order.requester.name}</TableCell>
                   <TableCell>{order.from_address || order.location}</TableCell>
                   <TableCell>
-                    {order.created_at 
-                      ? new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                    {order.created_at
+                      ? new Date(order.created_at).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
                       : order.time}
                   </TableCell>
-                  <TableCell>{order.professional?.id || order.responderId}</TableCell>
+                  {/* <TableCell>
+                    {order.professional?.id || order.responderId}
+                  </TableCell> */}
+                  <TableCell>{order?.assigned_first_responder?.id}</TableCell>
                   <TableCell>
-                    <span className={cn("inline-flex items-center px-2.5 py-0.5 gap-3 rounded-full text-xs font-medium")}>
-                      <div className={`w-[12px] h-[12px] rounded-full ${statusStyles[order.status]}`} />
+                    <span
+                      className={cn(
+                        "inline-flex items-center px-2.5 py-0.5 gap-3 rounded-full text-xs font-medium"
+                      )}
+                    >
+                      <div
+                        className={`w-[12px] h-[12px] rounded-full ${
+                          statusStyles[order.status]
+                        }`}
+                      />
                       {order.status}
                     </span>
                   </TableCell>
@@ -166,7 +191,7 @@ const MOCK_ORDERS = [
     id: "ORD-00567",
     customerName: "Emmanuel Nwosu",
     location: "8 Badagry Express, Festac",
-    time: "2:30 PM", 
+    time: "2:30 PM",
     responderId: "FR-102",
     status: "In Progress",
   },

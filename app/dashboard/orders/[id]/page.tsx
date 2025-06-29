@@ -2,12 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { use } from "react"; // Import the `use` function
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import axiosInstance from "@/lib/axios";
 import { OrderView } from "@/components/orders/order-details/order-view";
 import { OrderEdit } from "@/components/orders/order-details/order-edit";
 
-export default function OrderDetailsPage({ params }: { params: { id: string } }) {
+export default function OrderDetailsPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const [order, setOrder] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -18,7 +22,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
     const fetchOrder = async () => {
       try {
         const response = await axiosInstance.get("/admin/get_all_orders");
-        const foundOrder = response.data.find((o) => o.id === id); // Use the unwrapped `id`
+        const foundOrder = response?.data?.data.find((o) => o.id === id);
         setOrder(foundOrder);
       } catch (error) {
         console.error("Error fetching order:", error);
@@ -26,7 +30,9 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
     };
 
     fetchOrder();
-  }, [id]); // Use the unwrapped `id` in the dependency array
+  }, [id]);
+
+  console.log("Order:", order);
 
   if (!order) {
     return <div>Loading...</div>;

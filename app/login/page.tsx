@@ -1,50 +1,51 @@
-"use client"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { AuthService } from "@/services/auth.service"
-import { useAuth } from "@/contexts/auth.context"
-import type { AuthState, LoginFormData } from "@/types/auth"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AuthService } from "@/services/auth.service";
+import { useAuth } from "@/contexts/auth.context";
+import type { AuthState, LoginFormData } from "@/types/auth";
 
 export default function LoginPage() {
-  const router = useRouter()
-  const { setUser } = useAuth()
+  const router = useRouter();
+  const { setUser } = useAuth();
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
-  })
+  });
   const [authState, setAuthState] = useState<AuthState>({
     isLoading: false,
     error: null,
-  })
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setAuthState({ isLoading: true, error: null })
+    e.preventDefault();
+    setAuthState({ isLoading: true, error: null });
 
     try {
-      const response = await AuthService.login(formData)
+      const response = await AuthService.login(formData);
       if (response.success && response.user) {
-        setUser(response.user)
-        router.push("/dashboard")
+        setUser(response.user);
+        router.push("/dashboard");
       }
     } catch (error: any) {
       setAuthState({
         isLoading: false,
         error: error.response?.data?.message || "Invalid credentials",
-      })
+      });
     }
-  }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
-    }))
-  }
+    }));
+  };
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center">
@@ -53,7 +54,13 @@ export default function LoginPage() {
           <div className="mx-auto w-full flex justify-center flex-col max-w-sm">
             <div className="mb-8 flex items-center flex-col">
               <div className="w-[181px] h-[70px] relative mb-8">
-                <Image src="/ressqx.png" alt="RESQ-X Logo" fill className="object-cover" priority />
+                <Image
+                  src="/ressqx.png"
+                  alt="RESQ-X Logo"
+                  fill
+                  className="object-cover"
+                  priority
+                />
               </div>
               <h1 className="text-5xl text-dark-brown font-medium">Welcome!</h1>
               <p className="mt-4 text-[13px] text-dark font-medium">
@@ -88,7 +95,9 @@ export default function LoginPage() {
                 />
               </div>
 
-              {authState.error && <p className="text-sm text-red-500">{authState.error}</p>}
+              {authState.error && (
+                <p className="text-sm text-red-500">{authState.error}</p>
+              )}
 
               <Button
                 type="submit"
@@ -125,14 +134,16 @@ export default function LoginPage() {
           <div className="absolute inset-0 bg-black/60 z-10" />
 
           <div className="absolute inset-0 z-20 flex flex-col justify-center p-12 text-white">
-            <h2 className="text-4xl font-bold mb-4">Optimizing administrative workflow.</h2>
+            <h2 className="text-4xl font-bold mb-4">
+              Optimizing administrative workflow.
+            </h2>
             <p className="text-lg max-w-xl">
-              Enhancing efficiency, improving response times, and providing seamless operations for the team.
+              Enhancing efficiency, improving response times, and providing
+              seamless operations for the team.
             </p>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
-

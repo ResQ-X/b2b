@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { StatsCards } from "@/components/operations/stats-cards"
-import { OperationsMap } from "@/components/operations/operations-map"
-import { IncidentsTable } from "@/components/operations/incidents-table"
-import { RespondersTable } from "@/components/operations/responders-table"
-import { PartnersTable } from "@/components/operations/partners-table"
-import type { Incident, Partner, Responder } from "@/types/operations"
+import { useState } from "react";
+import { StatsCards } from "@/components/operations/stats-cards";
+import { OperationsMap } from "@/components/operations/operations-map";
+import { IncidentsTable } from "@/components/operations/incidents-table";
+import { RespondersTable } from "@/components/operations/responders-table";
+import { PartnersTable } from "@/components/operations/partners-table";
+import type { Incident, Partner, Responder } from "@/types/operations";
 
 const MOCK_STATS = {
   activeResponders: 12,
@@ -19,7 +19,7 @@ const MOCK_STATS = {
     avgResponseTime: "4.3%",
     requestsInProgress: "1.8%",
   },
-}
+};
 
 const MOCK_INCIDENTS = [
   {
@@ -41,21 +41,21 @@ const MOCK_INCIDENTS = [
     coordinates: { lat: 6.4281, lng: 3.4219 },
   },
   // ... more incidents
-] as Incident[]
+] as Incident[];
 
 const MOCK_RESPONDERS = [
-    {
-        id: "FR-045",
-        name: "Daniel Osei",
-        status: "On Duty",
-        location: "12 Awolowo Way, Ikeja",
-        performanceMetrics: {
-            avgResponseTime: "10 mins",
-            incidentsResolved: 50,
-        },
+  {
+    id: "FR-045",
+    name: "Daniel Osei",
+    status: "On Duty",
+    location: "12 Awolowo Way, Ikeja",
+    performanceMetrics: {
+      avgResponseTime: "10 mins",
+      incidentsResolved: 50,
     },
-    // ... more responders
-] as Responder[]
+  },
+  // ... more responders
+] as Responder[];
 
 const MOCK_PARTNERS = [
   {
@@ -69,11 +69,13 @@ const MOCK_PARTNERS = [
     },
   },
   // ... more partners
-] as Partner[]
+] as Partner[];
 
 export default function OperationsPage() {
-  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null)
-  const [activeTab, setActiveTab] = useState<"live" | "status">("live")
+  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(
+    null
+  );
+  const [activeTab, setActiveTab] = useState<"live" | "status">("live");
 
   return (
     <div className="space-y-8">
@@ -82,7 +84,9 @@ export default function OperationsPage() {
         <div className="flex gap-2">
           <button
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === "live" ? "bg-orange text-white" : "text-[#A89887] border border-[#F2E7DA] hover:bg-orange/10"
+              activeTab === "live"
+                ? "bg-orange text-white"
+                : "text-[#A89887] border border-[#F2E7DA] hover:bg-orange/10"
             }`}
             onClick={() => setActiveTab("live")}
           >
@@ -90,10 +94,14 @@ export default function OperationsPage() {
           </button>
           <button
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === "status" ? "bg-orange text-white" : "text-gray-600 hover:bg-orange/10"
+              activeTab === "status"
+                ? "bg-orange text-white"
+                : "text-gray-600 hover:bg-orange/10"
             }\`}
             className={\`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === "status" ? "bg-orange text-white" : "text-[#A89887] border border-[#F2E7DA] hover:bg-orange/10"
+              activeTab === "status"
+                ? "bg-orange text-white"
+                : "text-[#A89887] border border-[#F2E7DA] hover:bg-orange/10"
             }`}
             onClick={() => setActiveTab("status")}
           >
@@ -119,9 +127,15 @@ export default function OperationsPage() {
             </button>
           </div>
 
-          <OperationsMap incidents={MOCK_INCIDENTS} selectedIncidentId={selectedIncident?.id} />
+          <OperationsMap
+            incidents={MOCK_INCIDENTS}
+            selectedIncidentId={selectedIncident?.id}
+          />
 
-          <IncidentsTable incidents={MOCK_INCIDENTS} onIncidentSelect={setSelectedIncident} />
+          <IncidentsTable
+            incidents={MOCK_INCIDENTS}
+            onIncidentSelect={setSelectedIncident}
+          />
         </>
       ) : (
         <>
@@ -131,8 +145,9 @@ export default function OperationsPage() {
         </>
       )}
 
-      <footer className="text-center text-sm text-gray-500">© 2025 ResQ-X. All Rights Reserved.</footer>
+      <footer className="text-center text-sm text-gray-500">
+        © 2025 ResQ-X. All Rights Reserved.
+      </footer>
     </div>
-  )
+  );
 }
-

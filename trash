@@ -1,0 +1,203 @@
+  {/* Add Order Modal can be implemented here */}
+      {addOrderModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#FAF8F5] p-8 rounded-[20px] shadow-lg w-full max-w-6xl">
+            <div className="flex justify-between items-start mb-6">
+              <h2 className="text-2xl font-bold text-[#332414]">
+                Create New Order
+              </h2>
+              <button
+                onClick={(e) => closeAddOrderModal(e)}
+                className="bg-[#736250] text-white text-xl font-bold border border-[#2A1C0F] rounded-full w-6 h-6 flex items-center justify-center leading-none"
+              >
+                ×
+              </button>
+            </div>
+
+            <form className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Row 1 */}
+              <div className="flex flex-col">
+                <label
+                  htmlFor=""
+                  className="text-[#332414] text-sm font-semibold mb-2"
+                >
+                  Customer Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="Customer Name"
+                  className="p-3 border border-[#F2E7DA] rounded-[10px] bg-white"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label
+                  htmlFor=""
+                  className="text-[#332414] text-sm font-semibold mb-2"
+                >
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  className="p-3 border border-[#F2E7DA] rounded-[10px] bg-white"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label
+                  htmlFor=""
+                  className="text-[#332414] text-sm font-semibold mb-2"
+                >
+                  Contact Number
+                </label>
+                <input
+                  type="tel"
+                  placeholder="Contact Number"
+                  className="p-3 border border-[#F2E7DA] rounded-[10px] bg-white"
+                />
+              </div>
+
+              {/* Row 2 */}
+
+              <div className="flex flex-col">
+                <label
+                  htmlFor=""
+                  className="text-[#332414] text-sm font-semibold mb-2"
+                >
+                  Location
+                </label>
+                <input
+                  type="text"
+                  placeholder="Location"
+                  className="p-3 border border-[#F2E7DA] rounded-[10px] bg-white"
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label
+                  htmlFor=""
+                  className="text-[#332414] text-sm font-semibold mb-2"
+                >
+                  Service Type
+                </label>
+                <select className="p-3 border border-[#F2E7DA] rounded-[10px] bg-white text-gray-600 outline-none">
+                  <option>Select Service</option>
+                  <option>Out of Fuel</option>
+                  <option>Tow Truck</option>
+                  <option>Flat Tyre</option>
+                  <option>Jump Start</option>
+                  <option>Key Replacement</option>
+                  <option>Health Check</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label
+                  htmlFor=""
+                  className="text-[#332414] text-sm font-semibold mb-2"
+                >
+                  Priority level
+                </label>
+                <select className="p-3 border border-[#F2E7DA] rounded-[10px] bg-white text-gray-600 outline-none">
+                  <option>High</option>
+                  <option>Medium</option>
+                  <option>Low</option>
+                </select>
+              </div>
+
+              {/* Row 3 */}
+
+              <div className="flex flex-col">
+                <label
+                  htmlFor=""
+                  className="text-[#332414] text-sm font-semibold mb-2"
+                >
+                  Assign Responder
+                </label>
+
+                <select className="p-3 border border-[#F2E7DA] rounded-[10px] bg-white text-gray-600 outline-none">
+                  <option>Responder</option>
+                  <option>John Doe</option>
+                  <option>Jane Smith</option>
+                  <option>Mike Johnson</option>
+                  <option>Emily Davis</option>
+                  <option>Sarah Brown</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label
+                  htmlFor=""
+                  className="text-[#332414] text-sm font-semibold mb-2"
+                >
+                  Time Reported
+                </label>
+                <input
+                  type="text"
+                  placeholder="12:35 PM"
+                  className="p-3 border border-[#F2E7DA] rounded-[10px] bg-white"
+                />
+              </div>
+
+              <div className="flex flex-col">
+                {/* <label
+                  htmlFor=""
+                  className="text-[#332414] text-sm font-semibold mb-2"
+                >
+                  Assign Responder
+                </label>
+                <input
+                  type="text"
+                  value="₦ 25,000.00"
+                  readOnly
+                  className="p-3 border border-[#F2E7DA] rounded-[10px] bg-white"
+                /> */}
+              </div>
+
+              {/* Row 4 */}
+              <div className="flex flex-col">
+                <label
+                  htmlFor=""
+                  className="text-[#332414] text-sm font-semibold mb-2"
+                >
+                  Service fee
+                </label>
+                <input
+                  type="text"
+                  value="₦ 25,000.00"
+                  readOnly
+                  className="p-3 border border-[#F2E7DA] rounded-[10px] bg-white"
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label
+                  htmlFor=""
+                  className="text-[#332414] text-sm font-semibold mb-2"
+                >
+                  Payment Method
+                </label>
+                <select className="p-3 border border-[#F2E7DA] rounded-[10px] bg-white text-gray-600 outline-none">
+                  <option>Bank Transfer</option>
+                  <option>Cash</option>
+                </select>
+              </div>
+            </form>
+
+            {/* Footer Buttons */}
+            <div className="flex justify-center gap-4 mt-6">
+              <button
+                type="submit"
+                className="bg-orange text-white px-4 py-2 rounded-[14px] text-sm font-medium transition-colors hover:bg-orange/90"
+              >
+                Create Order
+              </button>
+              <button
+                onClick={(e) => closeAddOrderModal(e)}
+                className="border border-orange text-[#736250] px-4 py-2 rounded-[14px] text-sm font-medium transition-colors hover:bg-orange/10"
+              >
+                Cancel Order
+              </button>
+            </div>
+          </div>
+        </div>
+      )}

@@ -36,7 +36,7 @@ export function IncidentsTable({
         <h2 className="text-[24px] pb-2 font-semibold">Live Incident</h2>
         <div className="flex gap-1 items-center">
           <div className="h-[5px] w-[5px] rounded-full bg-blue-600" />
-          <p className="text-sm text-dark-brown">January 12th</p>
+          {/* <p className="text-sm text-dark-brown">January 12th</p> */}
         </div>
       </div>
 
@@ -105,7 +105,9 @@ export function IncidentsTable({
         </p>
       </div>
       <div className="mt-6 w-full flex items-center justify-center">
-        <Button className="w-full text-[14px] rounded-[14px] font-medium max-w-[168px] mx-auto bg-orange hover:bg-orange/90">View All</Button>
+        <Button className="w-full text-[14px] rounded-[14px] font-medium max-w-[168px] mx-auto bg-orange hover:bg-orange/90">
+          View All
+        </Button>
       </div>
     </div>
   );
