@@ -22,8 +22,19 @@ const statusStyles = {
   Unassigned: "bg-[#535353] bg-opacity-30",
 };
 
+type Order = {
+  id: string;
+  requester?: { name: string };
+  from_address?: string;
+  location?: string;
+  created_at?: string;
+  time?: string;
+  assigned_first_responder?: { id: string };
+  status: string;
+};
+
 export function OrdersTable() {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   console.log("Orders:", orders);
 
@@ -38,7 +49,7 @@ export function OrdersTable() {
       } catch (error) {
         console.error("Error fetching orders:", error);
         // Fallback to mock data if API fails
-        setOrders(MOCK_ORDERS);
+        // setOrders(MOCK_ORDERS);
       } finally {
         setLoading(false);
       }
@@ -104,7 +115,7 @@ export function OrdersTable() {
                   {/* <TableCell>
                     {order.user?.name || order.customerName}
                   </TableCell> */}
-                  <TableCell>{order.requester.name}</TableCell>
+                  <TableCell>{order?.requester?.name}</TableCell>
                   <TableCell>{order.from_address || order.location}</TableCell>
                   <TableCell>
                     {order.created_at
@@ -126,7 +137,9 @@ export function OrdersTable() {
                     >
                       <div
                         className={`w-[12px] h-[12px] rounded-full ${
-                          statusStyles[order.status]
+                          statusStyles[
+                            order.status as keyof typeof statusStyles
+                          ]
                         }`}
                       />
                       {order.status}
@@ -143,9 +156,14 @@ export function OrdersTable() {
           </Table>
 
           <div className="mt-6 w-full flex items-center justify-center">
-            <Button className="w-full text-[14px] rounded-[14px] font-medium max-w-[168px] mx-auto bg-orange hover:bg-orange/90">
-              View All Orders
-            </Button>
+            <Link
+              href="/dashboard/orders"
+              className="w-full max-w-[168px] mx-auto"
+            >
+              <Button className="w-full text-[14px] rounded-[14px] font-medium bg-orange hover:bg-orange/90">
+                View All Orders
+              </Button>
+            </Link>
           </div>
         </>
       )}
@@ -154,45 +172,45 @@ export function OrdersTable() {
 }
 
 // Fallback mock data in case the API fails
-const MOCK_ORDERS = [
-  {
-    id: "ORD-00123",
-    customerName: "Alex Johnson",
-    location: "12 Awolowo Way, Ikeja",
-    time: "12:53 PM",
-    responderId: "FR-045",
-    status: "Resolved",
-  },
-  {
-    id: "ORD-00456",
-    customerName: "Sarah Miller",
-    location: "5 Admiralty Road, Lekki",
-    time: "12:53 PM",
-    responderId: "FR-112",
-    status: "In Progress",
-  },
-  {
-    id: "ORD-00789",
-    customerName: "David Okafor",
-    location: "21 Herbert Mac Street, Yaba",
-    time: "12:53 PM",
-    responderId: "FR-078",
-    status: "Canceled",
-  },
-  {
-    id: "ORD-00234",
-    customerName: "Grace Adebayo",
-    location: "15 Opebi Road, Ikeja",
-    time: "1:15 PM",
-    responderId: "FR-089",
-    status: "Unassigned",
-  },
-  {
-    id: "ORD-00567",
-    customerName: "Emmanuel Nwosu",
-    location: "8 Badagry Express, Festac",
-    time: "2:30 PM",
-    responderId: "FR-102",
-    status: "In Progress",
-  },
-];
+// const MOCK_ORDERS = [
+//   {
+//     id: "ORD-00123",
+//     customerName: "Alex Johnson",
+//     location: "12 Awolowo Way, Ikeja",
+//     time: "12:53 PM",
+//     responderId: "FR-045",
+//     status: "Resolved",
+//   },
+//   {
+//     id: "ORD-00456",
+//     customerName: "Sarah Miller",
+//     location: "5 Admiralty Road, Lekki",
+//     time: "12:53 PM",
+//     responderId: "FR-112",
+//     status: "In Progress",
+//   },
+//   {
+//     id: "ORD-00789",
+//     customerName: "David Okafor",
+//     location: "21 Herbert Mac Street, Yaba",
+//     time: "12:53 PM",
+//     responderId: "FR-078",
+//     status: "Canceled",
+//   },
+//   {
+//     id: "ORD-00234",
+//     customerName: "Grace Adebayo",
+//     location: "15 Opebi Road, Ikeja",
+//     time: "1:15 PM",
+//     responderId: "FR-089",
+//     status: "Unassigned",
+//   },
+//   {
+//     id: "ORD-00567",
+//     customerName: "Emmanuel Nwosu",
+//     location: "8 Badagry Express, Festac",
+//     time: "2:30 PM",
+//     responderId: "FR-102",
+//     status: "In Progress",
+//   },
+// ];

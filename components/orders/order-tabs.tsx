@@ -3,16 +3,21 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { CreateOrderDialog } from "./create-order/create-order-dialog";
 
+type Props = {
+  activeTab: string;
+  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+};
+
 const tabs = [
-  { id: "all", label: "All Orders" },
-  { id: "new", label: "New" },
-  { id: "in-progress", label: "In Progress" },
-  { id: "resolved", label: "Resolved" },
-  { id: "canceled", label: "Canceled" },
+  { id: "ALL", label: "All Orders" },
+  { id: "NEW", label: "New" },
+  { id: "IN_PROGRESS", label: "In Progress" },
+  { id: "RESOLVED", label: "Resolved" },
+  { id: "CANCELLED", label: "Cancelled" },
 ];
 
-export function OrderTabs() {
-  const [activeTab, setActiveTab] = useState("all");
+export function OrderTabs({ activeTab, setActiveTab }: Props) {
+  // const [activeTab, setActiveTab] = useState("all");
   // const [addOrderModalOpen, setAddOrderModalOpen] = useState(false);
 
   // console.log("Active Tab:", addOrderModalOpen);
@@ -26,6 +31,8 @@ export function OrderTabs() {
   //   e.preventDefault();
   //   setAddOrderModalOpen(false);
   // };
+
+  console.log("activeTab tabs component", activeTab);
 
   const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
 

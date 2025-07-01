@@ -1,19 +1,24 @@
+"use client";
+import React, { useState } from "react";
 import { OrderTabs } from "@/components/orders/order-tabs";
 import { OrdersTable } from "@/components/orders/orders-table";
 // import { MonthlyOverview } from "@/components/orders/monthly-overview"
 // import { OrderTrend } from "@/components/orders/order-trend"
 
 export default function OrdersPage() {
+  const [activeTab, setActiveTab] = useState("ALL");
+
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-[32px] text-dark-brown font-bold mb-4">
           Order Management
         </h1>
-        <OrderTabs />
+        <OrderTabs activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
 
-      <OrdersTable />
+      <OrdersTable activeTab={activeTab} />
+
       {/* <MonthlyOverview />
       <OrderTrend /> */}
 
