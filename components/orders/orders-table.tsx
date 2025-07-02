@@ -59,6 +59,7 @@ export function OrdersTable({ activeTab }: Props) {
     status: string;
   };
 
+  const [searchTerm, setSearchTerm] = useState("");
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   // const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
@@ -179,12 +180,20 @@ export function OrdersTable({ activeTab }: Props) {
               />
             </svg>
           </div>
-          <input
+          {/* <input
             type="search"
             id="default-search"
             className="block w-full p-4 ps-10 text-sm text-gray-900 border border-[#F2E7DA] rounded-[19px] bg-[#FAF8F5] outline-none"
             placeholder="Search Orders"
             required
+          /> */}
+          <input
+            type="search"
+            id="default-search"
+            className="block w-full p-4 ps-10 text-sm text-gray-900 border border-[#F2E7DA] rounded-[19px] bg-[#FAF8F5] outline-none"
+            placeholder="Search Orders"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </form>
@@ -241,46 +250,52 @@ export function OrdersTable({ activeTab }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders?.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell>
-                    <Link
+              {orders
+                ?.filter((order) =>
+                  order.requester.name
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
+                )
+                .map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell>
+                      {/* <Link
                       href={`/dashboard/orders/${order.id}`}
                       className="hover:text-orange"
                     >
                       {shortenId(order.id)}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{order.requester.name}</TableCell>
-                  <TableCell>{order.from_address}</TableCell>
-                  <TableCell>
-                    {new Date(order.created_at).toLocaleTimeString()}
-                  </TableCell>
-                  <TableCell>{order?.assigned_first_responder?.id}</TableCell>
-                  <TableCell>
-                    <span
-                      className={cn(
-                        "inline-flex items-center px-2.5 py-0.5 gap-3 rounded-full text-xs font-medium"
-                      )}
-                    >
-                      <div
-                        className={`w-[12px] h-[12px] rounded-full ${
-                          // statusStyles[order.status]
-                          statusStyles[
-                            order.status as keyof typeof statusStyles
-                          ] || "bg-gray-300"
-                        }`}
-                      />
-                      {order.status}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Link href={`/dashboard/orders/${order.id}`}>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </Link> */}
+                    </TableCell>
+                    <TableCell>{order.requester.name}</TableCell>
+                    <TableCell>{order.from_address}</TableCell>
+                    <TableCell>
+                      {new Date(order.created_at).toLocaleTimeString()}
+                    </TableCell>
+                    <TableCell>{order?.assigned_first_responder?.id}</TableCell>
+                    <TableCell>
+                      <span
+                        className={cn(
+                          "inline-flex items-center px-2.5 py-0.5 gap-3 rounded-full text-xs font-medium"
+                        )}
+                      >
+                        <div
+                          className={`w-[12px] h-[12px] rounded-full ${
+                            // statusStyles[order.status]
+                            statusStyles[
+                              order.status as keyof typeof statusStyles
+                            ] || "bg-gray-300"
+                          }`}
+                        />
+                        {order.status}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <Link href={`/dashboard/orders/${order.id}`}>
+                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         )}
