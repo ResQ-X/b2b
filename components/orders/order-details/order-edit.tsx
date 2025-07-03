@@ -65,6 +65,7 @@ export function OrderEdit({ order: initialOrder }: OrderEditProps) {
   const router = useRouter();
   const [order, setOrder] = useState(initialOrder);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
 
   const [responderOptions, setResponderOptions] = useState<
@@ -122,13 +123,20 @@ export function OrderEdit({ order: initialOrder }: OrderEditProps) {
         await axiosInstance.post("/admin/reassign_professional", {
           orderId: order.id,
           proId: order.responder.id,
+          password,
         });
       }
 
       // ✅ Always update order status
+      // await axiosInstance.post("/admin/change_order_status", {
+      //   orderId: order.id,
+      //   status: order.status,
+      // });
+
       await axiosInstance.post("/admin/change_order_status", {
         orderId: order.id,
         status: order.status,
+        password,
       });
 
       setShowSuccess(true);
@@ -309,13 +317,23 @@ export function OrderEdit({ order: initialOrder }: OrderEditProps) {
               }
             />
           </div>
-          <div className="relative h-[200px] rounded-lg overflow-hidden">
-            {/* <Image
+          {/* <div className="relative h-[200px] rounded-lg overflow-hidden">
+            <Image
               src="/map-placeholder.png"
               alt="Location Map"
               fill
               className="object-cover"
-            /> */}
+            />
+          </div> */}
+          <div className="space-y-2">
+            <label className="text-sm text-gray-500">Admin Password</label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password to confirm update"
+              // className="bg-white"
+            />
           </div>
         </div>
       </div>
