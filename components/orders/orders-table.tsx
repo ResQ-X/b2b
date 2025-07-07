@@ -153,6 +153,8 @@ export function OrdersTable({ activeTab }: Props) {
     return `ord-${id.split("-")[0].substring(0, 5)}`;
   };
 
+  console.log("shortenId:", shortenId);
+
   return (
     <div className="">
       <form className="max-w-md mb-4">
