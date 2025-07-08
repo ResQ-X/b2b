@@ -7,7 +7,8 @@ import {
   InfoWindow,
   useLoadScript,
 } from "@react-google-maps/api";
-import { FaTruck, FaUserShield } from "react-icons/fa";
+import { GiTowTruck } from "react-icons/gi";
+import { MdDeliveryDining } from "react-icons/md";
 import { renderToStaticMarkup } from "react-dom/server";
 import { useLiveProfessionals } from "@/lib/useLiveProfessionals";
 import { Cookies } from "react-cookie";
@@ -74,7 +75,20 @@ export default function Page() {
           const lat = Number(pro.latitude);
           const lng = Number(pro.longitude);
 
-          if (!isNaN(lat) && !isNaN(lng) && isFinite(lat) && isFinite(lng)) {
+          // if (!isNaN(lat) && !isNaN(lng) && isFinite(lat) && isFinite(lng)) {
+          //   bounds.extend({ lat, lng });
+          //   hasValidCoordinates = true;
+          // }
+          if (
+            !isNaN(lat) &&
+            !isNaN(lng) &&
+            isFinite(lat) &&
+            !(lat === 0 && lng === 0) &&
+            lat >= -90 &&
+            lat <= 90 &&
+            lng >= -180 &&
+            lng <= 180
+          ) {
             bounds.extend({ lat, lng });
             hasValidCoordinates = true;
           }
@@ -108,7 +122,20 @@ export default function Page() {
         const lat = Number(pro.latitude);
         const lng = Number(pro.longitude);
 
-        if (!isNaN(lat) && !isNaN(lng) && isFinite(lat) && isFinite(lng)) {
+        // if (!isNaN(lat) && !isNaN(lng) && isFinite(lat) && isFinite(lng)) {
+        //   bounds.extend({ lat, lng });
+        //   hasValidCoordinates = true;
+        // }
+        if (
+          !isNaN(lat) &&
+          !isNaN(lng) &&
+          isFinite(lat) &&
+          !(lat === 0 && lng === 0) &&
+          lat >= -90 &&
+          lat <= 90 &&
+          lng >= -180 &&
+          lng <= 180
+        ) {
           bounds.extend({ lat, lng });
           hasValidCoordinates = true;
         }
@@ -126,10 +153,10 @@ export default function Page() {
   const icons = useMemo(() => {
     return {
       PROFESSIONAL_TOW_TRUCK: iconToDataUrl(
-        <FaTruck size={32} color="#ff6600" />
+        <GiTowTruck size={32} color="#ff6600" />
       ),
       PROFESSIONAL_FIRST_RESPONDDER: iconToDataUrl(
-        <FaUserShield size={32} color="#0066cc" />
+        <MdDeliveryDining size={32} color="#0066cc" />
       ),
     };
   }, []);
@@ -149,6 +176,13 @@ export default function Page() {
     ],
     disableDefaultUI: false,
   };
+
+  // const defaultCenter = {
+  //   lat: 6.5244,
+  //   lng: 3.3792,
+  // };
+
+  // const defaultZoom = 10;
 
   // Handle loading states and errors
   if (loadError || mapError) {
@@ -202,13 +236,14 @@ export default function Page() {
     <div className="relative h-screen w-full">
       <GoogleMap
         mapContainerStyle={containerStyle}
+        // center={defaultCenter}
+        zoom={500}
         onLoad={handleMapLoad}
         options={mapOptions}
         onClick={() => setSelectedPro(null)}
       >
         {allProfessionalsData
           .filter((pro) => {
-            // Additional validation to ensure coordinates are valid numbers
             const lat = Number(pro.latitude);
             const lng = Number(pro.longitude);
             return !isNaN(lat) && !isNaN(lng) && isFinite(lat) && isFinite(lng);
