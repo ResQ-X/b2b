@@ -30,6 +30,11 @@ export const SIDEBAR_ITEMS = [
   //   icon: "Building",
   // },
   {
+    title: "ResQ-X Service",
+    href: "/dashboard/resq-service",
+    icon: "Building",
+  },
+  {
     title: "Live Tracking",
     href: "/dashboard/tracking",
     icon: "MapPin",
