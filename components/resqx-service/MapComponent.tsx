@@ -1,6 +1,7 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
-import { LocationMarker } from "@/components/resq-service/LocationMarker";
+import { LocationMarker } from "@/components/resqx-service/LocationMarker";
 import "leaflet/dist/leaflet.css";
 
 interface Position {

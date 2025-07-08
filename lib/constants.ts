@@ -31,7 +31,7 @@ export const SIDEBAR_ITEMS = [
   // },
   {
     title: "ResQ-X Service",
-    href: "/dashboard/resq-service",
+    href: "/dashboard/resqx-service",
     icon: "Building",
   },
   {

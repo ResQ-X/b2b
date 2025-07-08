@@ -1,17 +1,16 @@
 "use client";
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-import { MapComponent } from "@/components/resq-service/MapComponent";
-import { PaymentModal } from "@/components/resq-service/PaymentModal";
-import { DirectPaymentModal } from "@/components/resq-service/DirectPaymentModal";
+import { MapComponent } from "@/components/resqx-service/MapComponent";
+import { PaymentModal } from "@/components/resqx-service/PaymentModal";
+import { DirectPaymentModal } from "@/components/resqx-service/DirectPaymentModal";
 import {
   Tabs,
   TabsList,
   TabsTrigger,
   TabsContent,
-} from "@/components/resq-service/Tabs";
+} from "@/components/resqx-service/Tabs";
 
-// Types
 interface Position {
   lat: number;
   lng: number;
@@ -60,7 +59,6 @@ const ResQXServicesPage: React.FC = () => {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isSUV, setIsSUV] = useState(false);
-  // const [isFlatbed, setIsFlatbed] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestions>({
     start: [],
     end: [],
@@ -71,27 +69,81 @@ const ResQXServicesPage: React.FC = () => {
     useState<DirectPaymentResult | null>(null);
   const [showDirectPaymentModal, setShowDirectPaymentModal] = useState(false);
   const [isNightTime, setIsNightTime] = useState(false);
+  const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Load Google Maps script
+  // Check if component is mounted (client-side only)
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    setIsMounted(true);
+  }, []);
+
+  // Load Google Maps script - Fixed version
+  useEffect(() => {
+    if (!isMounted) return;
+
+    // Check if Google Maps is already loaded
+    if (typeof window !== "undefined" && window.google && window.google.maps) {
+      setIsGoogleMapsLoaded(true);
+      return;
+    }
+
+    // Check if script is already in the document
+    const existingScript = document.querySelector(
+      'script[src*="maps.googleapis.com"]'
+    );
+
+    if (existingScript) {
+      // If script exists, just wait for it to load
+      const handleLoad = () => {
+        setIsGoogleMapsLoaded(true);
+        console.log("Google Maps loaded (existing script)");
+      };
+
+      if (
+        typeof window !== "undefined" &&
+        window.google &&
+        window.google.maps
+      ) {
+        handleLoad();
+      } else {
+        existingScript.addEventListener("load", handleLoad);
+      }
+
+      return () => {
+        existingScript.removeEventListener("load", handleLoad);
+      };
+    } else {
+      // Create new script only if it doesn't exist
       const script = document.createElement("script");
       script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
       script.async = true;
-      script.onload = () => console.log("Google Maps loaded");
+      script.onload = () => {
+        setIsGoogleMapsLoaded(true);
+        console.log("Google Maps loaded (new script)");
+      };
+      script.onerror = () => {
+        console.error("Failed to load Google Maps");
+      };
       document.head.appendChild(script);
 
       return () => {
+        // Only remove if we created it and it's still in the document
         if (document.head.contains(script)) {
           document.head.removeChild(script);
         }
       };
     }
-  }, []);
+  }, [isMounted]);
 
-  // Handle address predictions
+  // Handle address predictions - only run when Google Maps is loaded
   const getPredictions = async (input: string, type: "start" | "end") => {
-    if (typeof window === "undefined" || !window.google || !input.trim()) {
+    if (
+      !isMounted ||
+      !isGoogleMapsLoaded ||
+      typeof window === "undefined" ||
+      !window.google ||
+      !input.trim()
+    ) {
       setSuggestions((prev) => ({ ...prev, [type]: [] }));
       return;
     }
@@ -114,12 +166,18 @@ const ResQXServicesPage: React.FC = () => {
     }
   };
 
-  // Handle address selection
+  // Handle address selection - only run when Google Maps is loaded
   const handleAddressSelect = async (
     address: string,
     type: "start" | "end"
   ) => {
-    if (typeof window === "undefined" || !window.google) return;
+    if (
+      !isMounted ||
+      !isGoogleMapsLoaded ||
+      typeof window === "undefined" ||
+      !window.google
+    )
+      return;
 
     try {
       const geocoder = new window.google.maps.Geocoder();
@@ -167,7 +225,6 @@ const ResQXServicesPage: React.FC = () => {
       pickup_latitude: startPosition.lat.toString(),
       pickup_longitude: startPosition.lng.toString(),
       is_SUV: isSUV,
-      // is_FLATBED: isFlatbed,
       order_type: "TOW_TRUCK",
       user_name: userName,
       user_email: userEmail,
@@ -237,12 +294,22 @@ const ResQXServicesPage: React.FC = () => {
     }
   };
 
+  // Show loading state while component is mounting or Google Maps is loading
+  if (!isMounted || !isGoogleMapsLoaded) {
+    return (
+      <div className="min-h-screen bg-[#fff] p-8 md:p-16 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-2 border-[#FF8500] border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600">
+            {!isMounted ? "Loading..." : "Loading Google Maps..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#fff] p-8 md:p-16 overflow-x-hidden">
-      {/* <h1 className="text-4xl md:text-5xl text-black lg:text-6xl text-center font-bold mb-8 leading-tight">
-        ResQ-X Service Request
-      </h1> */}
-
       <div className="max-w-4xl mx-auto">
         <Tabs defaultValue="location" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
