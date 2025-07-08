@@ -37,7 +37,7 @@ export default function DashboardLayout({
     const resetTimer = () => {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
-        localStorage.removeItem("token");
+        // localStorage.removeItem("token");
         router.push("/login");
       }, 5 * 60 * 1000);
     };

@@ -39,7 +39,7 @@ const iconToDataUrl = (icon: JSX.Element): string => {
     return `data:image/svg+xml,${svgString}`;
   } catch (error) {
     console.error("Error converting icon to data URL:", error);
-    return ""; // Fallback to default marker
+    return "";
   }
 };
 
