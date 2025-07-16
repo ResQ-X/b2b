@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export interface StaffMember {
   id: string;
   name: string;
@@ -20,6 +22,14 @@ export interface AdminStaff extends StaffMember {
 }
 
 export interface StaffProfile {
+  is_verified(
+    is_verified: any
+  ): string | number | readonly string[] | undefined;
+  country: string;
+  is_online: string | number | readonly string[] | undefined;
+  phone: string | number | readonly string[] | undefined;
+  email: string | number | readonly string[] | undefined;
+  userType: ReactNode;
   id: string;
   name: string;
   role: string;

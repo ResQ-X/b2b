@@ -56,11 +56,6 @@ interface OrderDetails {
   }[];
 }
 
-// interface ResponderOption {
-//   id: string;
-//   name: string;
-// }
-
 export function OrderEdit({ order: initialOrder }: OrderEditProps) {
   const router = useRouter();
   const [order, setOrder] = useState(initialOrder);
@@ -118,6 +113,12 @@ export function OrderEdit({ order: initialOrder }: OrderEditProps) {
     setSaving(true);
 
     try {
+      if (password === "") {
+        console.log("Error Message: Missing password");
+        alert("Password is required to save changes.");
+        return;
+      }
+
       // ✅ Only reassign if a responder is selected
       if (order.responder?.id && responderOptions.length > 0) {
         await axiosInstance.post("/admin/reassign_professional", {

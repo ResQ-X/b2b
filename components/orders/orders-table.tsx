@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import axiosInstance from "@/lib/axios";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -254,12 +254,12 @@ export function OrdersTable({ activeTab }: Props) {
                 .map((order) => (
                   <TableRow key={order.id}>
                     <TableCell>
-                      {/* <Link
-                      href={`/dashboard/orders/${order.id}`}
-                      className="hover:text-orange"
-                    >
-                      {shortenId(order.id)}
-                    </Link> */}
+                      <Link
+                        href={`/dashboard/orders/${order.id}`}
+                        className="hover:text-orange"
+                      >
+                        {shortenId(order.id)}
+                      </Link>
                     </TableCell>
                     <TableCell>{order.requester.name}</TableCell>
                     <TableCell>{order.from_address}</TableCell>
@@ -322,7 +322,7 @@ export function OrdersTable({ activeTab }: Props) {
           onOpenChange={setCreateServiceDialogOpen}
         /> */}
       </div>
-      <div className="flex items-center justify-end mt-5">
+      {/* <div className="flex items-center justify-end mt-5">
         <Button type="button" variant="outline" className="bg-transparent">
           Previous
         </Button>
@@ -335,7 +335,7 @@ export function OrdersTable({ activeTab }: Props) {
         <Button type="button" variant="outline" className="bg-transparent">
           Next
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }

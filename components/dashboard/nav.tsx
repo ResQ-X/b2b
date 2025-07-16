@@ -1,9 +1,7 @@
 "use client";
-
-import { Bell } from "lucide-react";
-
+// import { Bell } from "lucide-react";
 // import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth.context";
 
 export function DashboardNav() {
@@ -19,12 +17,12 @@ export function DashboardNav() {
       </div>
 
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="relative">
+        {/* <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
           <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-orange text-[10px] text-white flex items-center justify-center">
             6
           </span>
-        </Button>
+        </Button> */}
 
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-full bg-orange text-white flex items-center justify-center text-sm font-medium">

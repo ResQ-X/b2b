@@ -54,12 +54,13 @@ export function OrderTabs({ activeTab, setActiveTab }: Props) {
           </button>
         ))}
       </div>
-      <button
+
+      {/* <button
         onClick={() => setCreateOrderDialogOpen(true)}
         className="bg-orange text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-orange/90"
       >
         Add New Order
-      </button>
+      </button> */}
 
       <CreateOrderDialog
         open={createOrderDialogOpen}
