@@ -1,36 +1,12 @@
 "use client";
-// import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-// import { useLiveProfessionals } from "@/lib/useLiveProfessionals";
-// import { Cookies } from "react-cookie";
 
 export default function ProfDetails({ professional }: any) {
-  //   const { id } = useParams();
   const router = useRouter();
-  //   const cookies = new Cookies();
-  //   const user = cookies.get("user");
-  //   const userId = user?.id;
-
-  //   const { allProfessionalsData, loading } = useLiveProfessionals(userId);
-  //   const [professional, setProfessional] = useState<any>(null);
-
-  //   useEffect(() => {
-  //     if (!id || loading) return;
-  //     const found = allProfessionalsData.find((p) => p.id === id);
-  //     setProfessional(found);
-  //   }, [id, allProfessionalsData, loading]);
-
-  //   if (loading || !professional) {
-  //     return (
-  //       <div className="p-6">
-  //         <p>Loading professional details...</p>
-  //       </div>
-  //     );
-  //   }
 
   console.log("professional:", professional);
 
