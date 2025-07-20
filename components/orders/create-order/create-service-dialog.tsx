@@ -1,35 +1,38 @@
-"use client"
-
-import * as React from "react"
-import { X } from "lucide-react"
-
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { CreateServiceForm } from "./create-service-form"
-import { CreateServiceLoading } from "./create-service-loading"
-import { CreateServiceSuccess } from "./create-service-success"
-import type { CreateServiceState } from "@/types/service-form"
-import { AuthService } from "@/services/auth.service"
+"use client";
+import * as React from "react";
+import { X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { CreateServiceForm } from "./create-service-form";
+import { CreateServiceLoading } from "./create-service-loading";
+import { CreateServiceSuccess } from "./create-service-success";
+import type { CreateServiceState } from "@/types/service-form";
+import { AuthService } from "@/services/auth.service";
 
 export function CreateServiceDialog({
   open,
   onOpenChange,
 }: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
   const [state, setState] = React.useState<CreateServiceState>({
     step: "form",
     progress: 0,
-  })
+  });
 
   // Reset state when dialog closes
   React.useEffect(() => {
     if (!open) {
       setTimeout(() => {
-        setState({ step: "form", progress: 0 })
-      }, 300)
+        setState({ step: "form", progress: 0 });
+      }, 300);
     }
-  }, [open])
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -37,7 +40,9 @@ export function CreateServiceDialog({
         {state.step === "form" && (
           <>
             <DialogHeader>
-              <DialogTitle className="text-2xl font-semibold">Create New Service</DialogTitle>
+              <DialogTitle className="text-2xl font-semibold">
+                Create New Service
+              </DialogTitle>
             </DialogHeader>
             <button
               onClick={() => onOpenChange(false)}
@@ -48,30 +53,34 @@ export function CreateServiceDialog({
             </button>
             <CreateServiceForm
               onSubmit={async (data) => {
-                setState({ step: "creating", progress: 0 })
+                setState({ step: "creating", progress: 0 });
 
                 try {
                   await AuthService.createService(data);
 
                   // Simulate progress
                   for (let i = 0; i <= 100; i += 20) {
-                    await new Promise((resolve) => setTimeout(resolve, 500))
-                    setState((prev) => ({ ...prev, progress: i }))
+                    await new Promise((resolve) => setTimeout(resolve, 500));
+                    setState((prev) => ({ ...prev, progress: i }));
                   }
 
-                  setState({ step: "success", progress: 100 })
+                  setState({ step: "success", progress: 100 });
                 } catch (error) {
-                  setState({ step: "form", progress: 0 })
+                  setState({ step: "form", progress: 0 });
                 }
               }}
             />
           </>
         )}
 
-        {state.step === "creating" && <CreateServiceLoading progress={state.progress} />}
+        {state.step === "creating" && (
+          <CreateServiceLoading progress={state.progress} />
+        )}
 
-        {state.step === "success" && <CreateServiceSuccess onClose={() => onOpenChange(false)} />}
+        {state.step === "success" && (
+          <CreateServiceSuccess onClose={() => onOpenChange(false)} />
+        )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }

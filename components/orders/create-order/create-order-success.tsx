@@ -1,7 +1,6 @@
-"use client"
-
-import { Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
+"use client";
+import { Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function CreateOrderSuccess({ onClose }: { onClose: () => void }) {
   return (
@@ -16,6 +15,5 @@ export function CreateOrderSuccess({ onClose }: { onClose: () => void }) {
         See Update
       </Button>
     </div>
-  )
+  );
 }
-
