@@ -1,7 +1,6 @@
 "use client";
-
 import { useState, useEffect } from "react";
-import { use } from "react"; // Import the `use` function
+import { use } from "react";
 // import { useRouter } from "next/navigation";
 import axiosInstance from "@/lib/axios";
 import { OrderView } from "@/components/orders/order-details/order-view";
