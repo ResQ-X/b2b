@@ -32,7 +32,7 @@ export function SplashScreen() {
         </div>
       </div>
       <footer className="text-sm text-gray-500">
-        © 2023 RESQ-X. All Rights Reserved.
+        © 2025 RESQ-X. All Rights Reserved.
       </footer>
     </div>
   );

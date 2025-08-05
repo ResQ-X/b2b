@@ -11,7 +11,7 @@ import { AuthService } from "@/services/auth.service";
 import { SIDEBAR_ITEMS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-export function Sidebar() {
+export function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -23,6 +23,15 @@ export function Sidebar() {
   return (
     <div className="w-[242px] h-screen bg-white gap-4 flex flex-col py-3">
       <div className="w-full h-[93px]">
+        <div className="flex justify-end">
+          <button
+            onClick={onClose}
+            className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100"
+          >
+            <Icons.X className="w-6 h-6" />
+          </button>
+        </div>
+
         <Image
           src="/logo2.svg"
           alt="RESQ-X Logo"
@@ -43,6 +52,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={cn(
                 "flex w-full max-w-[193px] h-[50px] items-center gap-3 text-[16px] font-medium px-3 py-2 rounded-lg mb-1 relative group",
                 isActive

@@ -12,6 +12,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const cookies = new Cookies();
@@ -55,10 +56,27 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen">
-      <Sidebar />
+      {/* Sidebar for desktop */}
+      <div className="hidden md:flex">
+        <Sidebar />
+      </div>
+
+      {/* Sidebar for mobile */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={() => setSidebarOpen(false)}
+          />
+          <div className="relative bg-white w-64 z-50">
+            <Sidebar onClose={() => setSidebarOpen(false)} />
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col">
-        <DashboardNav />
-        <main className="flex-1 overflow-y-auto bg-lighter p-8">
+        <DashboardNav onMenuClick={() => setSidebarOpen(true)} />
+        <main className="flex-1 overflow-y-auto bg-lighter p-4 sm:p-8">
           {children}
         </main>
       </div>

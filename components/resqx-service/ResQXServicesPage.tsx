@@ -309,7 +309,7 @@ const ResQXServicesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#fff] p-8 md:p-16 overflow-x-hidden">
+    <div className="min-h-screen bg-[#fff] p-0 md:p-16 overflow-x-hidden">
       <div className="max-w-4xl mx-auto">
         <Tabs defaultValue="location" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
