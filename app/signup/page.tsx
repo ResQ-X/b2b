@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+// import { Label } from "@/components/ui/label";
 import { AuthService } from "@/services/auth.service";
 import type { AuthState, SignupFormData } from "@/types/auth";
 
@@ -19,6 +19,7 @@ export default function SignupPage() {
     country: "",
     phone: "",
     userType: "ADMIN",
+    // userType: "ADMIN" | "CUSTOMER_SUPPORT" | "OPERATION_MANAGER";
     password: "",
   });
   const [authState, setAuthState] = useState<AuthState>({
@@ -29,6 +30,16 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthState({ isLoading: true, error: null });
+
+    console.log("Form Data:", formData);
+
+    if (!/@resqx\.ng$/i.test(formData.email)) {
+      setAuthState({
+        isLoading: false,
+        error: "Only @resqx.ng email addresses are allowed",
+      });
+      return;
+    }
 
     try {
       const response = await AuthService.signup(formData);
@@ -166,14 +177,14 @@ export default function SignupPage() {
                 </button>
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label>User Type</Label>
                 <RadioGroup
                   defaultValue="ADMIN"
                   onValueChange={(value) =>
                     setFormData((prev) => ({
                       ...prev,
-                      userType: value as "ADMIN" | "CUSTOMER",
+                      userType: value as "ADMIN",
                     }))
                   }
                   className="flex gap-4"
@@ -187,7 +198,7 @@ export default function SignupPage() {
                     <Label htmlFor="customer">Customer</Label>
                   </div>
                 </RadioGroup>
-              </div>
+              </div> */}
 
               {authState.error && (
                 <p className="text-sm text-red-500">{authState.error}</p>
