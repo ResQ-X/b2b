@@ -1,37 +1,60 @@
 "use client";
-import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+
 import Image from "next/image";
+import LogoSvg from "@/public/logo.svg";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-// import { Label } from "@/components/ui/label";
 import { AuthService } from "@/services/auth.service";
+import { useState } from "react";
+import AuthImage from "@/public/auth-page.png";
+import AuthText from "@/components/auth/auth-text";
 import type { AuthState, SignupFormData } from "@/types/auth";
+import { Eye, EyeOff } from "lucide-react";
+import CustomInput from "@/components/auth/CustomInput";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
+
   const [formData, setFormData] = useState<SignupFormData>({
     name: "",
     email: "",
     country: "",
     phone: "",
     userType: "ADMIN",
-    // userType: "ADMIN" | "CUSTOMER_SUPPORT" | "OPERATION_MANAGER";
     password: "",
   });
+
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
+
   const [authState, setAuthState] = useState<AuthState>({
     isLoading: false,
     error: null,
   });
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    if (name === "phone") {
+      // keep digits and a leading +
+      const cleaned = value.replace(/[^\d+]/g, "");
+      setFormData((p) => ({ ...p, phone: cleaned }));
+      return;
+    }
+
+    setFormData((p) => ({ ...p, [name]: value }));
+  };
+
+  const passwordsMatch = formData.password === confirmPassword;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSuccessMsg(null);
     setAuthState({ isLoading: true, error: null });
-
-    console.log("Form Data (before format):", formData);
 
     if (!/@resqx\.ng$/i.test(formData.email)) {
       setAuthState({
@@ -41,187 +64,254 @@ export default function SignupPage() {
       return;
     }
 
-    let formattedPhone = formData.phone.trim();
-    if (formattedPhone.startsWith("0")) {
-      formattedPhone = "+234" + formattedPhone.slice(1);
+    if (!formData.password || formData.password.length < 8) {
+      setAuthState({
+        isLoading: false,
+        error: "Password must be at least 8 characters.",
+      });
+      return;
+    }
+
+    if (!passwordsMatch) {
+      setAuthState({
+        isLoading: false,
+        error: "Passwords do not match.",
+      });
+      return;
+    }
+
+    if (!agreeToTerms) {
+      setAuthState({
+        isLoading: false,
+        error:
+          "Please agree to the Terms of Service and Privacy Policy to continue.",
+      });
+      return;
     }
 
     try {
-      const response = await AuthService.signup({
-        ...formData,
-        phone: formattedPhone,
-      });
-      if (response.success) {
-        router.push(`/verify-email?email=${formData.email}`);
+      const res = await AuthService.signup({ ...formData });
+
+      if (res.success) {
+        setSuccessMsg(
+          res.message || "Account created! Please verify your email."
+        );
+        setAuthState({ isLoading: false, error: null });
+        router.push(
+          `/verify-email?email=${encodeURIComponent(formData.email)}`
+        );
+      } else {
+        setAuthState({
+          isLoading: false,
+          error: res?.message || "An error occurred during signup",
+        });
       }
     } catch (error: any) {
       setAuthState({
         isLoading: false,
         error:
-          error.response?.data?.message || "An error occurred during signup",
+          error?.response?.data?.message || "An error occurred during signup",
       });
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
   return (
-    <div className="flex min-h-screen w-full items-center justify-center">
-      <div className="w-full max-w-7xl flex justify-around mx-auto">
-        <div className="flex w-full flex-col justify-center max-w-[488px] px-4 sm:px-6 xl:px-12">
-          <div className="mx-auto w-full flex justify-center flex-col max-w-sm">
+    <div
+      className="relative flex min-h-screen w-full items-center justify-center"
+      style={{
+        backgroundImage: `url(${AuthImage.src})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      {/* overlay */}
+      <div className="absolute inset-0 bg-black/30" />
+
+      <div className="relative z-10 w-full max-w-7xl flex justify-around items-center mx-auto">
+        {/* Left: marketing text */}
+        <AuthText />
+
+        {/* Right: form card */}
+        <div className="flex w-full flex-col justify-center max-w-[900px] px-4 sm:px-6 xl:px-12">
+          <div className="mx-auto w-full flex justify-center flex-col max-w-lg">
             <div className="mb-8 flex items-center flex-col">
-              <div className="w-[181px] h-[70px] relative mb-8">
+              <div className="relative mb-8" style={{ width: 181, height: 70 }}>
                 <Image
-                  src="/ressqx.png"
+                  src={LogoSvg}
                   alt="RESQ-X Logo"
                   fill
-                  className="object-cover"
+                  className="object-contain"
                   priority
                 />
               </div>
-              <h1 className="text-5xl text-dark-brown font-medium">
-                Create Account
+
+              <h1 className="text-4xl md:text-5xl text-white font-semibold leading-[56px]">
+                Welcome!
               </h1>
-              <p className="mt-4 text-[13px] text-dark font-medium">
-                Join our team of authorized personnel.
+              <p className="mt-6 text-sm text-white/90 font-medium text-center">
+                Let’s get started, create an account
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Input
+            <form onSubmit={handleSubmit} className="space-y-6 text-white">
+              {/* Company Name */}
+              <div className="w-full max-w-[500px]">
+                <CustomInput
+                  label="Company’s Name"
                   id="name"
-                  className="w-full max-w-[400px] bg-orange bg-opacity-5 focus:ring-none focus:outline-none focus:border-orange h-[60px] rounded-[10px] border border-beige"
                   name="name"
                   type="text"
-                  required
+                  placeholder="Enter Company’s Name"
                   value={formData.name}
-                  placeholder="Full Name"
-                  onChange={handleChange}
+                  onChange={onChange}
+                  required
+                  className="text-white placeholder:text-white/70"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Input
+              {/* Company Email */}
+              <div className="w-full max-w-[500px]">
+                <CustomInput
+                  label="Company Email Address"
                   id="email"
-                  className="w-full max-w-[400px] bg-orange bg-opacity-5 focus:ring-none focus:outline-none focus:border-orange h-[60px] rounded-[10px] border border-beige"
                   name="email"
                   type="email"
-                  required
+                  placeholder="Enter Email Address"
                   value={formData.email}
-                  placeholder="Email"
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Input
-                  id="country"
-                  className="w-full max-w-[400px] bg-orange bg-opacity-5 focus:ring-none focus:outline-none focus:border-orange h-[60px] rounded-[10px] border border-beige"
-                  name="country"
-                  type="text"
+                  onChange={onChange}
                   required
-                  value={formData.country}
-                  placeholder="Country"
-                  onChange={handleChange}
+                  className="text-white placeholder:text-white/70"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Input
+              {/* Phone */}
+              <div className="w-full max-w-[500px]">
+                <CustomInput
+                  label="Phone Number"
                   id="phone"
-                  className="w-full max-w-[400px] bg-orange bg-opacity-5 focus:ring-none focus:outline-none focus:border-orange h-[60px] rounded-[10px] border border-beige"
                   name="phone"
                   type="tel"
-                  required
+                  placeholder="Enter your phone number"
                   value={formData.phone}
-                  placeholder="Phone Number"
-                  onChange={handleChange}
+                  onChange={onChange}
+                  required
+                  className="text-white placeholder:text-white/70"
                 />
               </div>
 
-              {/* <div className="space-y-2">
-                <Input
-                  id="password"
-                  name="password"
-                  className="w-full max-w-[400px] bg-orange bg-opacity-5 focus:ring-none focus:outline-none focus:border-orange h-[60px] rounded-[10px] border border-beige"
-                  type="password"
-                  placeholder="Password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-              </div> */}
-
-              <div className="relative w-full max-w-[400px]">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full bg-orange bg-opacity-5 h-[60px] rounded-[10px] border border-beige pr-12"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-dark focus:outline-none"
-                  tabIndex={-1}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
+              {/* Password */}
+              <div className="relative w-full max-w-[500px]">
+                <div className="relative w-full">
+                  <CustomInput
+                    label="Password"
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password must be 8 characters long"
+                    value={formData.password}
+                    onChange={onChange}
+                    required
+                    className="pr-12 text-white placeholder:text-white/70"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/90"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showPassword ? <EyeOff /> : <Eye />}
+                  </button>
+                </div>
               </div>
 
-              {/* <div className="space-y-2">
-                <Label>User Type</Label>
-                <RadioGroup
-                  defaultValue="ADMIN"
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      userType: value as "ADMIN",
-                    }))
-                  }
-                  className="flex gap-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="ADMIN" id="admin" />
-                    <Label htmlFor="admin">Admin</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="CUSTOMER" id="customer" />
-                    <Label htmlFor="customer">Customer</Label>
-                  </div>
-                </RadioGroup>
-              </div> */}
+              {/* Confirm Password */}
+              <div className="relative w-full max-w-[500px]">
+                <div className="relative w-full">
+                  <CustomInput
+                    label="Confirm Password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirm ? "text" : "password"}
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className="pr-12 text-white placeholder:text-white/70"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm((prev) => !prev)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/90"
+                    aria-label={
+                      showConfirm
+                        ? "Hide confirm password"
+                        : "Show confirm password"
+                    }
+                  >
+                    {showConfirm ? <EyeOff /> : <Eye />}
+                  </button>
+                </div>
+                {!passwordsMatch && confirmPassword.length > 0 && (
+                  <p className="mt-2 text-xs text-red-300">
+                    Passwords do not match.
+                  </p>
+                )}
+              </div>
 
+              {/* Terms checkbox + copy */}
+              <div className="w-full max-w-[500px]">
+                <label className="flex items-start gap-3 text-sm text-white/90 select-none">
+                  <input
+                    type="checkbox"
+                    className="orange-checkbox mt-1 h-4 w-4 rounded border border-orange bg-transparent focus:outline-none"
+                    checked={agreeToTerms}
+                    onChange={(e) => setAgreeToTerms(e.target.checked)}
+                  />
+                  <span>
+                    By using ResQ-X, you agree to our{" "}
+                    <Link
+                      href="/terms"
+                      className="text-orange underline underline-offset-4 hover:opacity-80"
+                    >
+                      Terms of Service
+                    </Link>{" "}
+                    and{" "}
+                    <Link
+                      href="/privacy"
+                      className="text-orange underline underline-offset-4 hover:opacity-80"
+                    >
+                      Privacy Policy
+                    </Link>
+                    .
+                  </span>
+                </label>
+              </div>
+
+              {/* Messages */}
+              {successMsg && (
+                <p className="text-sm text-emerald-300">{successMsg}</p>
+              )}
               {authState.error && (
-                <p className="text-sm text-red-500">{authState.error}</p>
+                <p className="text-sm text-red-400">{authState.error}</p>
               )}
 
+              {/* Submit */}
               <Button
                 type="submit"
-                className="w-full max-w-[400px] h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200"
-                disabled={authState.isLoading}
+                className="w-full max-w-lg h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200"
+                disabled={authState.isLoading || !agreeToTerms}
               >
-                {authState.isLoading ? "Creating Account..." : "Create Account"}
+                {authState.isLoading ? "Creating Account..." : "Sign Up"}
               </Button>
 
-              <p className="text-center text-sm text-gray-500">
+              {/* Switch to Login */}
+              <p className="text-center text-sm text-white/90">
                 Already have an account?{" "}
                 <Button
+                  type="button"
                   variant="link"
                   className="text-orange hover:text-orange/80"
                   onClick={() => router.push("/login")}
@@ -230,29 +320,6 @@ export default function SignupPage() {
                 </Button>
               </p>
             </form>
-          </div>
-        </div>
-
-        <div className="relative hidden w-full max-w-[600px] h-[602px] lg:block rounded-3xl overflow-hidden">
-          <Image
-            className="absolute inset-0 h-full w-full object-cover"
-            src="/resqman.jpeg"
-            alt="Background"
-            width={1200}
-            height={800}
-            priority
-          />
-
-          <div className="absolute inset-0 bg-black/60 z-10" />
-
-          <div className="absolute inset-0 z-20 flex flex-col justify-center p-12 text-white">
-            <h2 className="text-4xl font-bold mb-4">
-              Join our administrative team.
-            </h2>
-            <p className="text-lg max-w-xl">
-              Be part of our mission to enhance efficiency and improve response
-              times for seamless operations.
-            </p>
           </div>
         </div>
       </div>

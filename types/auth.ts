@@ -2,6 +2,9 @@ export interface LoginFormData {
   email: string;
   password: string;
 }
+export interface ForgotPasswordFormData {
+  email: string;
+}
 
 export interface SignupFormData {
   name: string;
@@ -17,6 +20,13 @@ export interface VerifyEmailData {
   email: string;
   token: string;
 }
+
+export type CreateNewPasswordData = {
+  email?: string;
+  token: string;
+  password: string;
+  confirmPassword?: string;
+};
 
 export interface AuthState {
   isLoading: boolean;

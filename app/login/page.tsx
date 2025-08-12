@@ -2,13 +2,16 @@
 "use client";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import LogoSvg from "@/public/logo.svg";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { AuthService } from "@/services/auth.service";
 import { useAuth } from "@/contexts/auth.context";
+import AuthImage from "@/public/auth-page.png";
+import AuthText from "@/components/auth/auth-text";
 import type { AuthState, LoginFormData } from "@/types/auth";
+import CustomInput from "@/components/auth/CustomInput";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -49,76 +52,87 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center">
-      <div className="w-full max-w-7xl flex justify-around mx-auto">
-        <div className="flex w-full flex-col justify-center max-w-[488px] px-4 sm:px-6 xl:px-12">
-          <div className="mx-auto w-full flex justify-center flex-col max-w-sm">
+    <div
+      className="relative flex min-h-screen w-full items-center justify-center"
+      style={{
+        backgroundImage: `url(${AuthImage.src})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      {/* Optional dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/30" />
+
+      <div className="relative z-10 w-full max-w-7xl flex justify-around mx-auto">
+        <AuthText />
+
+        <div className="flex w-full flex-col justify-center max-w-[600px] px-4 sm:px-6 xl:px-12">
+          <div className="mx-auto w-full flex justify-center flex-col max-w-lg">
             <div className="mb-8 flex items-center flex-col">
               <div className="w-[181px] h-[70px] relative mb-8">
                 <Image
-                  src="/ressqx.png"
+                  src={LogoSvg}
                   alt="RESQ-X Logo"
                   fill
-                  className="object-cover"
+                  className="w-[181px] h-[34px]"
                   priority
                 />
               </div>
-              <h1 className="text-5xl text-dark-brown font-medium">Welcome!</h1>
-              <p className="mt-4 text-[13px] text-dark font-medium">
+              <h1 className="text-5xl text-[#ffff] font-medium">Sign In</h1>
+              <p className="mt-8 text-[13px] text-[#ffff] font-medium">
                 Authorized Personnel: Sign in to access the dashboard.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Input
+            <form onSubmit={handleSubmit} className="space-y-6 text-[#ffff]">
+              <div className="space-y-2 relative w-full max-w-lg">
+                <CustomInput
+                  label="Email Address"
                   id="email"
-                  className="w-full max-w-[400px] bg-orange bg-opacity-5 focus:ring-none focus:outline-none focus:border-orange h-[60px] rounded-[10px] border border-beige"
                   name="email"
                   type="email"
-                  required
+                  placeholder="Enter Email Address"
                   value={formData.email}
-                  placeholder="Email"
                   onChange={handleChange}
+                  required
                 />
               </div>
 
-              {/* <div className="space-y-2">
-                <Input
-                  id="password"
-                  name="password"
-                  className="w-full max-w-[400px] bg-orange bg-opacity-5 focus:ring-none focus:outline-none focus:border-orange h-[60px] rounded-[10px] border border-beige"
-                  type="password"
-                  placeholder="Password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-              </div> */}
-
-              <div className="relative w-full max-w-[400px]">
-                <Input
+              <div className="space-y-2 relative w-full max-w-lg">
+                <CustomInput
+                  label="Password"
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  required
+                  placeholder="Enter Password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full bg-orange bg-opacity-5 h-[60px] rounded-[10px] border border-beige pr-12"
+                  required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-dark focus:outline-none"
+                  className="absolute right-4 top-[55%] -translate-y-1/2 text-dark focus:outline-none"
                   tabIndex={-1}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
+                    <EyeOff className="text-white" />
                   ) : (
-                    <Eye className="w-5 h-5" />
+                    <Eye className="text-white" />
                   )}
                 </button>
+              </div>
+
+              <div className="text-end text-sm font-medium text-[#ffff]">
+                <Button
+                  variant="link"
+                  className="text-[#ffff] hover:text-orange/80"
+                  onClick={() => router.push("/forgot-password")}
+                >
+                  Forgot password?
+                </Button>
               </div>
 
               {authState.error && (
@@ -127,13 +141,13 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                className="w-full max-w-[400px] h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200"
+                className="w-full max-w-lg h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200"
                 disabled={authState.isLoading}
               >
                 {authState.isLoading ? "Signing in..." : "Sign In"}
               </Button>
 
-              <p className="text-center text-sm text-gray-500">
+              <p className="text-center text-sm text-[#ffff]">
                 Don&apos;t have an account?{" "}
                 <Button
                   variant="link"
@@ -144,29 +158,6 @@ export default function LoginPage() {
                 </Button>
               </p>
             </form>
-          </div>
-        </div>
-
-        <div className="relative hidden w-full max-w-[600px] h-[602px] lg:block rounded-3xl overflow-hidden">
-          <Image
-            className="absolute inset-0 h-full w-full object-cover"
-            src="/resqman.jpeg"
-            alt="Background"
-            width={1200}
-            height={800}
-            priority
-          />
-
-          <div className="absolute inset-0 bg-black/60 z-10" />
-
-          <div className="absolute inset-0 z-20 flex flex-col justify-center p-12 text-white">
-            <h2 className="text-4xl font-bold mb-4">
-              Optimizing administrative workflow.
-            </h2>
-            <p className="text-lg max-w-xl">
-              Enhancing efficiency, improving response times, and providing
-              seamless operations for the team.
-            </p>
           </div>
         </div>
       </div>

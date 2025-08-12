@@ -1,22 +1,37 @@
 import axiosInstance from "@/lib/axios";
 import { Cookies } from "react-cookie";
-import type { LoginFormData, SignupFormData, VerifyEmailData, AuthResponse, CreateServiceData } from "@/types/auth";
+import type {
+  LoginFormData,
+  SignupFormData,
+  VerifyEmailData,
+  AuthResponse,
+  CreateServiceData,
+} from "@/types/auth";
 
 const cookies = new Cookies();
 
 export const AuthService = {
   async signup(data: SignupFormData): Promise<AuthResponse> {
-    const response = await axiosInstance.post<AuthResponse>("/auth/signup", data);
+    const response = await axiosInstance.post<AuthResponse>(
+      "/auth/signup",
+      data
+    );
     return response.data;
   },
 
   async verifyEmail(data: VerifyEmailData): Promise<AuthResponse> {
-    const response = await axiosInstance.post<AuthResponse>("/auth/verify_email_verification_token", data);
+    const response = await axiosInstance.post<AuthResponse>(
+      "/auth/verify_email_verification_token",
+      data
+    );
     return response.data;
   },
 
   async login(data: LoginFormData): Promise<AuthResponse> {
-    const response = await axiosInstance.post<AuthResponse>("/auth/login", data);
+    const response = await axiosInstance.post<AuthResponse>(
+      "/auth/login",
+      data
+    );
 
     if (response.data.accessToken) {
       cookies.set("accessToken", response.data.accessToken, { path: "/" });
@@ -27,7 +42,27 @@ export const AuthService = {
     return response.data;
   },
 
-  async createService(data: CreateServiceData): Promise<{ success: boolean; message: string }> {
+  async requestPasswordReset(
+    email: string
+  ): Promise<{ success: boolean; message: string }> {
+    const response = await axiosInstance.post("/auth/request_password_reset", {
+      email,
+    });
+    return response.data;
+  },
+
+  async resetPassword(data: {
+    token: string;
+    password: string;
+    confirmPassword?: string;
+  }): Promise<{ success: boolean; message: string }> {
+    const response = await axiosInstance.post("/auth/reset_password", data);
+    return response.data;
+  },
+
+  async createService(
+    data: CreateServiceData
+  ): Promise<{ success: boolean; message: string }> {
     const response = await axiosInstance.post("/resqx-services/create", data);
     return response.data;
   },

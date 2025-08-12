@@ -6,7 +6,6 @@ body {
   font-family: var(--font-raleway), Arial, Helvetica, sans-serif;
 }
 
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -76,4 +75,34 @@ body {
   .input {
     @apply w-full max-w-[400px] h-[60px] rounded-[10px] border border-beige bg-dark;
   }
+}
+
+.orange-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+  cursor: pointer;
+}
+
+.orange-checkbox:checked {
+  border-color: #f97316 !important; /* orange-500 */
+  background-color: transparent !important;
+}
+
+.orange-checkbox:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #f97316; /* orange-500 */
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.orange-checkbox:focus {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
 }
