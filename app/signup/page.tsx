@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Image from "next/image";
@@ -97,9 +98,10 @@ export default function SignupPage() {
           res.message || "Account created! Please verify your email."
         );
         setAuthState({ isLoading: false, error: null });
-        router.push(
-          `/verify-email?email=${encodeURIComponent(formData.email)}`
-        );
+        // router.push(
+        //   `/verify-email?email=${encodeURIComponent(formData.email)}`
+        // );
+        router.push("/subscription");
       } else {
         setAuthState({
           isLoading: false,
@@ -217,7 +219,7 @@ export default function SignupPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/90"
+                    className="absolute right-4 top-[70%] -translate-y-1/2 text-white/90"
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
@@ -244,7 +246,7 @@ export default function SignupPage() {
                   <button
                     type="button"
                     onClick={() => setShowConfirm((prev) => !prev)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/90"
+                    className="absolute right-4 top-[70%] -translate-y-1/2 text-white/90"
                     aria-label={
                       showConfirm
                         ? "Hide confirm password"
