@@ -104,6 +104,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${raleway.variable}`} suppressHydrationWarning>
+      <head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=5"
+        />
+        <meta name="theme-color" content="#ffffff" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/icons/resqx_icon_orange.png" />
+        <link rel="apple-touch-icon" href="/icons/resqx_icon_orange.png" />
+      </head>
       <body className={`antialiased`}>
         <LoadingProvider>
           <AuthProvider>{children}</AuthProvider>
@@ -112,5 +122,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-// https://pagespeed.web.dev/analysis/https-www-resqx-ng/6etnvsa7jp?form_factor=desktop
