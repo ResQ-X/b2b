@@ -21,7 +21,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   };
 
   return (
-    <div className="w-[242px] h-screen bg-white gap-4 flex flex-col py-3">
+    <div className="w-[242px] h-screen bg-[#3B3835] gap-4 flex flex-col py-3">
       <div className="w-full h-[93px]">
         <div className="flex justify-end">
           <button
@@ -33,55 +33,62 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         </div>
 
         <Image
-          src="/logo2.svg"
+          src="/sidebar-logo.svg"
           alt="RESQ-X Logo"
-          width={242}
-          height={93}
-          className="object-contain"
+          width={130}
+          height={30}
+          className="ml-10 mt-8"
         />
       </div>
 
-      <nav className="flex-1 gap-[32px] flex flex-col mt-6 px-4">
-        {SIDEBAR_ITEMS.map((item) => {
-          const Icon = Icons[
-            item.icon as keyof typeof Icons
-          ] as React.ElementType;
-          const isActive = pathname === item.href;
-          // const isActive = pathname.startsWith(item.href);
+      <nav className="flex-1 flex flex-col mt-6 px-4">
+        {[
+          ["Dashboard"],
+          ["Fuel Delivery", "Maintenance", "Emergency Service"],
+          ["Fleet Management", "Schedule"],
+          ["Billing", "Account"],
+        ].map((group, gi, groups) => (
+          <div key={gi} className="flex flex-col gap-[12px]">
+            {group.map((title) => {
+              const item = SIDEBAR_ITEMS.find((i) => i.title === title)!;
+              const Icon = Icons[
+                item.icon as keyof typeof Icons
+              ] as React.ElementType;
+              const isActive = pathname === item.href;
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onClose}
-              className={cn(
-                "flex w-full max-w-[193px] h-[50px] items-center gap-3 text-[16px] font-medium px-3 py-2 rounded-lg mb-1 relative group",
-                isActive
-                  ? "bg-orange text-white"
-                  : "text-dark-brown hover:bg-orange/10"
-              )}
-            >
-              <div
-                className={cn(
-                  "absolute -left-[22px] top-0 w-[9px] h-full rounded-r-full transition-all",
-                  isActive
-                    ? "bg-orange"
-                    : "bg-transparent group-hover:bg-orange/50"
-                )}
-              />
-              <Icon className="h-5 w-5" />
-              <span className="whitespace-nowrap text-[14px]">
-                {item.title}
-              </span>
-            </Link>
-          );
-        })}
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onClose}
+                  className={cn(
+                    "flex w-full max-w-[193px] h-[50px] items-center gap-3 text-[16px] font-semibold px-3 py-2 rounded-lg mb-1 relative group",
+                    isActive
+                      ? "bg-[#FFFFFF] text-orange"
+                      : "text-[#C6C6C6] hover:bg-orange/10"
+                  )}
+                >
+                  <div className="absolute -left-[22px] top-0 w-[9px] h-full rounded-r-full transition-all" />
+                  <Icon className="h-5 w-5" />
+                  <span className="whitespace-nowrap text-[14px]">
+                    {item.title}
+                  </span>
+                </Link>
+              );
+            })}
+
+            {/* separator after each group except the last */}
+            {gi < groups.length - 1 && (
+              <hr className="my-3 border-t border-white/10" />
+            )}
+          </div>
+        ))}
       </nav>
 
-      <div className="p-4 border-t">
+      <div className="p-4">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 w-full text-gray-600 hover:bg-orange/10 rounded-lg"
+          className="flex items-center gap-3 px-3 py-2 w-full text-[#C6C6C6] hover:bg-orange/10 rounded-lg"
         >
           <LogOut className="h-5 w-5" />
           <span>Log Out</span>

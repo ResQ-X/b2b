@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Cookies } from "react-cookie";
-import { DashboardNav } from "@/components/dashboard/nav";
-import { Sidebar } from "@/components/dashboard/sidebar";
+import { DashboardNav } from "@/components/dashboard/Nav";
+import { Sidebar } from "@/components/dashboard/Sidebar";
 
 export default function DashboardLayout({
   children,
@@ -68,7 +68,7 @@ export default function DashboardLayout({
             className="fixed inset-0 bg-black/50"
             onClick={() => setSidebarOpen(false)}
           />
-          <div className="relative bg-white w-64 z-50">
+          <div className="relative bg-[#3B3835] w-64 z-50">
             <Sidebar onClose={() => setSidebarOpen(false)} />
           </div>
         </div>
@@ -76,7 +76,7 @@ export default function DashboardLayout({
 
       <div className="flex-1 flex flex-col">
         <DashboardNav onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto bg-lighter p-4 sm:p-8">
+        <main className="flex-1 overflow-y-auto bg-[#242220] p-4 sm:p-8">
           {children}
         </main>
       </div>

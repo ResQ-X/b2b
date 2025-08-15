@@ -2,47 +2,42 @@ export const SIDEBAR_ITEMS = [
   {
     title: "Dashboard",
     href: "/dashboard",
-    icon: "LayoutDashboard",
+    icon: "PieChart",
   },
   {
-    title: "Manage Orders",
-    href: "/dashboard/orders",
-    icon: "ClipboardList",
+    title: "Fuel Delivery",
+    href: "/dashboard/fuel-delivery",
+    icon: "Fuel",
   },
   {
-    title: "Manage Services",
-    href: "/dashboard/services",
-    icon: "LayoutDashboard",
-  },
-  // {
-  //   title: "Live Operations",
-  //   href: "/dashboard/operations",
-  //   icon: "Activity",
-  // },
-  {
-    title: "Manage Staff",
-    href: "/dashboard/staff",
-    icon: "Users",
+    title: "Maintenance",
+    href: "/dashboard/maintenance",
+    icon: "Bolt",
   },
   {
-    title: "Manage Users",
-    href: "/dashboard/users",
-    icon: "Users",
-  },
-  // {
-  //   title: "Manage Partners",
-  //   href: "/dashboard/partners",
-  //   icon: "Building",
-  // },
-  {
-    title: "ResQ-X Service",
-    href: "/dashboard/resqx-service",
-    icon: "Building",
+    title: "Emergency Service",
+    href: "/dashboard/emergency",
+    icon: "AlertTriangle",
   },
   {
-    title: "Live Tracking",
-    href: "/dashboard/tracking",
-    icon: "MapPin",
+    title: "Fleet Management",
+    href: "/dashboard/fleet",
+    icon: "CarFront",
+  },
+  {
+    title: "Schedule",
+    href: "/dashboard/schedule",
+    icon: "Calendar",
+  },
+  {
+    title: "Billing",
+    href: "/dashboard/billing",
+    icon: "CreditCard",
+  },
+  {
+    title: "Account",
+    href: "/dashboard/account",
+    icon: "User",
   },
 ] as const;
 

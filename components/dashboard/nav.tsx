@@ -1,10 +1,10 @@
 "use client";
 import React from "react";
-import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react"; // hamburger icon
-// import { Bell } from "lucide-react";
+import Image from "next/image";
+import { Menu } from "lucide-react";
 // import { Input } from "@/components/ui/input";
 // import { Button } from "@/components/ui/button";
+import Search from "@/components/dashboard/Search";
 import { useAuth } from "@/contexts/auth.context";
 
 interface DashboardNavProps {
@@ -12,39 +12,10 @@ interface DashboardNavProps {
 }
 
 export function DashboardNav({ onMenuClick }: DashboardNavProps) {
-  const pathname = usePathname();
   const { user } = useAuth();
 
-  // const getPageTitle = (path: string) => {
-  //   const titleMap: Record<string, string> = {
-  //     "/dashboard": "Dashboard",
-  //     "/dashboard/orders": "Orders Management",
-  //     "/dashboard/services": "Services Management",
-  //     "/dashboard/staff": "Staff Management",
-  //     "/dashboard/resqx-service": "ResQx Service",
-  //     "/dashboard/tracking": "Live Tracking",
-  //   };
-
-  //   return titleMap[path] || "Page";
-  // };
-
-  const getPageTitle = (path: string) => {
-    if (path.startsWith("/dashboard/orders")) return "Orders Management";
-    if (path.startsWith("/dashboard/services")) return "Services Management";
-    if (path.startsWith("/dashboard/staff")) return "Staff Management";
-    if (path.startsWith("/dashboard/users")) return "Users Management";
-    if (path.startsWith("/dashboard/resqx-service")) return "ResQx Service";
-    if (path.startsWith("/dashboard/tracking")) return "Live Tracking";
-    if (path === "/dashboard") return "Dashboard";
-
-    // fallback: turn last segment into Title Case
-    const segments = path.split("/").filter(Boolean);
-    const last = segments[segments.length - 1];
-    return last.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-  };
-
   return (
-    <div className="h-16 bg-white px-4 sm:px-6 md:px-8 flex items-center justify-between border-b">
+    <div className="h-20 bg-[#3B3835] px-4 sm:px-6 md:px-8 flex items-center justify-between border-b border-[#474747]">
       {/* Hamburger (Mobile only) */}
       <div className="md:hidden">
         <button
@@ -57,33 +28,45 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
 
       {/* Logo or Search Placeholder */}
       <div className="flex-1 flex justify-center md:justify-start">
-        <span className="text-lg md:text-2xl font-bold text-dark-brown">
-          {getPageTitle(pathname)}
-        </span>
-        {/* Optional: insert search input here for md+ screens */}
+        {/* Show only on md+ screens */}
+        <div className="hidden md:block w-full max-w-xs">
+          <Search />
+        </div>
       </div>
-
       {/* Right side user info */}
       <div className="flex items-center gap-4">
-        {/* Optional notification button */}
-        {/* 
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-orange text-[10px] text-white flex items-center justify-center">
-            6
-          </span>
-        </Button> 
-        */}
-
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-orange text-white flex items-center justify-center text-sm font-medium">
-            EA
+        <div className="flex items-center gap-8">
+          {/* Notification Icon with badge */}
+          <div className="relative">
+            <div className="flex justify-center items-center bg-[#D8D8D8] w-11 h-11 rounded-full">
+              <Image
+                src="/notification-bing.svg"
+                alt="Notification Avatar"
+                width={24}
+                height={24}
+                className="rounded-full"
+              />
+            </div>
+            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#F87171] text-[10px] text-white flex items-center justify-center">
+              6
+            </span>
           </div>
-          <div className="hidden sm:block text-left">
-            <p className="text-sm text-dark-brown font-medium truncate">
-              {user?.name}
-            </p>
-            <p className="text-xs text-[#565656] truncate">Admin</p>
+
+          {/* User info */}
+          <div className="hidden sm:block text-left text-[#FFFFFF]">
+            <p className="text-sm font-semibold truncate">{user?.name}</p>
+            <p className="text-sm font-semibold truncate">Admin</p>
+          </div>
+
+          {/* User avatar */}
+          <div className="flex justify-center items-center bg-[#D8D8D8] w-11 h-11 rounded-full">
+            <Image
+              src="/user-round.svg"
+              alt="User Avatar"
+              width={24}
+              height={24}
+              className="rounded-full"
+            />
           </div>
         </div>
       </div>

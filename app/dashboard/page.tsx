@@ -1,83 +1,203 @@
 "use client";
-
 import { useEffect, useState } from "react";
-import { StatCard } from "@/components/dashboard/stat-card";
-import { OrdersTable } from "@/components/dashboard/incidents-table";
-// import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import axiosInstance from "@/lib/axios";
+import { CarFront, Bolt, Wallet, Fuel, AlertTriangle } from "lucide-react";
+import FuelIcon from "@/public/gas-station.svg";
+import { StatTile } from "@/components/dashboard/StatTile";
+import { CTABanner } from "@/components/dashboard/CTABanner";
+import { WalletCard } from "@/components/dashboard/WalletCard";
+import { FuelBarChart } from "@/components/dashboard/FuelBarChart";
+import { DonutBreakdown } from "@/components/dashboard/DonutBreakdown";
+import { RecentDeliveries } from "@/components/dashboard/RecentDeliveries";
+import { UpcomingSchedules } from "@/components/dashboard/UpcomingSchedules";
+import { SideCard } from "@/components/dashboard/SideCard";
+import { ServiceBundle } from "@/components/dashboard/ServiceBundle";
+import {
+  getFuelChartData,
+  getCostBreakdownChartData,
+  getRecentDeliveriesForTable,
+  getUpcomingSchedulesForTable,
+  getAvailableYears,
+} from "@/lib/mockData";
 
 interface DashboardMetrics {
   active_order_count: number;
   professionals: number;
   active_order: unknown[];
+  wallet_balance?: number;
 }
 
 export default function DashboardPage() {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const [selectedYear, setSelectedYear] = useState(2025);
+
+  // Get mock data with selected year
+  const fuelChartData = getFuelChartData(selectedYear);
+  const costBreakdownData = getCostBreakdownChartData();
+  const recentDeliveriesData = getRecentDeliveriesForTable();
+  const upcomingSchedulesData = getUpcomingSchedulesForTable();
+  const availableYears = getAvailableYears();
 
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const response = await axiosInstance.get(
+        const { data } = await axiosInstance.get(
           "/admin/get_dashboard_metrics"
         );
-        setMetrics(response.data.data);
+        setMetrics(data.data);
       } catch (error) {
         console.error("Failed to fetch dashboard metrics:", error);
       }
     };
-
     fetchMetrics();
   }, []);
 
-  console.log("metrics", metrics);
-  if (!metrics) {
-    return <div>Loading...</div>;
-  }
+  // Handler for year change
+  const handleYearChange = (year: number) => {
+    setSelectedYear(year);
+    // You can add API calls here to fetch data for the selected year if needed
+    console.log(`Year changed to: ${year}`);
+  };
 
-  const stats = [
+  if (!metrics) return <div className="text-white/80">Loading...</div>;
+
+  const tiles = [
     {
-      title: "Active Orders",
-      value: metrics.active_order_count,
-      change: { value: "+0%", timeframe: "this week" },
-      icon: "Users",
-      // icon: "ShoppingCart",
+      title: "Active Vehicles",
+      value: metrics.active_order_count ?? 0,
+      sub: "89% uptime",
+      icon: CarFront,
+      gradientFrom: "#FF9A3E",
+      gradientTo: "#7E4F18",
     },
     {
-      title: "Professionals",
-      value: metrics.professionals,
-      change: { value: "+0%", timeframe: "this week" },
-      icon: "Dices",
+      title: "Maintenance Pending",
+      value: 8,
+      sub: "View Schedule →",
+      icon: Bolt,
+      gradientFrom: "#FF9A3E",
+      gradientTo: "#7E4F18",
     },
-    // {
-    //   title: "Avg Response Time",
-    //   value: metrics.professionals,
-    //   change: { value: "+0%", timeframe: "this week" },
-    //   icon: "Clock",
-    // },
-    // {
-    //   title: "Customer Satisfaction",
-    //   value: metrics.professionals,
-    //   change: { value: "+0%", timeframe: "this week" },
-    //   icon: "Star",
-    // },
+    {
+      title: "Total Monthly Savings",
+      value: "₦800k",
+      sub: "Maintenance & Fuel Delivery",
+      icon: Wallet,
+      gradientFrom: "#FF9A3E",
+      gradientTo: "#7E4F18",
+    },
   ];
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-4 gap-6">
-        {stats.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
+    <div className="space-y-6">
+      <div className="">
+        <h1 className="text-[#F1F1F1] text-2xl font-semibold">
+          Welcome Emtech,
+        </h1>
+        <p className="text-[#E2E2E2] text-base font-medium">
+          Today&apos;s snapshot of your operations.
+        </p>
+      </div>
+
+      {/* Top tiles */}
+      <div className="flex flex-col md:flex-row md:gap-[52px]">
+        {tiles.map((t, idx) => (
+          <div key={t.title} className="relative flex-1">
+            <StatTile {...t} />
+
+            {idx < tiles.length - 1 && (
+              <span className="hidden md:block absolute -right-[26px] top-1/2 -translate-y-1/2 h-[41px] w-px bg-[#FFFFFF]" />
+            )}
+          </div>
         ))}
       </div>
 
-      <OrdersTable />
+      {/* Mid row: CTA + Wallet */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 border border-[#777777] rounded-2xl">
+          <CTABanner
+            title="Hey! Running low on Fuel?"
+            desc="Place your orders in seconds and keep your fleet fueled | without the hassle."
+            buttonText="Order Fuel"
+            illustration="/fuel-truck.svg"
+            onAction={() => console.log("Order Fuel clicked")}
+          />
+        </div>
 
-      {/* <RevenueChart /> */}
+        <WalletCard
+          balance={metrics.wallet_balance ?? 64500}
+          onTopUp={() => console.log("Top up wallet")}
+        />
+      </div>
 
-      <footer className="text-center font-medium text-[16px] text-black">
-        © 2025 ResQ-X. All Rights Reserved.
-      </footer>
+      {/* Charts row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 border border-[#777777] rounded-2xl">
+          <FuelBarChart
+            title="Monthly Fuel Consumption"
+            data={fuelChartData.data}
+            labels={fuelChartData.labels}
+            availableYears={availableYears}
+            onYearChange={handleYearChange}
+          />
+        </div>
+
+        <DonutBreakdown
+          title="Cost Breakdown"
+          legend={costBreakdownData.legend}
+          slices={costBreakdownData.slices}
+          colors={costBreakdownData.colors}
+        />
+      </div>
+
+      {/* Lists row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <RecentDeliveries items={recentDeliveriesData} />
+
+          <UpcomingSchedules items={upcomingSchedulesData} />
+        </div>
+
+        <div className="space-y-6">
+          <SideCard
+            title="Schedule Service"
+            subtitle="6 vehicles need maintenance"
+            actionText="View Schedule"
+            icon={FuelIcon}
+            onAction={() => console.log("View Schedule")}
+          />
+
+          <SideCard
+            title="Emergency?"
+            subtitle="24/7 roadside assistance"
+            actionText="Get Help Here"
+            icon={FuelIcon}
+            tone="danger"
+            onAction={() => console.log("Get Help")}
+          />
+
+          <ServiceBundle
+            status="Active"
+            services={[
+              {
+                icon: Fuel,
+                title: "Fuel Delivery",
+                desc: "On-demand & scheduled",
+              },
+              {
+                icon: Bolt,
+                title: "Maintenance",
+                desc: "Preventive & repairs",
+              },
+              {
+                icon: AlertTriangle,
+                title: "Emergency",
+                desc: "24/7 roadside & towing",
+              },
+            ]}
+          />
+        </div>
+      </div>
     </div>
   );
 }
