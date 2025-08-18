@@ -1,0 +1,203 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+
+export type RequestServiceForm = {
+  type: string;
+  vehicle: string;
+  location: string;
+  slot: string;
+  notes: string;
+};
+
+type Option = { label: string; value: string };
+
+export default function RequestServiceModal({
+  open,
+  onOpenChange,
+  onSubmit,
+  initialValues,
+  typeOptions = [],
+  vehicleOptions = [],
+  locationOptions = [],
+  slotOptions = [],
+  title = "Request Service",
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (data: RequestServiceForm) => Promise<void> | void;
+  initialValues?: Partial<RequestServiceForm>;
+  typeOptions?: Option[];
+  vehicleOptions?: Option[];
+  locationOptions?: Option[];
+  slotOptions?: Option[];
+  title?: string;
+}) {
+  const [submitting, setSubmitting] = useState(false);
+
+  const [form, setForm] = useState<RequestServiceForm>({
+    type: initialValues?.type || "",
+    vehicle: initialValues?.vehicle || "",
+    location: initialValues?.location || "",
+    slot: initialValues?.slot || "",
+    notes: initialValues?.notes || "",
+  });
+
+  const canSubmit = useMemo(
+    () => form.type && form.vehicle && form.location && form.slot,
+    [form]
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+    setSubmitting(true);
+    try {
+      await onSubmit(form);
+      onOpenChange(false);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg rounded-3xl border-none bg-[#242220] text-white p-6">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-semibold">{title}</DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Maintenance Type */}
+          <Field label="Maintenance Type">
+            <Select
+              value={form.type}
+              onValueChange={(v) => setForm((p) => ({ ...p, type: v }))}
+            >
+              <Trigger />
+              <List options={typeOptions} />
+            </Select>
+          </Field>
+
+          {/* Vehicle */}
+          <Field label="Vehicle">
+            <Select
+              value={form.vehicle}
+              onValueChange={(v) => setForm((p) => ({ ...p, vehicle: v }))}
+            >
+              <Trigger />
+              <List options={vehicleOptions} />
+            </Select>
+          </Field>
+
+          {/* Service Location */}
+          <Field label="Service Location">
+            <Select
+              value={form.location}
+              onValueChange={(v) => setForm((p) => ({ ...p, location: v }))}
+            >
+              <Trigger />
+              <List options={locationOptions} />
+            </Select>
+          </Field>
+
+          {/* Time Slot */}
+          <Field label="Time Slot">
+            <Select
+              value={form.slot}
+              onValueChange={(v) => setForm((p) => ({ ...p, slot: v }))}
+            >
+              <Trigger />
+              <List options={slotOptions} />
+            </Select>
+          </Field>
+
+          {/* Notes */}
+          <div className="space-y-2">
+            <Label className="text-white/80">Additional Notes</Label>
+            <Textarea
+              value={form.notes}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, notes: e.target.value }))
+              }
+              placeholder="Add any extra details to help us find your location or complete the request."
+              className="min-h-[110px] rounded-xl border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
+            />
+          </div>
+
+          <DialogFooter className="mt-2 flex w-full gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="flex-1 h-[54px] border-white/15 text-white hover:bg-white/10"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={!canSubmit || submitting}
+              className="flex-1 h-[54px] bg-[#FF8500] hover:bg-[#ff9a33]"
+            >
+              {submitting ? "Submitting..." : "Request Service"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ---------- tiny internal helpers for consistent UI ---------- */
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-white/80">{label}</Label>
+      {children}
+    </div>
+  );
+}
+
+function Trigger() {
+  return (
+    <SelectTrigger className="h-12 rounded-xl border-white/10 bg-[#2D2A27] text-white">
+      <SelectValue placeholder="Select" />
+    </SelectTrigger>
+  );
+}
+
+function List({ options }: { options: { label: string; value: string }[] }) {
+  return (
+    <SelectContent className="bg-[#2D2A27] text-white border-white/10">
+      {options.map((opt) => (
+        <SelectItem key={opt.value} value={opt.value}>
+          {opt.label}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  );
+}

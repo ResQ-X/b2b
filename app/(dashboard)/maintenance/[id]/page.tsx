@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
-import { FuelView } from "@/components/fuel-delivery/FuelView";
-import { fuelData } from "@/components/fuel-delivery/FuelTable";
+import { MaintenanceView } from "@/components/maintenance/MaintenanceView";
+import { maintenanceData } from "@/components/maintenance/MaintenanceTable";
 
-export default function FuelDetailsPage({
+export default function MaintenanceDetailsPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -11,12 +11,12 @@ export default function FuelDetailsPage({
   // ✅ unwrap params with React.use
   const { id } = React.use(params);
 
-  // decode `/fuel-delivery/%23RF-2024-1000` → `#RF-2024-1000`
+  // decode `/Maintenance-delivery/%23RF-2024-1000` → `#RF-2024-1000`
   const decodedId = decodeURIComponent(id);
 
   const order =
-    fuelData.find((o) => o.id === decodedId) ||
-    fuelData.find(
+    maintenanceData.find((o) => o.id === decodedId) ||
+    maintenanceData.find(
       (o) => o.id.replace(/^#/, "") === decodedId.replace(/^#/, "")
     );
 
@@ -28,7 +28,7 @@ export default function FuelDetailsPage({
 
   return (
     <div className="mx-auto px-4 py-10">
-      <FuelView fuel={order} />
+      <MaintenanceView maintenance={order} />
     </div>
   );
 }

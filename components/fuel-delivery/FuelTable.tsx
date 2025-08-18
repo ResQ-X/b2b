@@ -16,7 +16,7 @@ export type Order = {
   dateISO: string;
 };
 
-export const MOCK_ORDERS: Order[] = [
+export const fuelData: Order[] = [
   {
     id: "RF-2024-1000",
     vehicle: "LND-451-AA",
@@ -207,7 +207,7 @@ const StatusPill = ({ status }: { status: OrderStatus }) => {
 };
 
 export default function OrdersTable({ orders }: { orders?: Order[] }) {
-  const source = orders ?? MOCK_ORDERS;
+  const source = orders ?? fuelData;
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(source.length / PER_PAGE);
 
@@ -237,66 +237,64 @@ export default function OrdersTable({ orders }: { orders?: Order[] }) {
       {/* </div> */}
 
       {/* Rows */}
-      <div className="">
-        <ul className="bg-[#3B3835]">
-          {data.map((o, i) => (
-            <li
-              key={o.id + i}
-              className="grid grid-cols-7 items-center px-6 py-8"
-            >
-              <div className="font-medium">{o.id}</div>
-              <div className="text-white/90">{o.vehicle}</div>
-              <div className="text-white/90">{o.location}</div>
-              <div className="text-white/90">{o.quantityL}L</div>
-              <div className="text-white/90">{formatMoney(o.costNaira)}</div>
-              <div>
-                <StatusPill status={o.status} />
-              </div>
-              <div className="flex items-center justify-end gap-5">
-                <span className="text-white/80">{formatDate(o.dateISO)}</span>
-                <Link
-                  href={`/fuel-delivery/${o.id}`}
-                  className="text-[#FF8500] font-semibold hover:underline"
-                >
-                  View
-                </Link>
-              </div>
-            </li>
-          ))}
-        </ul>
-
-        {/* Divider */}
-        <div className="h-px bg-white/15 mt-6" />
-
-        {/* Pagination + CTA */}
-        <div className="flex flex-col items-center gap-4 py-6">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => canPrev && setPage((p) => p - 1)}
-              disabled={!canPrev}
-              className="rounded-lg bg-white/10 p-2 disabled:opacity-40"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <span className="text-sm text-white/80 min-w-[70px] text-center">
-              {page} / {totalPages}
-            </span>
-            <button
-              onClick={() => canNext && setPage((p) => p + 1)}
-              disabled={!canNext}
-              className="rounded-lg bg-white/10 p-2 disabled:opacity-40"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </div>
-
-          <Button
-            className="w-full max-w-[248px] h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200"
-            // onClick={() => router.push("/signup")}
+      <ul className="bg-[#3B3835]">
+        {data.map((o, i) => (
+          <li
+            key={o.id + i}
+            className="grid grid-cols-7 items-center px-6 py-8"
           >
-            New Delivery <Plus className="h-4 w-4" />
-          </Button>
+            <div className="font-medium">{o.id}</div>
+            <div className="text-white/90">{o.vehicle}</div>
+            <div className="text-white/90">{o.location}</div>
+            <div className="text-white/90">{o.quantityL}L</div>
+            <div className="text-white/90">{formatMoney(o.costNaira)}</div>
+            <div>
+              <StatusPill status={o.status} />
+            </div>
+            <div className="flex items-center justify-end gap-5">
+              <span className="text-white/80">{formatDate(o.dateISO)}</span>
+              <Link
+                href={`/fuel-delivery/${o.id}`}
+                className="text-[#FF8500] font-semibold hover:underline"
+              >
+                View
+              </Link>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      {/* Divider */}
+      <div className="h-px bg-white/15 mt-6" />
+
+      {/* Pagination + CTA */}
+      <div className="flex flex-col items-center gap-4 py-6">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => canPrev && setPage((p) => p - 1)}
+            disabled={!canPrev}
+            className="rounded-lg bg-white/10 p-2 disabled:opacity-40"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <span className="text-sm text-white/80 min-w-[70px] text-center">
+            {page} / {totalPages}
+          </span>
+          <button
+            onClick={() => canNext && setPage((p) => p + 1)}
+            disabled={!canNext}
+            className="rounded-lg bg-white/10 p-2 disabled:opacity-40"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
         </div>
+
+        <Button
+          className="w-full max-w-[248px] h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200"
+          // onClick={() => router.push("/signup")}
+        >
+          New Delivery <Plus className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );

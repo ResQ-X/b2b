@@ -5,7 +5,7 @@ import { Rows3 } from "lucide-react";
 import { StatTile } from "@/components/dashboard/StatTile";
 import Loader from "@/components/ui/Loader";
 import OrdersTable, {
-  MOCK_ORDERS,
+  fuelData,
   type Order,
 } from "@/components/fuel-delivery/FuelTable";
 import FuelTabs from "@/components/fuel-delivery/FuelTabs";
@@ -29,10 +29,10 @@ export default function FuelDeliveryPage() {
 
   const counts = useMemo(
     () => ({
-      all: MOCK_ORDERS.length,
-      completed: MOCK_ORDERS.filter((o) => o.status === "Completed").length,
-      inprogress: MOCK_ORDERS.filter((o) => o.status === "In Progress").length,
-      scheduled: MOCK_ORDERS.filter((o) => o.status === "Scheduled").length,
+      all: fuelData.length,
+      completed: fuelData.filter((o) => o.status === "Completed").length,
+      inprogress: fuelData.filter((o) => o.status === "In Progress").length,
+      scheduled: fuelData.filter((o) => o.status === "Scheduled").length,
     }),
     []
   );
@@ -44,12 +44,12 @@ export default function FuelDeliveryPage() {
 
   const filtered: Order[] = useMemo(() => {
     if (tab === "completed")
-      return MOCK_ORDERS.filter((o) => o.status === "Completed");
+      return fuelData.filter((o) => o.status === "Completed");
     if (tab === "inprogress")
-      return MOCK_ORDERS.filter((o) => o.status === "In Progress");
+      return fuelData.filter((o) => o.status === "In Progress");
     if (tab === "scheduled")
-      return MOCK_ORDERS.filter((o) => o.status === "Scheduled");
-    return MOCK_ORDERS;
+      return fuelData.filter((o) => o.status === "Scheduled");
+    return fuelData;
   }, [tab]);
 
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);

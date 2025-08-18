@@ -1,18 +1,26 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { AuthService } from "@/services/auth.service";
-import { useState } from "react";
+// import { AuthService } from "@/services/auth.service";
+import { Suspense, useState } from "react";
 import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";
 import type { AuthState, CreateNewPasswordData } from "@/types/auth";
 import { Eye, EyeOff } from "lucide-react";
 import CustomInput from "@/components/ui/CustomInput";
 
+// ✅ Wrapper adds the required Suspense boundary
 export default function CreateNewPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black/70" />}>
+      <CreateNewPasswordForm />
+    </Suspense>
+  );
+}
+
+function CreateNewPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -41,65 +49,15 @@ export default function CreateNewPasswordPage() {
   };
 
   const passwordsMatch = data.password === (data.confirmPassword || "");
-  const hasMinLen = data.password.length >= 8;
+  // const hasMinLen = data.password.length >= 8;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuccessMsg(null);
     setAuthState({ isLoading: true, error: null });
 
-    // if (!data.token) {
-    //   setAuthState({
-    //     isLoading: false,
-    //     error:
-    //       "Reset token is missing. Please restart the reset process from 'Forgot password'.",
-    //   });
-    //   return;
-    // }
-    // if (!hasMinLen) {
-    //   setAuthState({
-    //     isLoading: false,
-    //     error: "Password must be at least 8 characters.",
-    //   });
-    //   return;
-    // }
-    // if (!passwordsMatch) {
-    //   setAuthState({
-    //     isLoading: false,
-    //     error: "Passwords do not match.",
-    //   });
-    //   return;
-    // }
-
+    // TODO: re-enable validations + API call when ready
     setTimeout(() => router.push("/login"), 1200);
-
-    // try {
-    //   const res = await AuthService.resetPassword({
-    //     token: data.token,
-    //     password: data.password,
-    //     confirmPassword: data.confirmPassword,
-    //     // If your backend requires email too, include it:
-    //     // email: data.email,
-    //   } as any);
-
-    //   if (res?.success) {
-    //     setSuccessMsg(res.message || "Password reset successful!");
-    //     setAuthState({ isLoading: false, error: null });
-    //     router.push("/login");
-    //   } else {
-    //     setAuthState({
-    //       isLoading: false,
-    //       error: res?.message || "Unable to reset password. Please try again.",
-    //     });
-    //   }
-    // } catch (error: any) {
-    //   setAuthState({
-    //     isLoading: false,
-    //     error:
-    //       error?.response?.data?.message ||
-    //       "Unable to reset password. Please try again.",
-    //   });
-    // }
   };
 
   return (
@@ -172,9 +130,6 @@ export default function CreateNewPasswordPage() {
                     {show.password ? <EyeOff /> : <Eye />}
                   </button>
                 </div>
-                {/* <p className="mt-2 text-xs text-white/70">
-                  Minimum 8 characters.
-                </p> */}
               </div>
 
               {/* Confirm Password */}
