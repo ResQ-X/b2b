@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Menu } from "lucide-react";
 // import { Input } from "@/components/ui/input";
 // import { Button } from "@/components/ui/button";
-import Search from "@/components/dashboard/Search";
+import Search from "@/components/ui/Search";
 import { useAuth } from "@/contexts/auth.context";
 
 interface DashboardNavProps {

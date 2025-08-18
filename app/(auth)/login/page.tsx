@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/auth.context";
 import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";
 import type { AuthState, LoginFormData } from "@/types/auth";
-import CustomInput from "@/components/auth/CustomInput";
+import CustomInput from "@/components/ui/CustomInput";
 
 export default function LoginPage() {
   const router = useRouter();

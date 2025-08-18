@@ -12,7 +12,7 @@ import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";
 import type { AuthState, SignupFormData } from "@/types/auth";
 import { Eye, EyeOff } from "lucide-react";
-import CustomInput from "@/components/auth/CustomInput";
+import CustomInput from "@/components/ui/CustomInput";
 
 export default function SignupPage() {
   const router = useRouter();

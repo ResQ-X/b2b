@@ -12,13 +12,11 @@ export function StatTile({
   value: number | string;
   sub?: string;
   icon: LucideIcon;
-  gradientFrom?: string;
-  gradientTo?: string;
   borderColor?: string;
 }) {
   return (
     <div
-      className="relative rounded-[28px] p-5 md:p-6 text-white min-h-[138px] border-2"
+      className="relative rounded-[28px] p-5 md:p-6 text-white min-h-[138px] border-2 mb-5 lg:mb-0"
       style={{
         background: "linear-gradient(179.52deg, #5E5E5E 0.42%, #763F04 99.58%)",
         borderColor,
