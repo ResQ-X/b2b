@@ -3,6 +3,9 @@ import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import RequestServiceModal, {
+  type RequestServiceForm,
+} from "@/components/fuel-delivery/FuelModal";
 
 export type OrderStatus = "Completed" | "In Progress" | "Scheduled";
 
@@ -219,6 +222,36 @@ export default function OrdersTable({ orders }: { orders?: Order[] }) {
   const canPrev = page > 1;
   const canNext = page < totalPages;
 
+  const [open, setOpen] = useState(false);
+
+  const typeOptions = [
+    { label: "Oil Change", value: "oil-change" },
+    { label: "Brake Inspection", value: "brake-inspection" },
+    { label: "Tire Rotation", value: "tire-rotation" },
+    { label: "Full Service", value: "full-service" },
+  ];
+  const vehicleOptions = [
+    { label: "LND-451-AA", value: "LND-451-AA" },
+    { label: "KJA-220-KD", value: "KJA-220-KD" },
+    { label: "ABC-123-XY", value: "ABC-123-XY" },
+  ];
+  const locationOptions = [
+    { label: "Lekki Office", value: "lekki-office" },
+    { label: "VI Branch", value: "vi-branch" },
+    { label: "Ikeja Depot", value: "ikeja-depot" },
+  ];
+  const slotOptions = [
+    { label: "08:00–10:00", value: "08:00-10:00" },
+    { label: "10:00–12:00", value: "10:00-12:00" },
+    { label: "12:00–14:00", value: "12:00-14:00" },
+  ];
+
+  const handleSubmit = async (data: RequestServiceForm) => {
+    // TODO: call your API
+    // await axios.post('/api/maintenance/request', data)
+    console.log("submit", data);
+  };
+
   return (
     <div className="bg-[#3B3835] rounded-b-[20px] text-white overflow-hidden">
       {/* Header */}
@@ -291,11 +324,21 @@ export default function OrdersTable({ orders }: { orders?: Order[] }) {
 
         <Button
           className="w-full max-w-[248px] h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200"
-          // onClick={() => router.push("/signup")}
+          onClick={() => setOpen(true)}
         >
           New Delivery <Plus className="h-4 w-4" />
         </Button>
       </div>
+
+      <RequestServiceModal
+        open={open}
+        onOpenChange={setOpen}
+        onSubmit={handleSubmit}
+        typeOptions={typeOptions}
+        vehicleOptions={vehicleOptions}
+        locationOptions={locationOptions}
+        slotOptions={slotOptions}
+      />
     </div>
   );
 }

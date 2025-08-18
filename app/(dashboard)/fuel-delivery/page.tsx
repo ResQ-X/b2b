@@ -4,7 +4,7 @@ import axiosInstance from "@/lib/axios";
 import { Rows3 } from "lucide-react";
 import { StatTile } from "@/components/dashboard/StatTile";
 import Loader from "@/components/ui/Loader";
-import OrdersTable, {
+import FuelTable, {
   fuelData,
   type Order,
 } from "@/components/fuel-delivery/FuelTable";
@@ -113,7 +113,7 @@ export default function FuelDeliveryPage() {
       <FuelTabs tabs={tabsWithCounts} value={tab} onChange={setTab} />
 
       {/* Table */}
-      <OrdersTable orders={filtered} />
+      <FuelTable orders={filtered} />
     </div>
   );
 }

@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import axiosInstance from "@/lib/axios";
 import { Wallet } from "lucide-react";
 import { StatTile } from "@/components/dashboard/StatTile";
@@ -26,7 +25,6 @@ export default function MaintenancePage() {
         );
         setMetrics(data.data);
       } catch {
-        // mock fallback so the page renders
         setMetrics({
           active_order_count: 0,
           professionals: 0,

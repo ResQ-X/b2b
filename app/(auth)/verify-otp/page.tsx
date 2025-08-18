@@ -1,5 +1,4 @@
 "use client";
-
 import { Suspense, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -11,6 +10,7 @@ import type { AuthState, VerifyEmailData } from "@/types/auth";
 
 type OTPArray = [string, string, string, string, string, string];
 
+// ✅ Wrapper adds the required Suspense boundary
 export default function VerifyEmailPage() {
   return (
     <Suspense fallback={<div className="text-white">Loading...</div>}>
