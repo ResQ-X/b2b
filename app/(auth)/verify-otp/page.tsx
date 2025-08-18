@@ -1,39 +1,46 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { Suspense, useRef, useState } from "react";
 import Image from "next/image";
-import LogoSvg from "@/public/logo.svg";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { AuthService } from "@/services/auth.service";
-import { useRef, useState } from "react";
+import LogoSvg from "@/public/logo.svg";
 import AuthImage from "@/public/auth-page.png";
+import { Button } from "@/components/ui/button";
 import AuthText from "@/components/auth/auth-text";
 import type { AuthState, VerifyEmailData } from "@/types/auth";
 
 type OTPArray = [string, string, string, string, string, string];
 
 export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<div className="text-white">Loading...</div>}>
+      <VerifyEmailContent />
+    </Suspense>
+  );
+}
+
+function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailFromQuery = searchParams.get("email") || "";
 
   const [otp, setOtp] = useState<OTPArray>(["", "", "", "", "", ""]);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
-
   const [verifyOtpData, setVerifyOtpData] = useState<VerifyEmailData>({
     email: emailFromQuery,
     token: "",
   });
 
+  console.log(verifyOtpData);
+
   const [authState, setAuthState] = useState<AuthState>({
     isLoading: false,
     error: null,
   });
+
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const handleDigitChange = (index: number, value: string) => {
-    // allow only a single digit
     if (!/^\d?$/.test(value)) return;
 
     const next = [...otp] as OTPArray;
@@ -46,7 +53,6 @@ export default function VerifyEmailPage() {
       token: joined,
     }));
 
-    // auto-advance focus
     if (value && index < 5) inputsRef.current[index + 1]?.focus();
   };
 
@@ -92,34 +98,19 @@ export default function VerifyEmailPage() {
   };
 
   const code = otp.join("");
-  //   const canSubmit =
-  //     code.length === 6 && !!(verifyOtpData.email || emailFromQuery);
+  console.log(code);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuccessMsg(null);
     setAuthState({ isLoading: true, error: null });
 
-    setTimeout(() => router.push("/create-password"), 1200);
-
-    // try {
-    //   const payload: VerifyEmailData = {
-    //     email: verifyOtpData.email || emailFromQuery,
-    //     token: code,
-    //   };
-
-    //   const res = await AuthService.verifyEmail(payload);
-    //   setSuccessMsg(res.message || "Email verified successfully!");
-    //   setAuthState({ isLoading: false, error: null });
-
-    //   setTimeout(() => router.push("/login"), 1200);
-    // } catch (error: any) {
-    //   setAuthState({
-    //     isLoading: false,
-    //     error:
-    //       error?.response?.data?.message || "Invalid OTP. Please try again.",
-    //   });
-    // }
+    // Mock submit → redirect
+    setTimeout(() => {
+      setSuccessMsg("Email verified successfully!");
+      setAuthState({ isLoading: false, error: null });
+      router.push("/create-password");
+    }, 1200);
   };
 
   return (
@@ -156,15 +147,13 @@ export default function VerifyEmailPage() {
                 OTP Sent
               </h1>
               <p className="mt-6 text-sm text-white/90 font-medium text-center">
-                We sent a 6 digit code to
-                <span>
-                  {emailFromQuery ? emailFromQuery : "your Email Address"}
-                </span>
+                We sent a 6 digit code to{" "}
+                <span>{emailFromQuery || "your Email Address"}</span>
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 text-white">
-              <div className="space-y-2 relative w-full max-w-[500px] mb-10 flex items-center justify-between gap-3">
+              <div className="relative w-full max-w-[500px] mb-10 flex items-center justify-between gap-3">
                 {[0, 1, 2, 3, 4, 5].map((i) => (
                   <input
                     key={i}
@@ -178,15 +167,7 @@ export default function VerifyEmailPage() {
                     onChange={(e) => handleDigitChange(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
                     onPaste={handlePaste}
-                    className="
-                      w-14 h-14 md:w-16 md:h-16
-                      text-center text-2xl md:text-3xl font-semibold
-                      rounded-xl
-                      bg-[#3B3835] text-[#fff]
-                      focus:outline-none focus:ring-2 focus:ring-orange
-                      border border-[#474747]
-                      shadow-sm
-                    "
+                    className="w-14 h-14 md:w-16 md:h-16 text-center text-2xl md:text-3xl font-semibold rounded-xl bg-[#3B3835] text-[#fff] focus:outline-none focus:ring-2 focus:ring-orange border border-[#474747] shadow-sm"
                     aria-label={`Digit ${i + 1}`}
                     autoFocus={i === 0}
                   />
