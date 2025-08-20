@@ -1,246 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
 import SubIcon from "@/public/sub.svg";
 import AuthImage from "@/public/auth-page.png";
 import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
-const ACCENT = "#FF8500";
-
-type Billing = "monthly" | "annually";
-
-type CategoryKey = "rescue" | "refuel" | "fleet" | "enterprise";
-
-interface CardSpec {
-  title: string;
-  price: string;
-  cadence: "/mon" | "/mo" | "/yr" | "/year";
-  bullets: string[];
-  cta?: string;
-}
-
-const PLANS: Record<Billing, Record<CategoryKey, CardSpec[]>> = {
-  monthly: {
-    rescue: [
-      {
-        title: "Rescue Basic",
-        price: "₦4,000",
-        cadence: "/mon",
-        bullets: [
-          "1 rescue / vehicle",
-          "Tow pool: 100 km free",
-          "Member km rate: 25% off",
-        ],
-      },
-      {
-        title: "Rescue Plus",
-        price: "₦8,000",
-        cadence: "/mon",
-        bullets: [
-          "2 rescues / vehicle",
-          "Tow pool: 150 km free",
-          "Priority support",
-        ],
-      },
-      {
-        title: "Rescue Max",
-        price: "₦12,500",
-        cadence: "/mon",
-        bullets: [
-          "Quarterly checks",
-          "Pick-and-return ≤ 10 km (2x / yr)",
-          "+ priority concierge",
-        ],
-      },
-    ],
-    refuel: [
-      {
-        title: "Fuel Service Pack",
-        price: "₦3,000",
-        cadence: "/mon",
-        bullets: [
-          "Delivery fees waived",
-          "Fuel at pump + ₦5–10",
-          "Scheduled windows",
-        ],
-      },
-      {
-        title: "Fuel Plus",
-        price: "₦5,000",
-        cadence: "/mon",
-        bullets: ["Driver PIN control", "Daily spend caps", "Invoice sync"],
-      },
-      {
-        title: "Fuel Pro",
-        price: "₦7,000",
-        cadence: "/mon",
-        bullets: ["Zone pricing", "SMS/Email alerts", "Dispute assistance"],
-      },
-    ],
-    fleet: [
-      {
-        title: "Care Lite",
-        price: "₦5,500",
-        cadence: "/mon",
-        bullets: ["Care Lite", "Tow pool: 100 km free", "Compliance reminders"],
-      },
-      {
-        title: "Care Plus",
-        price: "₦8,500",
-        cadence: "/mon",
-        bullets: [
-          "30-pt annual + mid‑year mini‑check",
-          "Service history",
-          "Reminders",
-        ],
-      },
-      {
-        title: "Care Max",
-        price: "₦12,500",
-        cadence: "/mon",
-        bullets: [
-          "Quarterly checks",
-          "Pick-and-return ≤ 10 km (2x / yr)",
-          "+ priority concierge",
-        ],
-      },
-    ],
-    enterprise: [
-      {
-        title: "Everything (B2B per vehicle)",
-        price: "₦12,000",
-        cadence: "/mo",
-        bullets: [
-          "Fleet Plus + Fuel Service Pack + Care Plus",
-          "Volume tiers: 10–49: ₦12k; 50–199: ₦10k; 200+: ₦8.5k per veh / mo",
-        ],
-      },
-      {
-        title: "Enterprise Plus",
-        price: "₦16,000",
-        cadence: "/mo",
-        bullets: ["Dedicated manager", "Custom SLAs", "Quarterly reviews"],
-      },
-      {
-        title: "Enterprise Max",
-        price: "₦22,000",
-        cadence: "/mo",
-        bullets: ["24/7 hotline", "Onsite clinics (add‑on)", "Annual audits"],
-      },
-    ],
-  },
-  annually: {
-    rescue: [
-      {
-        title: "Rescue Basic",
-        price: "₦48,000",
-        cadence: "/yr",
-        bullets: [
-          "1 rescue / vehicle",
-          "Tow pool: 100 km free",
-          "Member km rate: 25% off",
-        ],
-      },
-      {
-        title: "Rescue Plus",
-        price: "₦96,000",
-        cadence: "/yr",
-        bullets: [
-          "2 rescues / vehicle",
-          "Tow pool: 100 km free",
-          "Priority support",
-        ],
-      },
-      {
-        title: "Rescue Max",
-        price: "₦144,000",
-        cadence: "/yr",
-        bullets: [
-          "Quarterly checks",
-          "Pick-and-return ≤ 10 km (2x / yr)",
-          "+ priority concierge",
-        ],
-      },
-    ],
-    refuel: [
-      {
-        title: "Fuel Service Pack",
-        price: "₦36,000",
-        cadence: "/yr",
-        bullets: [
-          "Delivery fees waived",
-          "Fuel at pump + ₦5–10",
-          "Scheduled windows",
-        ],
-      },
-      {
-        title: "Fuel Plus",
-        price: "₦60,000",
-        cadence: "/yr",
-        bullets: ["Driver PIN control", "Daily spend caps", "Invoice sync"],
-      },
-      {
-        title: "Fuel Pro",
-        price: "₦84,000",
-        cadence: "/yr",
-        bullets: ["Zone pricing", "SMS/Email alerts", "Dispute assistance"],
-      },
-    ],
-    fleet: [
-      {
-        title: "Care Lite",
-        price: "₦60,000",
-        cadence: "/yr",
-        bullets: ["Care Lite", "Tow pool: 100 km free", "Compliance reminders"],
-      },
-      {
-        title: "Care Plus",
-        price: "₦98,000",
-        cadence: "/yr",
-        bullets: [
-          "30-pt annual + mid‑year mini‑check",
-          "Service history",
-          "Reminders",
-        ],
-      },
-      {
-        title: "Care Max",
-        price: "₦138,000",
-        cadence: "/yr",
-        bullets: [
-          "Quarterly checks",
-          "Pick-and-return ≤ 10 km (2x / yr)",
-          "+ priority concierge",
-        ],
-      },
-    ],
-    enterprise: [
-      {
-        title: "Everything (B2B per vehicle)",
-        price: "₦144,000",
-        cadence: "/yr",
-        bullets: [
-          "Fleet Plus + Fuel Service Pack + Care Plus",
-          "Volume tiers on request",
-        ],
-      },
-      {
-        title: "Enterprise Plus",
-        price: "₦186,000",
-        cadence: "/yr",
-        bullets: ["Dedicated manager", "Custom SLAs", "Quarterly reviews"],
-      },
-      {
-        title: "Enterprise Max",
-        price: "₦264,000",
-        cadence: "/yr",
-        bullets: ["24/7 hotline", "Onsite clinics (add‑on)", "Annual audits"],
-      },
-    ],
-  },
-};
+import { PlanCard } from "@/components/subscription/PlanCard";
+import { Billing, CategoryKey, CardSpec, PLANS } from "@/lib/constants";
 
 export default function SubscriptionPage() {
   const [billing, setBilling] = useState<Billing>("monthly");
@@ -393,10 +158,7 @@ export default function SubscriptionPage() {
               >
                 {label}
                 {category === key && (
-                  <span
-                    className="absolute -bottom-[3px] left-0 right-0 mx-auto h-[3px] w-full"
-                    style={{ backgroundColor: ACCENT }}
-                  />
+                  <span className="bg-[#FF8500] absolute -bottom-[3px] left-0 right-0 mx-auto h-[3px] w-full" />
                 )}
               </button>
             ))}
@@ -453,63 +215,16 @@ export default function SubscriptionPage() {
                   key={i}
                   onClick={() => setIndex(i)}
                   className={`h-1.5 rounded-full transition-all ${
-                    i === index ? "w-6" : "w-3 opacity-60"
+                    i === index
+                      ? "bg-[#FF8500] w-6"
+                      : "bg-[#FFFFFF] w-3 opacity-60"
                   }`}
-                  style={{ backgroundColor: ACCENT }}
                   aria-label={`Go to slide ${i + 1}`}
                 />
               ))}
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function PlanCard({
-  card,
-  onChoose,
-}: {
-  card: CardSpec;
-  onChoose: () => void;
-}) {
-  return (
-    <div
-      className="bg-[#3B3835] relative w-full max-w-[392px] h-[423px] mx-auto rounded-3xl text-white border-2 border-[#FF8500] px-[30px] py-10"
-      style={{ borderColor: `${ACCENT}33` }}
-    >
-      {/* <div className="p-8"> */}
-      <p className="text-center text-xl font-semibold mb-5">{card.title}</p>
-      <div className="flex items-end justify-center text-center mb-6">
-        <span className="text-5xl font-semibold tracking-tight">
-          {card.price}
-        </span>
-        <span className="ml-2 text-xl font-medium opacity-90">
-          {card.cadence}
-        </span>
-      </div>
-
-      <ul className="space-y-3 mb-8 text-sm">
-        {card.bullets.map((b, i) => (
-          <li key={i} className="flex items-center gap-2">
-            <span
-              className="inline-block h-1.5 w-1.5 rounded-full mr-4"
-              style={{ backgroundColor: ACCENT }}
-            />
-            <span className="opacity-95 text-base font-medium">{b}</span>
-          </li>
-        ))}
-      </ul>
-
-      <div className="pb-2">
-        <Button
-          onClick={onChoose}
-          className="w-full h-11 rounded-xl font-semibold text-[#FFFFFF] text-sm "
-          style={{ backgroundColor: ACCENT, color: "#FFFFFF" }}
-        >
-          Choose Plan
-        </Button>
       </div>
     </div>
   );

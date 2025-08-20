@@ -61,10 +61,10 @@ export default function FleetTable({ rows }: { rows?: FleetRow[] }) {
   };
 
   return (
-    <div className="bg-[#2B2A28] rounded-2xl text-white overflow-hidden border border-white/10">
+    <div className="bg-[#3B3835] rounded-b-[20px] text-white overflow-hidden">
       {/* Header */}
-      <div className="bg-[#1F1E1C] px-6 py-5">
-        <div className="grid grid-cols-4 text-sm font-semibold text-white/90">
+      <div className="h-[80px] rounded-b-xl bg-[#262422] px-6 py-8">
+        <div className="grid grid-cols-4 text-sm font-semibold ">
           <div>Vehicle ID</div>
           <div>Fuel Level</div>
           <div>Last Refuel</div>
@@ -75,16 +75,13 @@ export default function FleetTable({ rows }: { rows?: FleetRow[] }) {
       {/* Rows */}
       <ul>
         {data.map((r, i) => (
-          <li key={r.vehicleId + i} className="px-6 py-6">
+          <li key={r.vehicleId + i} className="px-6 py-8">
             <div className="grid grid-cols-4 items-center">
-              <div className="text-white/90">{r.vehicleId}</div>
-              <div className="text-white/90">{r.fuelLevelPct}%</div>
-              <div className="text-white/90">{fmtRefuel(r.lastRefuelISO)}</div>
-              <div className="text-white/90 text-right md:text-left">
-                {r.location}
-              </div>
+              <div className="">{r.vehicleId}</div>
+              <div className="">{r.fuelLevelPct}%</div>
+              <div className="">{fmtRefuel(r.lastRefuelISO)}</div>
+              <div className=" text-right md:text-left">{r.location}</div>
             </div>
-            {i < data.length - 1 && <div className="h-px bg-white/10 mt-6" />}
           </li>
         ))}
       </ul>

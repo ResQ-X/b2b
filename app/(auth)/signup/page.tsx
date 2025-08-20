@@ -1,12 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { AuthService } from "@/services/auth.service";
+// import { AuthService } from "@/services/auth.service";
 import { useState } from "react";
 import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";
@@ -89,32 +87,32 @@ export default function SignupPage() {
       });
       return;
     }
+    router.push("/subscription");
+    // try {
+    //   const res = await AuthService.signup({ ...formData });
 
-    try {
-      const res = await AuthService.signup({ ...formData });
-
-      if (res.success) {
-        setSuccessMsg(
-          res.message || "Account created! Please verify your email."
-        );
-        setAuthState({ isLoading: false, error: null });
-        // router.push(
-        //   `/verify-email?email=${encodeURIComponent(formData.email)}`
-        // );
-        router.push("/subscription");
-      } else {
-        setAuthState({
-          isLoading: false,
-          error: res?.message || "An error occurred during signup",
-        });
-      }
-    } catch (error: any) {
-      setAuthState({
-        isLoading: false,
-        error:
-          error?.response?.data?.message || "An error occurred during signup",
-      });
-    }
+    //   if (res.success) {
+    //     setSuccessMsg(
+    //       res.message || "Account created! Please verify your email."
+    //     );
+    //     setAuthState({ isLoading: false, error: null });
+    //     // router.push(
+    //     //   `/verify-email?email=${encodeURIComponent(formData.email)}`
+    //     // );
+    //     router.push("/subscription");
+    //   } else {
+    //     setAuthState({
+    //       isLoading: false,
+    //       error: res?.message || "An error occurred during signup",
+    //     });
+    //   }
+    // } catch (error: any) {
+    //   setAuthState({
+    //     isLoading: false,
+    //     error:
+    //       error?.response?.data?.message || "An error occurred during signup",
+    //   });
+    // }
   };
 
   return (

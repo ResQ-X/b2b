@@ -150,7 +150,7 @@ export default function MaintenanceTable({ orders }: { orders?: Order[] }) {
         {data.map((o, i) => (
           <li
             key={o.id + i}
-            className="grid grid-cols-7 items-center px-6 py-6"
+            className="grid grid-cols-7 items-center px-6 py-8"
           >
             <div className="text-white/90">#{o.id}</div>
             <div className="text-white/90">{o.serviceType}</div>
