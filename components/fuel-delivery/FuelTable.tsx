@@ -256,7 +256,6 @@ export default function OrdersTable({ orders }: { orders?: Order[] }) {
   return (
     <div className="bg-[#3B3835] rounded-b-[20px] text-white overflow-hidden">
       {/* Header */}
-      {/* <div className=""> */}
       <div className="h-[80px] rounded-b-xl bg-[#262422] px-6 py-8">
         <div className="grid grid-cols-7 text-sm font-semibold text-white/90">
           <div>Order ID</div>
@@ -268,7 +267,6 @@ export default function OrdersTable({ orders }: { orders?: Order[] }) {
           <div className="text-right">Date / Actions</div>
         </div>
       </div>
-      {/* </div> */}
 
       {/* Rows */}
       <ul className="bg-[#3B3835]">

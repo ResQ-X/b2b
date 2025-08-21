@@ -5,8 +5,8 @@ import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-// import { AuthService } from "@/services/auth.service";
-// import { useAuth } from "@/contexts/auth.context";
+import { AuthService } from "@/services/auth.service";
+import { useAuth } from "@/contexts/auth.context";
 import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";
 import type { AuthState, LoginFormData } from "@/types/auth";
@@ -14,7 +14,7 @@ import CustomInput from "@/components/ui/CustomInput";
 
 export default function LoginPage() {
   const router = useRouter();
-  // const { setUser } = useAuth();
+  const { setUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
@@ -28,19 +28,19 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthState({ isLoading: true, error: null });
-    router.push("/dashboard");
-    // try {
-    //   const response = await AuthService.login(formData);
-    //   if (response.success && response.user) {
-    //     setUser(response.user);
-    //     router.push("/dashboard");
-    //   }
-    // } catch (error: any) {
-    //   setAuthState({
-    //     isLoading: false,
-    //     error: error.response?.data?.message || "Invalid credentials",
-    //   });
-    // }
+    // router.push("/dashboard");
+    try {
+      const response = await AuthService.login(formData);
+      if (response.success && response.user) {
+        setUser(response.user);
+        router.push("/dashboard");
+      }
+    } catch (error: any) {
+      setAuthState({
+        isLoading: false,
+        error: error.response?.data?.message || "Invalid credentials",
+      });
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

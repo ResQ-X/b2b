@@ -11,7 +11,6 @@ export interface SignupFormData {
   email: string;
   country: string;
   phone: string;
-  // userType: "ADMIN" | "CUSTOMER_SUPPORT" | "OPERATION_MANAGER";
   userType: "ADMIN";
   password: string;
 }

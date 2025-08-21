@@ -1,6 +1,5 @@
 "use client";
 import Image from "next/image";
-// import { CalendarClock } from "lucide-react";
 import ScheduleIcon from "@/public/schedule.svg";
 
 export function UpcomingSchedules({

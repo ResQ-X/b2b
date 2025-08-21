@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { AuthService } from "@/services/auth.service";
+// import { AuthService } from "@/services/auth.service";
 import { useState } from "react";
 import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";

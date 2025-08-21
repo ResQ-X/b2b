@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setUser(userFromCookie);
       }
-      console.log(userFromCookie)
+      console.log(userFromCookie);
     }
   }, [cookies.get]);
 

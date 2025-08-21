@@ -51,51 +51,63 @@ export default function MaintenanceTabs({
   ];
 
   const handleSubmit = async (data: RequestServiceForm) => {
-    // TODO: call your API
-    // await axios.post('/api/maintenance/request', data)
     console.log("submit", data);
   };
 
   return (
     <>
-      <div className="relative flex justify-between rounded-2xl bg-[#3B3835] border border-[#ABABAB] p-2 text-white">
-        <div className="h-[59px] flex flex-wrap items-center gap-2">
-          {tabs.map((t) => {
-            const active = value === t.key;
-            return (
-              <button
-                key={t.key}
-                onClick={() => onChange(t.key)}
-                className={[
-                  "h-full px-4 py-2 rounded-lg text-base font-semibold transition",
-                  active
-                    ? "bg-[#FFFFFF] text-[#FF8500] font-bold"
-                    : "text-[#E2E2E2] hover:bg-white/10 font-medium",
-                ].join(" ")}
-              >
-                {t.label}
-              </button>
-            );
-          })}
-
-          <div className="absolute right-64">
-            <Search value={search} onChange={onSearchChange} />
+      <div className="rounded-2xl bg-[#3B3835] border border-[#ABABAB] p-2 text-white">
+        <div className="flex flex-wrap items-center gap-2 pt-4 lg:pt-0">
+          {/* Tabs: scrollable on small screens */}
+          <div className="order-1 flex min-w-0 flex-1 items-center gap-2 overflow-x-auto no-scrollbar">
+            {tabs.map((t) => {
+              const active = value === t.key;
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => onChange(t.key)}
+                  className={[
+                    "whitespace-nowrap rounded-lg px-2 lg:px-4 text-base transition",
+                    active
+                      ? "bg-white text-[#FF8500] font-medium lg:font-bold"
+                      : "text-[#E2E2E2] hover:bg-white/10 font-normal lg:font-medium",
+                  ].join(" ")}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
           </div>
 
-          <Image
-            onClick={onExport}
-            src={ExportIcon}
-            alt="Export"
-            className="w-6 h-6 absolute right-52 cursor-pointer"
-          />
-        </div>
+          {/* Search + Export: full width on mobile, inline on sm+ */}
+          <div className="order-2 flex w-full sm:w-auto items-center gap-3 justify-between sm:justify-end">
+            <Search
+              value={search}
+              onChange={onSearchChange}
+              className="w-full sm:w-[360px] my-4 lg:my-0"
+            />
 
-        <Button
-          className="w-full max-w-[170px] h-[48px] bg-[#FF8500] hover:bg-[#ff9a33] mt-[5px]"
-          onClick={() => setOpen(true)}
-        >
-          Schedule Service <Plus className="h-4 w-4 ml-2" />
-        </Button>
+            <button
+              type="button"
+              onClick={onExport}
+              className="shrink-0 rounded-md p-2 hover:bg-white/10 active:scale-95 transition"
+              aria-label="Export"
+              title="Export"
+            >
+              <Image src={ExportIcon} alt="Export" className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* CTA: full width on mobile, right-aligned on sm+ */}
+          <div className="order-3 w-full sm:w-auto sm:ml-auto mb-4 lg:mb-0 flex justify-center lg:justify-start sm:block">
+            <Button
+              className="w-[170px] h-[48px] bg-[#FF8500] hover:bg-[#ff9a33]"
+              onClick={() => setOpen(true)}
+            >
+              Schedule Service <Plus className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+        </div>
       </div>
 
       <RequestServiceModal

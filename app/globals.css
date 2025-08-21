@@ -106,3 +106,12 @@ body {
   outline: 2px solid #f97316;
   outline-offset: 2px;
 }
+
+/* hide scrollbar for elements with .no-scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
