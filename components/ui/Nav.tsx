@@ -41,7 +41,7 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
           onClick={onMenuClick}
           className="p-2 rounded-md hover:bg-gray-100 focus:outline-none"
         >
-          <Menu className="h-6 w-6 text-gray-700" />
+          <Menu className="h-6 w-6 text-[#fff]" />
         </button>
       </div>
 

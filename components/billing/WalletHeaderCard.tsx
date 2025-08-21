@@ -1,6 +1,6 @@
 import Image from "next/image";
 import CardImage from "@/public/resq-x-card.svg";
-import { Button } from "../ui/button";
+import { Button } from "../ui/Button";
 
 export function WalletHeaderCard() {
   return (

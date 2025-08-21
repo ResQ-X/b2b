@@ -2,7 +2,7 @@
 import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 // import { AuthService } from "@/services/auth.service";
 import { Suspense, useState } from "react";
 import AuthImage from "@/public/auth-page.png";

@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import CustomInput from "@/components/ui/CustomInput";
 import type { FleetRow } from "@/components/fleet/FleetTable";
 

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { CardSpec } from "@/lib/constants";
 
 export function PlanCard({

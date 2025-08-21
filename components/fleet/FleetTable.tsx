@@ -2,7 +2,7 @@
 "use client";
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import VehicleModal, { type VehicleForm } from "@/components/fleet/FleetModal";
 
 export type FleetRow = {
