@@ -1,4 +1,7 @@
 "use client";
+import Search from "@/components/ui/Search";
+import Image from "next/image";
+import ExportIcon from "@/public/export.svg";
 
 type Tab = { key: string; label: string; count?: number };
 
@@ -6,14 +9,20 @@ export default function FuelTabs({
   tabs,
   value,
   onChange,
+  search,
+  onSearchChange,
+  onExport,
 }: {
   tabs: Tab[];
   value: string;
   onChange: (key: string) => void;
+  search: string;
+  onSearchChange: (q: string) => void;
+  onExport: () => void;
 }) {
   return (
     <div className="h-[79px] rounded-2xl bg-[#2C2926] border border-[#ABABAB] p-2 text-white">
-      <div className="h-[59px] flex flex-wrap items-center gap-2">
+      <div className="relative h-[59px] flex flex-wrap items-center gap-2">
         {tabs.map((t) => {
           const active = value === t.key;
           return (
@@ -41,6 +50,17 @@ export default function FuelTabs({
             </button>
           );
         })}
+
+        <div className="absolute right-20">
+          <Search value={search} onChange={onSearchChange} />
+        </div>
+
+        <Image
+          onClick={onExport}
+          src={ExportIcon}
+          alt="Export"
+          className="w-6 h-6 absolute right-5 cursor-pointer"
+        />
       </div>
     </div>
   );

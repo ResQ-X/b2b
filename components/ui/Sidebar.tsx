@@ -54,7 +54,8 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               const Icon = Icons[
                 item.icon as keyof typeof Icons
               ] as React.ElementType;
-              const isActive = pathname === item.href;
+              // const isActive = pathname === item.href;
+              const isActive = pathname.startsWith(item.href);
 
               return (
                 <Link

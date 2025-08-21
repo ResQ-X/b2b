@@ -2,9 +2,10 @@
 import React from "react";
 import Image from "next/image";
 import { Menu } from "lucide-react";
+// import { usePathname } from "next/navigation";
 // import { Input } from "@/components/ui/input";
 // import { Button } from "@/components/ui/button";
-import Search from "@/components/ui/Search";
+// import Search from "@/components/ui/Search";
 import { useAuth } from "@/contexts/auth.context";
 
 interface DashboardNavProps {
@@ -13,6 +14,24 @@ interface DashboardNavProps {
 
 export function DashboardNav({ onMenuClick }: DashboardNavProps) {
   const { user } = useAuth();
+  // const pathname = usePathname();
+
+  // const getPageTitle = (path: string) => {
+  //   if (path.startsWith("/dashboard")) return "Dashboard";
+  //   if (path.startsWith("/fuel-delivery")) return "Fuel Delivery";
+  //   if (path.startsWith("/maintenance")) return "Maintenance";
+  //   if (path.startsWith("/emergency")) return "Emergency Services";
+  //   if (path.startsWith("/fleet")) return "Fleet Management";
+  //   if (path.startsWith("/schedule")) return "Schedule";
+  //   if (path.startsWith("/billing")) return "Billing Management";
+  //   if (path.startsWith("/account")) return "Account Management";
+  //   if (path === "/dashboard") return "Dashboard";
+
+  //   // fallback: turn last segment into Title Case
+  //   const segments = path.split("/").filter(Boolean);
+  //   const last = segments[segments.length - 1];
+  //   return last.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  // };
 
   return (
     <div className="h-20 bg-[#3B3835] px-4 sm:px-6 md:px-8 flex items-center justify-between border-b border-[#474747]">
@@ -29,9 +48,9 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
       {/* Logo or Search Placeholder */}
       <div className="flex-1 flex justify-center md:justify-start">
         {/* Show only on md+ screens */}
-        <div className="hidden md:block w-full max-w-xs">
-          <Search />
-        </div>
+        {/* <span className="text-lg md:text-2xl font-bold text-[#fff]">
+          {getPageTitle(pathname)}
+        </span> */}
       </div>
       {/* Right side user info */}
       <div className="flex items-center gap-4">

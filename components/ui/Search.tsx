@@ -1,10 +1,17 @@
-import React, { useState } from "react";
+"use client";
+import React from "react";
 
-function Search() {
-  const [searchTerm, setSearchTerm] = useState("");
-
+export default function Search({
+  value,
+  onChange,
+  className = "",
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  className?: string;
+}) {
   return (
-    <div className="w-[450px] relative">
+    <div className={`w-[450px] relative ${className}`}>
       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
         <svg
           className="h-4 w-4 text-[#A89887]"
@@ -25,15 +32,12 @@ function Search() {
 
       <input
         type="search"
-        id="default-search"
-        className="block w-full rounded-[19px] border border-[#5E5E5E] bg-[#242220] p-4 pl-10 text-sm font-medium placeholder-[#A1A1AA] text-[#FFFF] outline-none"
-        placeholder="Search"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        className="block w-full rounded-[19px] border border-[#5E5E5E] bg-[#242220] p-4 pl-10 text-sm font-medium placeholder-[#A1A1AA] text-white outline-none"
+        placeholder="Search ..."
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
         aria-label="Search"
       />
     </div>
   );
 }
-
-export default Search;

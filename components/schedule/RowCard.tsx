@@ -5,8 +5,8 @@ export function RowCard({
   title,
   subtitle,
   rightTop,
-  rightLink = "View",
-}: {
+}: // rightLink = "View",
+{
   leftIcon?: React.ComponentType<any>;
   title: string;
   subtitle?: string;
@@ -41,9 +41,9 @@ export function RowCard({
               {rightTop}
             </div>
           )}
-          <button className="text-orange text-base font-semibold hover:underline">
+          {/* <button className="text-orange text-base font-semibold hover:underline">
             {rightLink}
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

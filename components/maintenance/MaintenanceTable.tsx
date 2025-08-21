@@ -122,6 +122,10 @@ export default function MaintenanceTable({ orders }: { orders?: Order[] }) {
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(source.length / PER_PAGE);
 
+  //   useEffect(() => {
+  //   setPage(1);
+  // }, [source]);
+
   const data = useMemo(() => {
     const start = (page - 1) * PER_PAGE;
     return source.slice(start, start + PER_PAGE);

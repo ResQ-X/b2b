@@ -1,22 +1,30 @@
 "use client";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import RequestServiceModal, {
   type RequestServiceForm,
 } from "@/components/maintenance/RequestServiceModal";
+import Search from "@/components/ui/Search";
+import Image from "next/image";
+import ExportIcon from "@/public/export.svg";
 
 type Tab = { key: string; label: string; count?: number };
 
-export default function FuelTabs({
+export default function MaintenanceTabs({
   tabs,
   value,
   onChange,
+  search,
+  onSearchChange,
+  onExport,
 }: {
   tabs: Tab[];
   value: string;
   onChange: (key: string) => void;
+  search: string;
+  onSearchChange: (q: string) => void;
+  onExport: () => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -50,7 +58,7 @@ export default function FuelTabs({
 
   return (
     <>
-      <div className="flex justify-between rounded-2xl bg-[#3B3835] border border-[#ABABAB] p-2 text-white">
+      <div className="relative flex justify-between rounded-2xl bg-[#3B3835] border border-[#ABABAB] p-2 text-white">
         <div className="h-[59px] flex flex-wrap items-center gap-2">
           {tabs.map((t) => {
             const active = value === t.key;
@@ -69,10 +77,21 @@ export default function FuelTabs({
               </button>
             );
           })}
+
+          <div className="absolute right-64">
+            <Search value={search} onChange={onSearchChange} />
+          </div>
+
+          <Image
+            onClick={onExport}
+            src={ExportIcon}
+            alt="Export"
+            className="w-6 h-6 absolute right-52 cursor-pointer"
+          />
         </div>
 
         <Button
-          className="w-full max-w-[248px] h-[48px] bg-[#FF8500] hover:bg-[#ff9a33] mt-[5px]"
+          className="w-full max-w-[170px] h-[48px] bg-[#FF8500] hover:bg-[#ff9a33] mt-[5px]"
           onClick={() => setOpen(true)}
         >
           Schedule Service <Plus className="h-4 w-4 ml-2" />

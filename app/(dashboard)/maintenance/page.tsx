@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+// app/.../maintenance/page.tsx
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "@/lib/axios";
@@ -13,7 +13,7 @@ import MaintenanceTabs from "@/components/maintenance/MaintenanceTabs";
 import ServiceHistoryCard, {
   type ServiceHistoryItem,
 } from "@/components/maintenance/ServiceHistoryCard";
-// import { Button } from "@/components/ui/button";
+import { toCSV, downloadText } from "@/lib/export";
 
 interface DashboardMetrics {
   active_order_count: number;
@@ -30,8 +30,17 @@ const TABS = [
   { key: "overdue", label: "Overdue" },
 ];
 
+const formatDate = (iso: string) => {
+  const d = new Date(iso);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return { dd, mm, yyyy, full: `${dd}-${mm}-${yyyy}` };
+};
+
 export default function MaintenancePage() {
   const [tab, setTab] = useState<string>("all");
+  const [search, setSearch] = useState<string>("");
 
   const counts = useMemo(
     () => ({
@@ -50,7 +59,8 @@ export default function MaintenancePage() {
     count: counts[t.key as keyof typeof counts] ?? 0,
   }));
 
-  const filtered: Order[] = useMemo(() => {
+  // Step 1: filter by tab
+  const filteredByTab: Order[] = useMemo(() => {
     switch (tab) {
       case "completed":
         return maintenanceData.filter((o) => o.status === "Completed");
@@ -65,6 +75,33 @@ export default function MaintenancePage() {
     }
   }, [tab]);
 
+  // Step 2: filter by search (supports id, vehicle, serviceType, status, mileage, cost, and date)
+  const filtered: Order[] = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return filteredByTab;
+
+    return filteredByTab.filter((o) => {
+      const { dd, mm, yyyy, full } = formatDate(o.dueDateISO);
+      const hay = [
+        o.id,
+        o.vehicle,
+        o.serviceType,
+        o.status,
+        full, // dd-mm-yyyy
+        `${yyyy}-${mm}-${dd}`, // ISO-like
+        dd,
+        mm,
+        String(yyyy),
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      const numbers = `${o.mileageKm} ${o.costNaira}`; // allow numeric text matches
+
+      return hay.includes(q) || numbers.includes(q);
+    });
+  }, [filteredByTab, search]);
+
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   useEffect(() => {
     (async () => {
@@ -73,8 +110,7 @@ export default function MaintenancePage() {
           "/admin/get_dashboard_metrics"
         );
         setMetrics(data.data);
-      } catch (e) {
-        // fail silently in mock env
+      } catch {
         setMetrics({
           active_order_count: 0,
           professionals: 0,
@@ -86,7 +122,6 @@ export default function MaintenancePage() {
 
   if (!metrics) return <Loader />;
 
-  // Top cards (text matches screenshot)
   const tiles = [
     {
       title: "Monthly Cost",
@@ -126,41 +161,51 @@ export default function MaintenancePage() {
     },
   ];
 
+  const exportMaintenance = () => {
+    const fmt = (iso: string) => {
+      const d = new Date(iso);
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      return `${dd}-${mm}-${yyyy}`;
+    };
+
+    const rows = filtered.map((o) => ({
+      "Order ID": o.id,
+      Vehicle: o.vehicle,
+      "Service Type": o.serviceType,
+      "Mileage (km)": o.mileageKm,
+      Status: o.status,
+      "Due Date": fmt(o.dueDateISO),
+      "Cost (NGN)": o.costNaira, // keep numeric; Excel can sum
+    }));
+
+    const csv = toCSV(rows);
+    downloadText(
+      `maintenance-orders-${new Date().toISOString().slice(0, 10)}.csv`,
+      csv
+    );
+  };
+
   return (
     <div className="space-y-6">
-      {/* Top tiles */}
       <div className="grid lg:grid-cols-3 gap-4">
         {tiles.map((t) => (
           <StatTile key={t.title} {...t} />
         ))}
       </div>
 
-      {/* Toolbar */}
-      {/* <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-xl bg-[#2C2926] px-3 py-2 text-white/80">
-            <Search className="h-4 w-4" />
-            <span className="text-sm">Search</span>
-          </div>
-          <div className="flex items-center gap-2 rounded-xl bg-[#2C2926] px-3 py-2 text-white/80">
-            <span className="text-sm">Filter by</span>
-            <span className="rounded-md bg-white text-black text-xs px-2 py-1">
-              All
-            </span>
-          </div>
-        </div>
-        <Button className="bg-[#FF8500] hover:bg-[#ff9a33] rounded-xl">
-          Schedule Service +
-        </Button>
-      </div> */}
+      <MaintenanceTabs
+        tabs={tabsWithCounts}
+        value={tab}
+        onChange={setTab}
+        search={search}
+        onSearchChange={setSearch}
+        onExport={exportMaintenance}
+      />
 
-      {/* Tabs */}
-      <MaintenanceTabs tabs={tabsWithCounts} value={tab} onChange={setTab} />
-
-      {/* Table */}
       <MaintenanceTable orders={filtered} />
 
-      {/* Service History */}
       <ServiceHistoryCard items={history} />
     </div>
   );

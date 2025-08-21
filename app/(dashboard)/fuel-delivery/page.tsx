@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "@/lib/axios";
 import { Rows3 } from "lucide-react";
 import { StatTile } from "@/components/dashboard/StatTile";
@@ -9,6 +9,7 @@ import FuelTable, {
   type Order,
 } from "@/components/fuel-delivery/FuelTable";
 import FuelTabs from "@/components/fuel-delivery/FuelTabs";
+import { toCSV, downloadText } from "@/lib/export";
 
 interface DashboardMetrics {
   active_order_count: number;
@@ -26,6 +27,7 @@ const TABS = [
 
 export default function FuelDeliveryPage() {
   const [tab, setTab] = useState<string>("all");
+  const [search, setSearch] = useState<string>("");
 
   const counts = useMemo(
     () => ({
@@ -42,7 +44,14 @@ export default function FuelDeliveryPage() {
     count: counts[t.key as keyof typeof counts],
   }));
 
-  const filtered: Order[] = useMemo(() => {
+  const formatDate = (iso: string) => {
+    const d = new Date(iso);
+    return `${String(d.getDate()).padStart(2, "0")}-${String(
+      d.getMonth() + 1
+    ).padStart(2, "0")}-${d.getFullYear()}`;
+  };
+
+  const filteredByTab: Order[] = useMemo(() => {
     if (tab === "completed")
       return fuelData.filter((o) => o.status === "Completed");
     if (tab === "inprogress")
@@ -51,6 +60,22 @@ export default function FuelDeliveryPage() {
       return fuelData.filter((o) => o.status === "Scheduled");
     return fuelData;
   }, [tab]);
+
+  const filtered: Order[] = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return filteredByTab;
+
+    return filteredByTab.filter((o) => {
+      const hay = [o.id, o.vehicle, o.location, formatDate(o.dateISO)]
+        .join(" ")
+        .toLowerCase();
+
+      // also allow numeric matches (quantity, cost)
+      const numHay = `${o.quantityL} ${o.costNaira}`;
+
+      return hay.includes(q) || numHay.includes(q);
+    });
+  }, [filteredByTab, search]);
 
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   useEffect(() => {
@@ -96,6 +121,24 @@ export default function FuelDeliveryPage() {
     },
   ];
 
+  const exportFuel = () => {
+    // Flat rows for CSV (use your formatters so it reads nicely)
+    const rows = filtered.map((o) => ({
+      "Order ID": o.id,
+      Vehicle: o.vehicle,
+      Location: o.location,
+      QuantityL: o.quantityL,
+      CostNGN: o.costNaira, // keep numeric; Excel can sum
+      Status: o.status,
+      Date: formatDate(o.dateISO),
+    }));
+    const csv = toCSV(rows);
+    downloadText(
+      `fuel-orders-${new Date().toISOString().slice(0, 10)}.csv`,
+      csv
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Top tiles */}
@@ -104,13 +147,20 @@ export default function FuelDeliveryPage() {
           <div key={t.title} className="relative flex-1">
             <StatTile {...t} />
             {idx < tiles.length - 1 && (
-              <span className="hidden md:block absolute -right-[26px] top-1/2 -translate-y-1/2 h-[41px] w-px bg-[#FFFFFF]" />
+              <span className="hidden md:block absolute -right-[26px] top-1/2 -translate-y-1/2 h-[41px] w-px bg-white" />
             )}
           </div>
         ))}
       </div>
 
-      <FuelTabs tabs={tabsWithCounts} value={tab} onChange={setTab} />
+      <FuelTabs
+        tabs={tabsWithCounts}
+        value={tab}
+        onChange={setTab}
+        search={search}
+        onSearchChange={setSearch}
+        onExport={exportFuel}
+      />
 
       {/* Table */}
       <FuelTable orders={filtered} />

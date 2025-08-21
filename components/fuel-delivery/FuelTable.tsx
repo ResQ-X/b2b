@@ -230,6 +230,7 @@ export default function OrdersTable({ orders }: { orders?: Order[] }) {
     { label: "Tire Rotation", value: "tire-rotation" },
     { label: "Full Service", value: "full-service" },
   ];
+
   const vehicleOptions = [
     { label: "LND-451-AA", value: "LND-451-AA" },
     { label: "KJA-220-KD", value: "KJA-220-KD" },

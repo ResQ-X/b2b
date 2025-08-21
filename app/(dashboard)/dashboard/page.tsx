@@ -20,6 +20,9 @@ import {
   getUpcomingSchedulesForTable,
   getAvailableYears,
 } from "@/lib/mockData";
+import RequestServiceModal, {
+  type RequestServiceForm,
+} from "@/components/fuel-delivery/FuelModal";
 
 interface DashboardMetrics {
   active_order_count: number;
@@ -31,6 +34,7 @@ interface DashboardMetrics {
 export default function DashboardPage() {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [selectedYear, setSelectedYear] = useState(2025);
+  const [open, setOpen] = useState(false);
 
   // Get mock data with selected year
   const fuelChartData = getFuelChartData(selectedYear);
@@ -83,6 +87,35 @@ export default function DashboardPage() {
     },
   ];
 
+  const typeOptions = [
+    { label: "Oil Change", value: "oil-change" },
+    { label: "Brake Inspection", value: "brake-inspection" },
+    { label: "Tire Rotation", value: "tire-rotation" },
+    { label: "Full Service", value: "full-service" },
+  ];
+
+  const vehicleOptions = [
+    { label: "LND-451-AA", value: "LND-451-AA" },
+    { label: "KJA-220-KD", value: "KJA-220-KD" },
+    { label: "ABC-123-XY", value: "ABC-123-XY" },
+  ];
+  const locationOptions = [
+    { label: "Lekki Office", value: "lekki-office" },
+    { label: "VI Branch", value: "vi-branch" },
+    { label: "Ikeja Depot", value: "ikeja-depot" },
+  ];
+  const slotOptions = [
+    { label: "08:00–10:00", value: "08:00-10:00" },
+    { label: "10:00–12:00", value: "10:00-12:00" },
+    { label: "12:00–14:00", value: "12:00-14:00" },
+  ];
+
+  const handleSubmit = async (data: RequestServiceForm) => {
+    // TODO: call your API
+    // await axios.post('/api/maintenance/request', data)
+    console.log("submit", data);
+  };
+
   return (
     <div className="space-y-6">
       <div className="">
@@ -115,7 +148,7 @@ export default function DashboardPage() {
             desc="Place your orders in seconds and keep your fleet fueled | without the hassle."
             buttonText="Order Fuel"
             illustration="/fuel-truck.svg"
-            onAction={() => console.log("Order Fuel clicked")}
+            onAction={() => setOpen(true)}
           />
         </div>
 
@@ -193,6 +226,16 @@ export default function DashboardPage() {
           />
         </div>
       </div>
+
+      <RequestServiceModal
+        open={open}
+        onOpenChange={setOpen}
+        onSubmit={handleSubmit}
+        typeOptions={typeOptions}
+        vehicleOptions={vehicleOptions}
+        locationOptions={locationOptions}
+        slotOptions={slotOptions}
+      />
     </div>
   );
 }
