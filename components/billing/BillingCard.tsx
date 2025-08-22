@@ -9,46 +9,65 @@ export function BillingCard({
   onChoose: () => void;
 }) {
   return (
-    <div className="bg-[#272727] relative w-full max-w-[392px] h-[423px] mx-auto rounded-3xl text-white px-[30px] py-10">
-      {/* <div className="p-8"> */}
-
+    <div className="bg-[#272727] w-11/12 lg:w-full mx-auto rounded-2xl sm:rounded-3xl text-white flex flex-col p-2 overflow-hidden">
       {card.title === "Rescue Basic" && (
-        <p className="text-orange text-sm font-semibold text-center mb-[17px]">
+        <p className="text-[#FF8500] text-xs sm:text-sm font-semibold text-center my-6">
           Current Plan
         </p>
       )}
 
-      <p className="text-center text-xl font-semibold mb-5">{card.title}</p>
-      <div className="flex items-end justify-center text-center mb-6">
-        <span className="text-5xl font-semibold tracking-tight">
+      <p className="text-center text-base lg:text-2xl font-normal lg:font-semibold mb-5">
+        {card.title}
+      </p>
+
+      <div className="lg:hidden text-lg lg:text-5xl font-medium lg:font-bold text-center">
+        {card.price} {card.cadence}
+      </div>
+
+      <div className="hidden lg:flex items-end justify-center mb-6">
+        <span className="text-xl lg:text-5xl font-medium lg:font-bold">
           {card.price}
         </span>
-        <span className="ml-2 text-xl font-medium opacity-90">
+        <span className="ml-2 text-sm lg:text-xl font-normal lg:font-medium">
           {card.cadence}
         </span>
       </div>
 
-      <ul className="space-y-3 mb-8 text-sm">
+      <ul className="mb-6 text-base font-medium ml-4">
         {card.bullets.map((b, i) => (
-          <li key={i} className="flex items-center gap-2">
-            <span className="bg-[#FF8500] inline-block h-1.5 w-1.5 rounded-full mr-4" />
-            <span className="opacity-95 text-base font-medium">{b}</span>
+          <li key={i} className="flex items-center">
+            <div className="bg-orange h-1.5 w-1.5 rounded-full mr-2" />
+            <span className="">{b}</span>
           </li>
         ))}
       </ul>
 
-      {card.title === "Rescue Basic" ? (
-        <></>
-      ) : (
-        <div className="pb-2">
+      {/* <ul className="space-y-3 mb-6 text-sm sm:text-base flex-grow break-words">
+        {card.bullets.map((b, i) => (
+          <li key={i} className="flex items-start gap-3">
+            <span className="bg-[#FF8500] inline-block h-1.5 w-1.5 rounded-full mt-2 flex-shrink-0" />
+            <span className="opacity-95 leading-relaxed">{b}</span>
+          </li>
+        ))}
+      </ul> */}
+
+      <div className="lg:mt-auto flex justify-center mb-4 lg:mb-0">
+        {card.title === "Rescue Basic" ? (
+          <div className="h-11 flex items-center justify-center">
+            <span className="text-sm sm:text-base text-white/60 font-medium">
+              Active Plan
+            </span>
+          </div>
+        ) : (
+          // <p></p>
           <Button
             onClick={onChoose}
-            className="bg-[#FF8500] w-full h-11 rounded-xl font-semibold text-[#FFFFFF] text-sm "
+            className="bg-[#FF8500] w-[100px] h-11 rounded-xl font-semibold text-white text-sm sm:text-base hover:bg-[#FF8500]/90 transition-colors"
           >
             Choose Plan
           </Button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

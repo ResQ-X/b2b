@@ -25,7 +25,7 @@ export function FleetView({ vehicle }: FleetViewProps) {
   const router = useRouter();
 
   return (
-    <div className="bg-[#242220] w-full space-y-8 text-white rounded-2xl p-6">
+    <div className="bg-[#242220] w-full space-y-8 text-white">
       {/* Back */}
       <div className="flex items-center gap-3">
         <Button

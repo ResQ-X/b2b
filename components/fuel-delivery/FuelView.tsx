@@ -96,8 +96,8 @@ export function FuelView({ fuel }: FuelViewProps) {
       </div>
 
       {/* ACTIVITY LOG */}
-      <div className="bg-[#3B3835] space-y-4 p-6 rounded-[14px] mt-14">
-        <h2 className="text-lg font-semibold">Activity Log</h2>
+      <div className="bg-[#3B3835] space-y-4 p-2 rounded-[14px] mt-14">
+        <h2 className="text-base lg:text-lg font-semibold">Activity Log</h2>
         <div className="rounded-2xl overflow-hidden">
           <table className="w-full">
             <thead className="bg-[#262422]">
@@ -162,9 +162,9 @@ function Tr({
 }) {
   return (
     <tr className="hover:bg-white/[0.03]">
-      <td className="p-4 text-sm">{time}</td>
-      <td className="p-4 text-sm">{activity}</td>
-      <td className="p-4 text-sm">{status}</td>
+      <td className="p-2 lg:p-4 text-sm">{time}</td>
+      <td className="p-2 lg:p-4 text-sm">{activity}</td>
+      <td className="p-2 lg:p-4 text-sm">{status}</td>
     </tr>
   );
 }

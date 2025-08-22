@@ -22,11 +22,11 @@ interface DashboardMetrics {
 }
 
 const TABS = [
-  { key: "all", label: "All" },
-  { key: "completed", label: "Completed" },
-  { key: "inprogress", label: "In Progress" },
-  { key: "scheduled", label: "Scheduled" },
-  { key: "overdue", label: "Overdue" },
+  { key: "all", label: "All Orders", shortLabel: "All" },
+  { key: "completed", label: "Completed Orders", shortLabel: "Completed" },
+  { key: "inprogress", label: "In Progress Orders", shortLabel: "In Progress" },
+  { key: "scheduled", label: "Scheduled Orders", shortLabel: "Scheduled" },
+  { key: "overdue", label: "Overdue Orders", shortLabel: "Overdue" },
 ];
 
 const formatDate = (iso: string) => {

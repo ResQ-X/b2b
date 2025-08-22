@@ -153,7 +153,7 @@ function VerifyEmailContent() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 text-white">
-              <div className="relative w-full max-w-[500px] mb-10 flex items-center justify-between gap-3">
+              <div className="relative w-full lg:max-w-[500px] mb-10 flex items-center justify-between gap-1 lg:gap-3">
                 {[0, 1, 2, 3, 4, 5].map((i) => (
                   <input
                     key={i}

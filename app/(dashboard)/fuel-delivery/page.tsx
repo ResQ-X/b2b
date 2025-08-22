@@ -19,10 +19,10 @@ interface DashboardMetrics {
 }
 
 const TABS = [
-  { key: "all", label: "All Orders" },
-  { key: "completed", label: "Completed Orders" },
-  { key: "inprogress", label: "In Transit Orders" }, // maps to "In Progress"
-  { key: "scheduled", label: "Scheduled Orders" },
+  { key: "all", label: "All Orders", shortLabel: "All" },
+  { key: "completed", label: "Completed Orders", shortLabel: "Completed" },
+  { key: "in-transit", label: "In transit Orders", shortLabel: "In transit" },
+  { key: "scheduled", label: "Scheduled Orders", shortLabel: "Scheduled" },
 ];
 
 export default function FuelDeliveryPage() {

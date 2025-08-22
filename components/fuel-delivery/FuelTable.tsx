@@ -199,9 +199,9 @@ const StatusPill = ({ status }: { status: OrderStatus }) => {
   } as const;
   const c = map[status];
   return (
-    <span className="inline-flex items-center gap-2 font-semibold">
+    <span className="inline-flex items-center gap-1 sm:gap-2 font-semibold whitespace-nowrap text-xs sm:text-sm">
       <span
-        className="h-2.5 w-2.5 rounded-full"
+        className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full flex-shrink-0"
         style={{ backgroundColor: c.dot }}
       />
       <span style={{ color: c.text }}>{status}</span>
@@ -254,60 +254,89 @@ export default function OrdersTable({ orders }: { orders?: Order[] }) {
   };
 
   return (
-    <div className="bg-[#3B3835] rounded-b-[20px] text-white overflow-hidden">
-      {/* Header */}
-      <div className="h-[80px] rounded-b-xl bg-[#262422] px-6 py-8">
-        <div className="grid grid-cols-7 text-sm font-semibold text-white/90">
-          <div>Order ID</div>
-          <div>Vehicle</div>
-          <div>Location</div>
-          <div>Quantity</div>
-          <div>Cost</div>
-          <div>Status</div>
-          <div className="text-right">Date / Actions</div>
+    <div className="bg-[#3B3835] rounded-b-[20px] text-white overflow-hidden w-full">
+      {/* Horizontal Scroll Container */}
+      <div className="overflow-x-auto">
+        <div className="w-full">
+          {/* Header */}
+          <div className="h-[60px] sm:h-[80px] rounded-b-xl bg-[#262422] px-3 sm:px-6 py-4 sm:py-8">
+            <div className="grid grid-cols-7 text-xs sm:text-sm font-semibold text-white/90 gap-1 sm:gap-2">
+              <div className="truncate">Order ID</div>
+              <div className="truncate">Vehicle</div>
+              <div className="truncate">Location</div>
+              <div className="truncate">Quantity</div>
+              <div className="truncate">Cost</div>
+              <div className="truncate">Status</div>
+              <div className="text-right truncate">Date / Actions</div>
+            </div>
+          </div>
+
+          {/* Rows */}
+          <ul className="bg-[#3B3835] w-full">
+            {data.map((o, i) => (
+              <li
+                key={o.id + i}
+                className="grid grid-cols-7 items-center px-3 sm:px-6 py-4 sm:py-8 gap-1 sm:gap-2 border-b border-white/5 last:border-b-0"
+              >
+                <div className="font-medium text-xs sm:text-sm truncate">
+                  <span className="sm:hidden">{o.id.split("-")[2]}</span>
+                  <span className="hidden sm:inline">{o.id}</span>
+                </div>
+                <div className="text-white/90 text-xs sm:text-sm truncate">
+                  {o.vehicle}
+                </div>
+                <div className="text-white/90 text-xs sm:text-sm truncate">
+                  <span className="sm:hidden">{o.location.split(" ")[0]}</span>
+                  <span className="hidden sm:inline">{o.location}</span>
+                </div>
+                <div className="text-white/90 text-xs sm:text-sm truncate">
+                  {o.quantityL}L
+                </div>
+                <div className="text-white/90 text-xs sm:text-sm truncate">
+                  <span className="sm:hidden">
+                    ₦{Math.round(o.costNaira / 1000)}k
+                  </span>
+                  <span className="hidden sm:inline">
+                    {formatMoney(o.costNaira)}
+                  </span>
+                </div>
+                <div className="truncate">
+                  <StatusPill status={o.status} />
+                </div>
+                <div className="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-1 sm:gap-5">
+                  <span className="text-white/80 text-xs sm:text-sm whitespace-nowrap order-2 sm:order-1">
+                    <span className="sm:hidden">
+                      {formatDate(o.dateISO).slice(0, 5)}
+                    </span>
+                    <span className="hidden sm:inline">
+                      {formatDate(o.dateISO)}
+                    </span>
+                  </span>
+                  <Link
+                    href={`/fuel-delivery/${o.id}`}
+                    className="text-[#FF8500] font-semibold hover:underline text-xs sm:text-sm whitespace-nowrap order-1 sm:order-2"
+                  >
+                    View
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
-
-      {/* Rows */}
-      <ul className="bg-[#3B3835]">
-        {data.map((o, i) => (
-          <li
-            key={o.id + i}
-            className="grid grid-cols-7 items-center px-6 py-8"
-          >
-            <div className="font-medium">{o.id}</div>
-            <div className="text-white/90">{o.vehicle}</div>
-            <div className="text-white/90">{o.location}</div>
-            <div className="text-white/90">{o.quantityL}L</div>
-            <div className="text-white/90">{formatMoney(o.costNaira)}</div>
-            <div>
-              <StatusPill status={o.status} />
-            </div>
-            <div className="flex items-center justify-end gap-5">
-              <span className="text-white/80">{formatDate(o.dateISO)}</span>
-              <Link
-                href={`/fuel-delivery/${o.id}`}
-                className="text-[#FF8500] font-semibold hover:underline"
-              >
-                View
-              </Link>
-            </div>
-          </li>
-        ))}
-      </ul>
 
       {/* Divider */}
       <div className="h-px bg-white/15 mt-6" />
 
       {/* Pagination + CTA */}
-      <div className="flex flex-col items-center gap-4 py-6">
+      <div className="flex flex-col items-center gap-4 py-4 sm:py-6 px-3 sm:px-6">
         <div className="flex items-center gap-2">
           <button
             onClick={() => canPrev && setPage((p) => p - 1)}
             disabled={!canPrev}
-            className="rounded-lg bg-white/10 p-2 disabled:opacity-40"
+            className="rounded-lg bg-white/10 p-2 disabled:opacity-40 hover:bg-white/20 transition-colors"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
           <span className="text-sm text-white/80 min-w-[70px] text-center">
             {page} / {totalPages}
@@ -315,14 +344,14 @@ export default function OrdersTable({ orders }: { orders?: Order[] }) {
           <button
             onClick={() => canNext && setPage((p) => p + 1)}
             disabled={!canNext}
-            className="rounded-lg bg-white/10 p-2 disabled:opacity-40"
+            className="rounded-lg bg-white/10 p-2 disabled:opacity-40 hover:bg-white/20 transition-colors"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
 
         <Button
-          className="w-full max-w-[248px] h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200"
+          className="w-full max-w-[248px] h-[48px] sm:h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200 text-sm sm:text-base"
           onClick={() => setOpen(true)}
         >
           New Delivery <Plus className="h-4 w-4" />

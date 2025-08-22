@@ -91,7 +91,7 @@ function CreateNewPasswordForm() {
                 />
               </div>
 
-              <h1 className="text-4xl md:text-5xl text-white font-medium">
+              <h1 className="text-3xl md:text-5xl text-white font-medium">
                 Create New Password
               </h1>
               <p className="mt-6 text-sm text-white/90 font-medium text-center">

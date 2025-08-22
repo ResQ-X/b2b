@@ -11,7 +11,7 @@ export default function Search({
   className?: string;
 }) {
   return (
-    <div className={`w-[450px] relative ${className}`}>
+    <div className={`w-[300px] lg:w-[450px] relative ${className}`}>
       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
         <svg
           className="h-4 w-4 text-[#A89887]"

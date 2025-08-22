@@ -44,7 +44,7 @@ export default function ChangePasswordPage() {
 
   return (
     <div className="min-h-screen text-[#FFFFFF]">
-      <div className="w-3/5 px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+      <div className="w-full lg:w-3/5 px-4 sm:px-6 lg:px-8 py-6 md:py-10">
         {/* Header (arrow + title) with divider aligned to title */}
         <div className="grid grid-cols-[32px_1fr] items-center gap-2">
           <Link

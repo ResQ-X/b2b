@@ -94,7 +94,8 @@ export default function RequestServiceModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="
-          max-w-[640px]
+        w-11/12
+          lg:max-w-[640px]
           rounded-[28px]
           border border-white/10
           bg-[#1F1E1C]

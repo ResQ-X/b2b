@@ -37,10 +37,7 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
     <div className="h-20 bg-[#3B3835] px-4 sm:px-6 md:px-8 flex items-center justify-between border-b border-[#474747]">
       {/* Hamburger (Mobile only) */}
       <div className="md:hidden">
-        <button
-          onClick={onMenuClick}
-          className="p-2 rounded-md hover:bg-gray-100 focus:outline-none"
-        >
+        <button onClick={onMenuClick} className="p-2 rounded-md">
           <Menu className="h-6 w-6 text-[#fff]" />
         </button>
       </div>

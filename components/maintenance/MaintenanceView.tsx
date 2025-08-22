@@ -37,7 +37,7 @@ export function MaintenanceView({ maintenance, onEdit }: MaintenanceViewProps) {
       : "#EF4444"; // Overdue
 
   return (
-    <div className="bg-[#242220] w-full space-y-8 text-white rounded-2xl p-6">
+    <div className="bg-[#242220] w-full space-y-8 text-white">
       {/* Back */}
       <div className="flex items-center gap-3">
         <Button
@@ -92,7 +92,7 @@ export function MaintenanceView({ maintenance, onEdit }: MaintenanceViewProps) {
       </div>
 
       {/* ACTIVITY LOG */}
-      <div className="bg-[#3B3835] space-y-4 p-6 rounded-[14px] mt-14">
+      {/* <div className="bg-[#3B3835] space-y-4 p-6 rounded-[14px] mt-14">
         <h2 className="text-lg font-semibold">Activity Log</h2>
         <div className="rounded-2xl overflow-hidden">
           <table className="w-full">
@@ -125,7 +125,7 @@ export function MaintenanceView({ maintenance, onEdit }: MaintenanceViewProps) {
             </tbody>
           </table>
         </div>
-      </div>
+      </div> */}
 
       {/* Actions (optional) */}
       {onEdit && (

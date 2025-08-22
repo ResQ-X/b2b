@@ -26,11 +26,8 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     <div className="w-[242px] h-screen bg-[#3B3835] gap-4 flex flex-col py-3">
       <div className="w-full h-[93px]">
         <div className="flex justify-end">
-          <button
-            onClick={onClose}
-            className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100"
-          >
-            <Icons.X className="w-6 h-6" />
+          <button onClick={onClose} className="md:hidden p-2 rounded-md">
+            <Icons.X className="w-6 h-6 text-[#fff]" />
           </button>
         </div>
 

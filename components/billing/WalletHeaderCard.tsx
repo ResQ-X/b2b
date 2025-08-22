@@ -16,7 +16,7 @@ export function WalletHeaderCard() {
         </Button>
       </div>
 
-      <div className="absolute inset-0 flex justify-end items-end">
+      <div className="hidden absolute inset-0 lg:flex justify-end items-end">
         <Image
           src={CardImage}
           alt="ResQ-X Card"

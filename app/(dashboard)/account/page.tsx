@@ -12,7 +12,7 @@ const rows: Row[] = [
 
 export default function AccountPage() {
   return (
-    <div className="min-h-screen">
+    <div className="">
       <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 md:py-10">
         <div className="space-y-4">
           {rows.map((r) => (
