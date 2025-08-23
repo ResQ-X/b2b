@@ -16,9 +16,9 @@ export function PlanCard({
       <div className="w-11/12 lg:w-full flex items-end justify-center text-center mb-6">
         <p className="text-xl lg:text-5xl font-medium lg:font-semibold tracking-tight">
           {card.price}
-          {/* <span className="lg:ml-2 text-xs lg:text-xl font-light lg:font-medium">
+          <span className="lg:ml-2 text-xs lg:text-xl font-light lg:font-medium">
             {card.cadence}
-          </span> */}
+          </span>
         </p>
       </div>
 
