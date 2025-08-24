@@ -4,9 +4,9 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import LogoSvg from "@/public/logo.svg";
 import AuthImage from "@/public/auth-page.png";
+import { Button } from "@/components/ui/Button";
 import AuthText from "@/components/auth/auth-text";
 import type { AuthState, VerifyEmailData } from "@/types/auth";
-import { Button } from "@/components/ui/Button";
 
 type OTPArray = [string, string, string, string, string, string];
 

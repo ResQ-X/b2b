@@ -4,13 +4,13 @@ import { useState } from "react";
 import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 import { AuthService } from "@/services/auth.service";
 import { useAuth } from "@/contexts/auth.context";
 import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";
 import type { AuthState, LoginFormData } from "@/types/auth";
 import CustomInput from "@/components/ui/CustomInput";
-import { Button } from "@/components/ui/Button";
 
 export default function LoginPage() {
   const router = useRouter();

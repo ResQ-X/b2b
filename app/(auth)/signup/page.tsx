@@ -3,6 +3,7 @@ import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 // import { AuthService } from "@/services/auth.service";
 import { useState } from "react";
 import AuthImage from "@/public/auth-page.png";
@@ -10,7 +11,6 @@ import AuthText from "@/components/auth/auth-text";
 import type { AuthState, SignupFormData } from "@/types/auth";
 import { Eye, EyeOff } from "lucide-react";
 import CustomInput from "@/components/ui/CustomInput";
-import { Button } from "@/components/ui/Button";
 
 export default function SignupPage() {
   const router = useRouter();
