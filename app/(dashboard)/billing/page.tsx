@@ -5,7 +5,6 @@ import { Tabs } from "@/components/billing/Tabs";
 import { FeaturePanel } from "@/components/billing/FeaturePanel";
 import { BillingTable } from "@/components/billing/BillingTable";
 import { CurrentPlanCard } from "@/components/billing/CurrentPlanCard";
-// import { PlanPicker } from "@/components/billing/PlanPicker";
 import Sub from "@/components/billing/Sub";
 
 export const naira = (n: number) =>
@@ -50,11 +49,6 @@ export default function BillingPage() {
           {/* Right column (shows at the right, not below) */}
           {showRightPane && (
             <div className="w-full lg:w-[38%] bg-[#3B3835] rounded-2xl h-auto lg:h-[810px] shrink-0 lg:mt-[-21rem] py-5 lg:py-16">
-              {/* <PlanPicker
-                current="basic"
-                onClose={() => setShowPicker(false)}
-              /> */}
-
               <Sub />
             </div>
           )}

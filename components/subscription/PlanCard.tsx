@@ -9,36 +9,34 @@ export function PlanCard({
   onChoose: () => void;
 }) {
   return (
-    <div className="bg-[#3B3835] relative w-11/12 lg:w-full lg:max-w-[392px] h-auto lg:h-[423px] mx-auto rounded-2xl lg:rounded-3xl text-[#fff] px-4 lg:px-[30px] py-10">
-      <p className="text-center text-sm lg:text-xl font-medium lg:font-semibold mb-5">
-        {card.title}
-      </p>
-      <div className="w-11/12 lg:w-full flex items-end justify-center text-center mb-6">
-        <p className="text-xl lg:text-5xl font-medium lg:font-semibold tracking-tight">
+    <div className="bg-[#3B3835] relative w-full max-w-[392px] h-[423px] mx-auto rounded-3xl text-white border border-[#FF8500] px-[30px] py-10">
+      <p className="text-center text-xl font-semibold mb-5">{card.title}</p>
+      <div className="flex items-end justify-center text-center mb-6">
+        <span className="text-5xl font-semibold tracking-tight">
           {card.price}
-          <span className="lg:ml-2 text-xs lg:text-xl font-light lg:font-medium">
-            {card.cadence}
-          </span>
-        </p>
+        </span>
+        <span className="ml-2 text-xl font-medium opacity-90">
+          {card.cadence}
+        </span>
       </div>
 
-      {/* <ul className="space-y-3 mb-8 text-sm">
+      <ul className="space-y-3 mb-8 text-sm">
         {card.bullets.map((b, i) => (
           <li key={i} className="flex items-center gap-2">
             <span className="bg-[#FF8500] inline-block h-1.5 w-1.5 rounded-full mr-4" />
             <span className="opacity-95 text-base font-medium">{b}</span>
           </li>
         ))}
-      </ul> */}
+      </ul>
 
-      {/* <div className="pb-2">
+      <div className="pb-2">
         <Button
           onClick={onChoose}
           className="bg-[#FF8500] w-full h-11 rounded-xl font-semibold text-[#FFFFFF] text-sm "
         >
           Choose Plan
         </Button>
-      </div> */}
+      </div>
     </div>
   );
 }

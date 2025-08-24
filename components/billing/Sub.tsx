@@ -1,7 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { PlanCard } from "@/components/subscription/PlanCard";
 import { Card } from "@/components/billing/Card";
 import { Billing, CategoryKey, CardSpec, PLANS } from "@/lib/constants";
 
@@ -152,7 +151,7 @@ function Sub() {
           >
             {cards.map((card, i) => (
               <div key={i} className="w-full shrink-0 lg:px-2 lg:mt-16">
-                <PlanCard
+                <Card
                   card={card}
                   onChoose={() => handleChoosePlan(billing, category, card, i)}
                 />
