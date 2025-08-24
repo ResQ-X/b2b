@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+import Button from "@/components/ui/Button";
 import { AuthService } from "@/services/auth.service";
 import { useAuth } from "@/contexts/auth.context";
 import AuthImage from "@/public/auth-page.png";

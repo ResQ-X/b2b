@@ -4,7 +4,7 @@ import LogoSvg from "@/public/logo.svg";
 import { useRouter } from "next/navigation";
 // import { AuthService } from "@/services/auth.service";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
+import Button from "@/components/ui/Button";
 import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";
 import type { AuthState, ForgotPasswordFormData } from "@/types/auth";

@@ -7,7 +7,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/Select";
-import { Button } from "@/components/ui/Button";
+import Button from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 
 export function RequestEmergencyServiceCard() {

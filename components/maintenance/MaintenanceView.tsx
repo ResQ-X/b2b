@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import Button from "@/components/ui/Button";
 import CustomInput from "@/components/ui/CustomInput";
 import type { Order } from "@/components/maintenance/MaintenanceTable";
 
@@ -159,7 +159,7 @@ function Labeled({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Th({ children }: { children: React.ReactNode }) {
+export function Th({ children }: { children: React.ReactNode }) {
   return (
     <th className="text-left p-4 text-sm font-medium text-white/70">
       {children}
@@ -167,7 +167,7 @@ function Th({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Tr({
+export function Tr({
   time,
   activity,
   status,
