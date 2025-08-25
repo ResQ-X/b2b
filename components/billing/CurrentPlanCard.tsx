@@ -1,5 +1,5 @@
 import { naira } from "@/app/(dashboard)/billing/page";
-import { Button } from "../ui/Button";
+import { Button } from "../ui/button";
 
 export function CurrentPlanCard({ onUpgrade }: { onUpgrade: () => void }) {
   return (

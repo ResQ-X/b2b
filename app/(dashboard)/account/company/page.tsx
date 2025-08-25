@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { FieldRow } from "@/components/account/FieldRow";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 export default function CompanyInformationPage() {
   // Company info state

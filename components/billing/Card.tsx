@@ -1,5 +1,5 @@
 import { CardSpec } from "@/lib/constants";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 export function Card({
   card,

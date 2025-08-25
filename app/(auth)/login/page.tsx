@@ -3,7 +3,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { AuthService } from "@/services/auth.service";
 import { useAuth } from "@/contexts/auth.context";
