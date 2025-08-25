@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import {
   Dialog,
   DialogContent,
@@ -173,7 +173,7 @@ export default function VehicleModal({
             </Button>
             <Button
               type="button"
-              variant="outline"
+              // variant="outline"
               onClick={() => onOpenChange(false)}
               className="h-12 rounded-xl border border-white/20 bg-transparent text-white hover:bg-white/10"
             >

@@ -15,7 +15,7 @@ export default function CustomInput({ label, ...props }: CustomInputProps) {
       )}
       <input
         {...props}
-        className={`w-full max-w-[500px] bg-[#3B3835]/100 placeholder:text-[#FFFFFF] h-[50px] rounded-[5px] border-none focus:border-none focus:ring-0 outline-none pl-3   ${
+        className={`w-full bg-[#3B3835]/100 placeholder:text-[#FFFFFF] h-[50px] rounded-[5px] border-none focus:border-none focus:ring-0 outline-none pl-3 ${
           props.className || ""
         }
         `}

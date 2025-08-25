@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import RequestServiceModal, {
   type RequestServiceForm,
@@ -351,10 +351,12 @@ export default function OrdersTable({ orders }: { orders?: Order[] }) {
         </div>
 
         <Button
-          className="w-full max-w-[248px] h-[48px] sm:h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200 text-sm sm:text-base"
+          variant="orange"
+          className="w-[180px] lg:w-[262px] h-[58px] lg:h-[60px]"
           onClick={() => setOpen(true)}
+          leftIcon={<Plus className="h-4 w-4" />}
         >
-          New Delivery <Plus className="h-4 w-4" />
+          New Delivery
         </Button>
       </div>
 

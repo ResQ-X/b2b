@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Plus } from "lucide-react";
 import RequestServiceModal, {
   type RequestServiceForm,
@@ -121,10 +121,12 @@ export default function MaintenanceTabs({
           {/* CTA: full width on mobile, right-aligned on sm+ */}
           <div className="order-3 w-full sm:w-auto sm:ml-auto mb-4 lg:mb-0 flex justify-center lg:justify-start sm:block">
             <Button
-              className="w-[170px] h-[48px] bg-[#FF8500] hover:bg-[#ff9a33]"
+              variant="orange"
+              className="h-[58px] lg:h-[60px]"
               onClick={() => setOpen(true)}
+              rightIcon={<Plus className="h-4 w-4" />}
             >
-              Schedule Service <Plus className="h-4 w-4 ml-2" />
+              Schedule Service
             </Button>
           </div>
         </div>

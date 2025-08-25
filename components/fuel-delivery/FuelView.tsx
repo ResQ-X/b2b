@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import CustomInput from "@/components/ui/CustomInput";
 import type { Order } from "@/components/fuel-delivery/FuelTable";
 
@@ -38,11 +38,10 @@ export function FuelView({ fuel }: FuelViewProps) {
       {/* Back */}
       <div className="flex items-center gap-3">
         <Button
-          variant="ghost"
+          variant="black"
           onClick={() => router.back()}
-          className="text-white/80 hover:text-white hover:bg-white/5"
+          leftIcon={<ArrowLeft className="h-4 w-4" />}
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
       </div>

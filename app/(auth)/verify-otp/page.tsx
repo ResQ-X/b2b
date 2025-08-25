@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import LogoSvg from "@/public/logo.svg";
 import AuthImage from "@/public/auth-page.png";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import AuthText from "@/components/auth/auth-text";
 import type { AuthState, VerifyEmailData } from "@/types/auth";
 
@@ -153,7 +153,7 @@ function VerifyEmailContent() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 text-white">
-              <div className="relative w-full lg:max-w-[500px] mb-10 flex items-center justify-between gap-1 lg:gap-3">
+              <div className="relative w-full mb-10 flex items-center justify-between gap-1 lg:gap-3">
                 {[0, 1, 2, 3, 4, 5].map((i) => (
                   <input
                     key={i}
@@ -183,7 +183,8 @@ function VerifyEmailContent() {
 
               <Button
                 type="submit"
-                className="w-full max-w-[500px] h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200"
+                variant="orange"
+                className="w-full h-[52px]"
                 disabled={authState.isLoading}
               >
                 {authState.isLoading ? "Verifying..." : "Verify Email"}

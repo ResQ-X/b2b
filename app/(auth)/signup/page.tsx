@@ -3,7 +3,7 @@ import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 // import { AuthService } from "@/services/auth.service";
 import { useState } from "react";
 import AuthImage from "@/public/auth-page.png";
@@ -156,7 +156,7 @@ export default function SignupPage() {
 
             <form onSubmit={handleSubmit} className="space-y-6 text-white">
               {/* Company Name */}
-              <div className="w-full max-w-[500px]">
+              <div className="w-full">
                 <CustomInput
                   label="Company’s Name"
                   id="name"
@@ -171,7 +171,7 @@ export default function SignupPage() {
               </div>
 
               {/* Company Email */}
-              <div className="w-full max-w-[500px]">
+              <div className="w-full">
                 <CustomInput
                   label="Company Email Address"
                   id="email"
@@ -186,7 +186,7 @@ export default function SignupPage() {
               </div>
 
               {/* Phone */}
-              <div className="w-full max-w-[500px]">
+              <div className="w-full">
                 <CustomInput
                   label="Phone Number"
                   id="phone"
@@ -201,7 +201,7 @@ export default function SignupPage() {
               </div>
 
               {/* Password */}
-              <div className="relative w-full max-w-[500px]">
+              <div className="relative w-full">
                 <div className="relative w-full">
                   <CustomInput
                     label="Password"
@@ -228,7 +228,7 @@ export default function SignupPage() {
               </div>
 
               {/* Confirm Password */}
-              <div className="relative w-full max-w-[500px]">
+              <div className="relative w-full">
                 <div className="relative w-full">
                   <CustomInput
                     label="Confirm Password"
@@ -262,7 +262,7 @@ export default function SignupPage() {
               </div>
 
               {/* Terms checkbox + copy */}
-              <div className="w-full max-w-[500px]">
+              <div className="w-full">
                 <label className="flex items-start gap-3 text-sm text-white/90 select-none">
                   <input
                     type="checkbox"
@@ -301,8 +301,9 @@ export default function SignupPage() {
               {/* Submit */}
               <Button
                 type="submit"
-                className="w-full max-w-lg h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200"
-                disabled={authState.isLoading || !agreeToTerms}
+                variant="orange"
+                className="w-full h-[52px]"
+                // disabled={authState.isLoading || !agreeToTerms}
               >
                 {authState.isLoading ? "Creating Account..." : "Sign Up"}
               </Button>

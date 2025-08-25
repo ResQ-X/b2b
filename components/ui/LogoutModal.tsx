@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 
 interface LogoutModalProps {
   isOpen: boolean;
@@ -27,15 +27,16 @@ export default function LogoutModal({
 
         <div className="my-8 flex justify-between gap-4">
           <Button
-            variant="secondary"
+            variant="grey"
             onClick={onClose}
-            className="w-[224px] h-[52px] rounded-lg bg-[#4A4A4A] text-white hover:bg-[#5a5a5a]"
+            className="w-[224px] h-[48px] lg:h-[52px]"
           >
             Cancel
           </Button>
           <Button
+            variant="orange"
             onClick={onConfirm}
-            className="w-[224px] h-[52px] rounded-lg bg-orange text-white hover:bg-orange/90"
+            className="w-[224px] h-[48px] lg:h-[52px]"
           >
             Logout
           </Button>

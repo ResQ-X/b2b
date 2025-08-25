@@ -4,7 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 
 export default function SecurityPage() {
   const router = useRouter();
@@ -51,8 +51,9 @@ export default function SecurityPage() {
 
               <Button
                 type="button"
+                variant="orange"
                 onClick={handleChangePassword}
-                className="w-[142px] h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all duration-200"
+                className="w-auto h-[48px] lg:h-[52px] "
               >
                 Change Password
               </Button>

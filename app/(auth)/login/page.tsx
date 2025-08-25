@@ -3,8 +3,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
+import { Button } from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
-import Button from "@/components/ui/Button";
 import { AuthService } from "@/services/auth.service";
 import { useAuth } from "@/contexts/auth.context";
 import AuthImage from "@/public/auth-page.png";
@@ -126,7 +126,7 @@ export default function LoginPage() {
 
               <div className="text-end text-sm font-medium text-[#ffff]">
                 <Button
-                  variant="link"
+                  variant="transparent"
                   className="text-[#ffff] hover:text-orange/80"
                   onClick={() => router.push("/forgot-password")}
                 >
@@ -140,7 +140,8 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                className="w-full max-w-lg h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200"
+                variant="orange"
+                className="w-full h-[52px]"
                 disabled={authState.isLoading}
               >
                 {authState.isLoading ? "Signing in..." : "Sign In"}

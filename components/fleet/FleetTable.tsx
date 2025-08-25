@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import VehicleModal, { type VehicleForm } from "@/components/fleet/FleetModal";
 
 export type FleetRow = {
@@ -90,9 +90,11 @@ export default function FleetTable({ rows }: { rows?: FleetRow[] }) {
         <div className="flex justify-center">
           <Button
             onClick={() => setOpen(true)}
-            className="h-[48px] rounded-xl bg-[#FF8500] hover:bg-[#ff9a33] px-6"
+            variant="orange"
+            className="w-[200px] lg:w-[248px] h-[48px] lg:h-[52px]"
+            rightIcon={<Plus className="h-4 w-4 ml-2" />}
           >
-            Add New Fleet <Plus className="h-4 w-4 ml-2" />
+            Add New Fleet
           </Button>
         </div>
       </div>

@@ -3,7 +3,7 @@ import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import { useRouter, useSearchParams } from "next/navigation";
 // import { AuthService } from "@/services/auth.service";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Suspense, useState } from "react";
 import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";
@@ -104,7 +104,7 @@ function CreateNewPasswordForm() {
 
             <form onSubmit={handleSubmit} className="space-y-6 text-white">
               {/* Password */}
-              <div className="relative w-full max-w-[500px]">
+              <div className="relative w-full">
                 <div className="relative w-full">
                   <CustomInput
                     label="Password"
@@ -133,7 +133,7 @@ function CreateNewPasswordForm() {
               </div>
 
               {/* Confirm Password */}
-              <div className="relative w-full max-w-[500px]">
+              <div className="relative w-full">
                 <div className="relative w-full">
                   <CustomInput
                     label="Confirm Password"
@@ -179,7 +179,8 @@ function CreateNewPasswordForm() {
               {/* Submit */}
               <Button
                 type="submit"
-                className="w-full max-w-[500px] h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all duration-200"
+                variant="orange"
+                className="w-full h-[52px]"
                 disabled={authState.isLoading}
               >
                 {authState.isLoading ? "Saving..." : "Save New Password"}
@@ -191,7 +192,6 @@ function CreateNewPasswordForm() {
                 <Button
                   type="button"
                   variant="link"
-                  className="text-orange hover:text-orange/80"
                   onClick={() => router.push("/login")}
                 >
                   Back to Sign In

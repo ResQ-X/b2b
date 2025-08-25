@@ -155,10 +155,6 @@ function Sub() {
                   card={card}
                   onChoose={() => handleChoosePlan(billing, category, card, i)}
                 />
-                {/* <Card
-                  card={card}
-                  onChoose={() => handleChoosePlan(billing, category, card, i)}
-                /> */}
               </div>
             ))}
           </div>

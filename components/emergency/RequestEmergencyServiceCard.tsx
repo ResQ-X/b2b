@@ -7,7 +7,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/Select";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 
 export function RequestEmergencyServiceCard() {
@@ -71,7 +71,8 @@ export function RequestEmergencyServiceCard() {
 
         <Button
           disabled={!canSubmit}
-          className="w-full h-[48px] bg-[#FF8500] hover:bg-[#ff9a33] rounded-xl mt-2 disabled:opacity-50"
+          variant="orange"
+          className="w-full h-[48px] lg:h-[52px]"
         >
           Request Service
         </Button>

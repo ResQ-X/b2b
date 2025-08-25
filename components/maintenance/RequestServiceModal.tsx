@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import {
   Dialog,
   DialogContent,
@@ -79,7 +79,17 @@ export default function RequestServiceModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg rounded-3xl border-none bg-[#242220] text-white p-6">
+      <DialogContent
+        className="
+        w-11/12
+          lg:max-w-[640px]
+          rounded-[28px]
+          border border-white/10
+          bg-[#1F1E1C]
+          text-white
+          p-7 md:p-9
+        "
+      >
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">{title}</DialogTitle>
         </DialogHeader>
@@ -142,21 +152,19 @@ export default function RequestServiceModal({
             />
           </div>
 
-          <DialogFooter className="mt-2 flex w-full gap-3">
+          <DialogFooter className="mt-4 flex w-full gap-4">
             <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="flex-1 h-[54px] border-white/15 text-white hover:bg-white/10"
+              variant="black"
+              className="flex-1 w-full lg:w-[254px] h-[58px] lg:h-[60px]"
             >
               Cancel
             </Button>
+
             <Button
-              type="submit"
-              disabled={!canSubmit || submitting}
-              className="flex-1 h-[54px] bg-[#FF8500] hover:bg-[#ff9a33]"
+              variant="orange"
+              className="flex-1 w-full lg:w-[254px] h-[58px] lg:h-[60px]"
             >
-              {submitting ? "Submitting..." : "Request Service"}
+              {submitting ? "Submitting..." : "Request Serviced"}
             </Button>
           </DialogFooter>
         </form>

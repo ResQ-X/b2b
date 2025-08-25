@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import CustomInput from "@/components/ui/CustomInput";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 
 export default function ChangePasswordPage() {
   const router = useRouter();
@@ -111,7 +111,8 @@ export default function ChangePasswordPage() {
             <div className="mt-2 flex flex-wrap gap-4">
               <Button
                 type="submit"
-                className="w-[200px] h-[52px] bg-orange hover:bg-opacity-90 hover:scale-105 transition-all duration-200"
+                variant="orange"
+                className="w-[215px] h-[48px] lg:h-[52px]"
                 disabled={isLoading}
               >
                 {isLoading ? "Updating..." : "Update Password"}
@@ -119,8 +120,8 @@ export default function ChangePasswordPage() {
 
               <Button
                 type="button"
-                variant="secondary"
-                className="w-[200px] h-[52px] bg-[#B9B9B9] text-black hover:bg-[#c9c9c9]"
+                variant="grey"
+                className="w-[215px] h-[48px] lg:h-[52px]"
                 onClick={() => router.push("/account/security")}
               >
                 Cancel

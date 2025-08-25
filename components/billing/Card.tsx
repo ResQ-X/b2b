@@ -1,4 +1,5 @@
 import { CardSpec } from "@/lib/constants";
+import { Button } from "@/components/ui/Button";
 
 export function Card({
   card,
@@ -36,12 +37,13 @@ export function Card({
       </ul>
 
       <div className="w-3/5 lg:w-full pb-2 m-auto h-12 lg:h-16">
-        <button
+        <Button
+          variant="orange"
           onClick={onChoose}
-          className="bg-[#FF8500] w-full m-auto h-full rounded-xl font-medium text-[#FFFFFF] text-sm"
+          className="w-11/12 lg:w-full m-auto h-full"
         >
           Choose Plan
-        </button>
+        </Button>
       </div>
     </div>
   );

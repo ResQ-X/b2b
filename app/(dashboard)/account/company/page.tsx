@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { FieldRow } from "@/components/account/FieldRow";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 
 export default function CompanyInformationPage() {
   // Company info state
@@ -85,7 +85,8 @@ export default function CompanyInformationPage() {
           <div className="mt-2">
             <Button
               type="button"
-              className="w-[182px] h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all duration-200"
+              variant="orange"
+              className="w-auto h-[48px] lg:h-[52px]"
             >
               Add Team Members
             </Button>

@@ -4,7 +4,7 @@ import LogoSvg from "@/public/logo.svg";
 import { useRouter } from "next/navigation";
 // import { AuthService } from "@/services/auth.service";
 import { useState } from "react";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";
 import type { AuthState, ForgotPasswordFormData } from "@/types/auth";
@@ -95,7 +95,7 @@ export default function ForgotPasswordPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 text-white">
-              <div className="space-y-2 relative w-full max-w-[500px] mb-10">
+              <div className="space-y-2 relative w-full mb-10">
                 <CustomInput
                   label="Email Address"
                   id="email"
@@ -117,7 +117,8 @@ export default function ForgotPasswordPage() {
 
               <Button
                 type="submit"
-                className="w-full max-w-[500px] h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200"
+                variant="orange"
+                className="w-full h-[52px]"
                 disabled={authState.isLoading}
               >
                 {authState.isLoading ? "Sending..." : "Send OTP"}

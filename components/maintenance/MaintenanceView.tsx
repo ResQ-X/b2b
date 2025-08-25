@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import CustomInput from "@/components/ui/CustomInput";
 import type { Order } from "@/components/maintenance/MaintenanceTable";
 
@@ -41,11 +41,10 @@ export function MaintenanceView({ maintenance, onEdit }: MaintenanceViewProps) {
       {/* Back */}
       <div className="flex items-center gap-3">
         <Button
-          variant="ghost"
+          variant="black"
           onClick={() => router.back()}
-          className="text-white/80 hover:text-white hover:bg-white/5"
+          leftIcon={<ArrowLeft className="h-4 w-4" />}
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
       </div>
@@ -130,13 +129,15 @@ export function MaintenanceView({ maintenance, onEdit }: MaintenanceViewProps) {
       {/* Actions (optional) */}
       {onEdit && (
         <div className="flex justify-center gap-4">
-          <Button onClick={onEdit} className="bg-[#FF8500] hover:bg-[#ff8b12]">
+          <Button
+            variant="orange"
+            onClick={onEdit}
+            className="w-[224px] h-[48px] lg:h-[52px]"
+          >
             Edit Service
           </Button>
-          <Button
-            variant="outline"
-            className="border-[#FF8500] text-[#FF8500] hover:bg-[#FF8500]/10"
-          >
+
+          <Button variant="grey" className="w-[224px] h-[48px] lg:h-[52px]">
             Cancel Service
           </Button>
         </div>

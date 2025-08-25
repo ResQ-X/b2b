@@ -1,6 +1,6 @@
 import Image from "next/image";
 import CardImage from "@/public/resq-x-card.svg";
-import Button from "../ui/Button";
+import { Button } from "../ui/Button";
 
 export function WalletHeaderCard() {
   return (
@@ -11,7 +11,10 @@ export function WalletHeaderCard() {
           ₦64,500.00
         </h2>
 
-        <Button className="w-full max-w-lg h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200 mb-4">
+        <Button
+          variant="orange"
+          className="w-full lg:w-[159px] h-[48px] lg:h-[52px]"
+        >
           Top Up Wallet
         </Button>
       </div>

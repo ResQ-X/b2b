@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 
 export function CTABanner({
   title,
@@ -28,11 +28,12 @@ export function CTABanner({
     <div className="rounded-2xl bg-[#3B3835] text-white p-6 flex items-center justify-between gap-6">
       <div>
         <h3 className="text-2xl font-semibold text-[#FFFFFF]">{title}</h3>
-        <p className="text-sm font-medium mt-[16px]">{formatDesc(desc)}</p>
+        <p className="text-sm font-medium mt-[16px] mb-6">{formatDesc(desc)}</p>
 
         <Button
+          variant="orange"
           onClick={onAction}
-          className="w-full max-w-[226px] h-[60px] bg-orange hover:bg-opacity-80 hover:scale-105 transition-all hover:bg-orange duration-200 mt-6 mb-[40px]"
+          className="w-[180px] lg:w-[262px] h-[58px] lg:h-[60px]"
         >
           {buttonText}
         </Button>

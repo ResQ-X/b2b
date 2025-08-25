@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import {
   Dialog,
   DialogContent,
@@ -175,31 +175,17 @@ export default function RequestServiceModal({
 
           <DialogFooter className="mt-4 flex w-full gap-4">
             <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="
-                flex-1 h-[56px]
-                rounded-xl
-                border border-white/15
-                bg-transparent
-                text-white
-                hover:bg-white/10
-              "
+              variant="black"
+              className="flex-1 w-full lg:w-[254px] h-[58px] lg:h-[60px]"
             >
               Cancel
             </Button>
+
             <Button
-              type="submit"
-              disabled={!canSubmit || submitting}
-              className="
-                flex-1 h-[56px]
-                rounded-xl
-                bg-[#FF8500]
-                hover:bg-[#ff9a33]
-              "
+              variant="orange"
+              className="flex-1 w-full lg:w-[254px] h-[58px] lg:h-[60px]"
             >
-              {submitting ? "Submitting..." : "Request Service"}
+              {submitting ? "Submitting..." : "Request Serviced"}
             </Button>
           </DialogFooter>
         </form>
