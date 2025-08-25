@@ -309,7 +309,7 @@ export default function SignupPage() {
               </Button>
 
               {/* Switch to Login */}
-              <p className="text-center text-sm text-white/90">
+              <p className="flex items-center justify-center text-center text-sm text-white/90">
                 Already have an account?{" "}
                 <Button
                   type="button"

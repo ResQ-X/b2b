@@ -124,7 +124,7 @@ export default function ForgotPasswordPage() {
                 {authState.isLoading ? "Sending..." : "Send OTP"}
               </Button>
 
-              <p className="text-center text-sm text-white/90">
+              <p className="flex items-center justify-center text-center text-sm text-white/90">
                 Remembered your password?{" "}
                 <Button
                   type="button"

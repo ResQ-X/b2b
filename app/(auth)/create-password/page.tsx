@@ -187,7 +187,7 @@ function CreateNewPasswordForm() {
               </Button>
 
               {/* Back to login */}
-              <p className="text-center text-sm text-white/90">
+              <p className="flex items-center justify-center text-center text-sm text-white/90">
                 Done already?{" "}
                 <Button
                   type="button"

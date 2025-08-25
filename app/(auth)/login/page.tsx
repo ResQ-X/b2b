@@ -124,7 +124,7 @@ export default function LoginPage() {
                 </button>
               </div>
 
-              <div className="text-end text-sm font-medium text-[#ffff]">
+              <div className="w-full flex justify-end text-end text-sm font-medium text-[#ffff]">
                 <Button
                   variant="transparent"
                   className="text-[#ffff] hover:text-orange/80"
@@ -147,7 +147,7 @@ export default function LoginPage() {
                 {authState.isLoading ? "Signing in..." : "Sign In"}
               </Button>
 
-              <p className="text-center text-sm text-[#ffff]">
+              <p className="flex items-center justify-center text-center text-sm text-[#ffff]">
                 Don&apos;t have an account?{" "}
                 <Button
                   variant="link"
