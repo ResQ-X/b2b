@@ -16,7 +16,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/Textarea";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
 export type RequestServiceForm = {
