@@ -8,16 +8,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/Dialog";
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectTrigger,
   SelectContent,
   SelectItem,
   SelectValue,
-} from "@/components/ui/Select";
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/Textarea";
-import { Label } from "@/components/ui/Label";
+import { Label } from "@/components/ui/label";
 
 export type RequestServiceForm = {
   type: string;

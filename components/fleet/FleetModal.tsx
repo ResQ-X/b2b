@@ -7,15 +7,15 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/Dialog";
-import { Label } from "@/components/ui/Label";
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectTrigger,
   SelectContent,
   SelectItem,
   SelectValue,
-} from "@/components/ui/Select";
+} from "@/components/ui/select";
 import CustomInput from "@/components/ui/CustomInput";
 
 export type VehicleForm = {

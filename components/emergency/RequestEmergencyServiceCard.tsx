@@ -6,9 +6,9 @@ import {
   SelectContent,
   SelectItem,
   SelectValue,
-} from "@/components/ui/Select";
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/Label";
+import { Label } from "@/components/ui/label";
 
 export function RequestEmergencyServiceCard() {
   const [form, setForm] = useState({
