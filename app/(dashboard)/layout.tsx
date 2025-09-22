@@ -26,32 +26,32 @@ export default function DashboardLayout({
     }
   }, [router]);
 
-  useEffect(() => {
-    if (!isAuthorized) return;
+  // useEffect(() => {
+  //   if (!isAuthorized) return;
 
-    let timeout: NodeJS.Timeout;
+  //   let timeout: NodeJS.Timeout;
 
-    const resetTimer = () => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        const cookies = new Cookies();
-        cookies.remove("accessToken");
-        cookies.remove("refreshToken");
-        cookies.remove("user");
-        router.push("/login");
-      }, 5 * 60 * 1000);
-    };
+  //   const resetTimer = () => {
+  //     clearTimeout(timeout);
+  //     timeout = setTimeout(() => {
+  //       const cookies = new Cookies();
+  //       cookies.remove("accessToken");
+  //       cookies.remove("refreshToken");
+  //       cookies.remove("user");
+  //       router.push("/login");
+  //     }, 5 * 60 * 1000);
+  //   };
 
-    window.addEventListener("mousemove", resetTimer);
-    window.addEventListener("keydown", resetTimer);
-    resetTimer();
+  //   window.addEventListener("mousemove", resetTimer);
+  //   window.addEventListener("keydown", resetTimer);
+  //   resetTimer();
 
-    return () => {
-      window.removeEventListener("mousemove", resetTimer);
-      window.removeEventListener("keydown", resetTimer);
-      clearTimeout(timeout);
-    };
-  }, [isAuthorized, router]);
+  //   return () => {
+  //     window.removeEventListener("mousemove", resetTimer);
+  //     window.removeEventListener("keydown", resetTimer);
+  //     clearTimeout(timeout);
+  //   };
+  // }, [isAuthorized, router]);
 
   if (!isAuthorized) return null;
 
