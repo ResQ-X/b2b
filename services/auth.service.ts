@@ -4,6 +4,9 @@ import type {
   LoginFormData,
   SignupFormData,
   VerifyEmailData,
+  ResendCodeData,
+  requestPasswordResetData,
+  resetPasswordData,
   AuthResponse,
   CreateServiceData,
 } from "@/types/auth";
@@ -13,7 +16,7 @@ const cookies = new Cookies();
 export const AuthService = {
   async signup(data: SignupFormData): Promise<AuthResponse> {
     const response = await axiosInstance.post<AuthResponse>(
-      "/auth/signup",
+      "/auth/fleet-signup",
       data
     );
     return response.data;
@@ -21,7 +24,15 @@ export const AuthService = {
 
   async verifyEmail(data: VerifyEmailData): Promise<AuthResponse> {
     const response = await axiosInstance.post<AuthResponse>(
-      "/auth/verify_email_verification_token",
+      "/auth/verify-fleet-email",
+      data
+    );
+    return response.data;
+  },
+
+  async resendCode(data: ResendCodeData): Promise<AuthResponse> {
+    const response = await axiosInstance.post<AuthResponse>(
+      "/auth/resend-verification-fleet",
       data
     );
     return response.data;
@@ -29,34 +40,34 @@ export const AuthService = {
 
   async login(data: LoginFormData): Promise<AuthResponse> {
     const response = await axiosInstance.post<AuthResponse>(
-      "/auth/login",
+      "/auth/fleet-login",
       data
     );
-
     if (response.data.accessToken) {
       cookies.set("accessToken", response.data.accessToken, { path: "/" });
       cookies.set("refreshToken", response.data.refreshToken, { path: "/" });
       cookies.set("user", JSON.stringify(response.data.user), { path: "/" });
     }
-
     return response.data;
   },
 
   async requestPasswordReset(
-    email: string
+    data: requestPasswordResetData
   ): Promise<{ success: boolean; message: string }> {
-    const response = await axiosInstance.post("/auth/request_password_reset", {
-      email,
-    });
+    const response = await axiosInstance.post(
+      "/auth/forgot-password-fleet",
+      data
+    );
     return response.data;
   },
 
-  async resetPassword(data: {
-    token: string;
-    password: string;
-    confirmPassword?: string;
-  }): Promise<{ success: boolean; message: string }> {
-    const response = await axiosInstance.post("/auth/reset_password", data);
+  async resetPassword(
+    data: resetPasswordData
+  ): Promise<{ success: boolean; message: string }> {
+    const response = await axiosInstance.post(
+      "/auth/reset-password-fleet",
+      data
+    );
     return response.data;
   },
 

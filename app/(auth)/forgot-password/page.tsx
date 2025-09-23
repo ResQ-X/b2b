@@ -2,7 +2,7 @@
 import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import { useRouter } from "next/navigation";
-// import { AuthService } from "@/services/auth.service";
+import { AuthService } from "@/services/auth.service";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import AuthImage from "@/public/auth-page.png";
@@ -27,29 +27,30 @@ export default function ForgotPasswordPage() {
     setSuccessMsg(null);
     setAuthState({ isLoading: true, error: null });
 
-    setTimeout(() => router.push("/verify-otp"), 1200);
-
-    // try {
-    //   // Adjust this call name to match your service method
-    //   // e.g. AuthService.requestPasswordReset(formData.email)
-    //   // or AuthService.forgotPassword(formData)
-    //   await AuthService.requestPasswordReset(formData.email);
-
-    //   setSuccessMsg(
-    //     "If an account exists for this email, we’ve sent a reset link. Please check your inbox (and spam)."
-    //   );
-    //   setAuthState({ isLoading: false, error: null });
-
-    //   // Optional: redirect after a short delay
-    //   // setTimeout(() => router.push(`/verify-reset?email=${encodeURIComponent(formData.email)}`), 1200);
-    // } catch (error: any) {
-    //   setAuthState({
-    //     isLoading: false,
-    //     error:
-    //       error?.response?.data?.message ||
-    //       "Unable to send reset link. Please try again.",
-    //   });
-    // }
+    try {
+      const response = await AuthService.requestPasswordReset(formData);
+      if (
+        response?.success === true &&
+        response?.message === "Verification code sent successfully"
+      ) {
+        setAuthState({ isLoading: false, error: null });
+        setSuccessMsg(response.message);
+        router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
+      } else {
+        // Handle unexpected response format
+        setAuthState({
+          isLoading: false,
+          error: response?.message || "Unexpected response. Please try again.",
+        });
+      }
+    } catch (error: any) {
+      setAuthState({
+        isLoading: false,
+        error:
+          error?.response?.data?.message ||
+          "Unable to send reset link. Please try again.",
+      });
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

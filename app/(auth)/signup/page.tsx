@@ -4,7 +4,7 @@ import LogoSvg from "@/public/logo.svg";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-// import { AuthService } from "@/services/auth.service";
+import { AuthService } from "@/services/auth.service";
 import { useState } from "react";
 import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";
@@ -15,12 +15,23 @@ import CustomInput from "@/components/ui/CustomInput";
 export default function SignupPage() {
   const router = useRouter();
 
+  // name: string;
+  // email: string;
+  // company_name: string;
+  // company_email: string;
+  // phone: string;
+  // company_phone: string;
+  // country: string;
+  // password: string;
+
   const [formData, setFormData] = useState<SignupFormData>({
     name: "",
     email: "",
-    country: "",
+    company_name: "",
+    company_email: "",
     phone: "",
-    userType: "ADMIN",
+    company_phone: "",
+    country: "NG",
     password: "",
   });
 
@@ -35,13 +46,44 @@ export default function SignupPage() {
   });
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  // const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value } = e.target;
+
+  //   if (name === "phone") {
+  //     // keep digits and a leading +
+  //     const cleaned = value.replace(/[^\d+]/g, "");
+  //     setFormData((p) => ({ ...p, phone: cleaned }));
+  //     return;
+  //   }
+
+  //   setFormData((p) => ({ ...p, [name]: value }));
+  // };
+
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     if (name === "phone") {
-      // keep digits and a leading +
-      const cleaned = value.replace(/[^\d+]/g, "");
-      setFormData((p) => ({ ...p, phone: cleaned }));
+      // Remove all non-digits
+      const digitsOnly = value.replace(/\D/g, "");
+
+      let formattedPhone = "";
+
+      if (digitsOnly.length > 0) {
+        // If starts with 0, remove it and add +234
+        if (digitsOnly.startsWith("0")) {
+          formattedPhone = "+234" + digitsOnly.substring(1);
+        }
+        // If starts with 234, add + prefix
+        else if (digitsOnly.startsWith("234")) {
+          formattedPhone = "+" + digitsOnly;
+        }
+        // If doesn't start with 0 or 234, assume it's a local number and add +234
+        else {
+          formattedPhone = "+234" + digitsOnly;
+        }
+      }
+
+      setFormData((p) => ({ ...p, phone: formattedPhone }));
       return;
     }
 
@@ -54,14 +96,6 @@ export default function SignupPage() {
     e.preventDefault();
     setSuccessMsg(null);
     setAuthState({ isLoading: true, error: null });
-
-    if (!/@resqx\.ng$/i.test(formData.email)) {
-      setAuthState({
-        isLoading: false,
-        error: "Only @resqx.ng email addresses are allowed",
-      });
-      return;
-    }
 
     if (!formData.password || formData.password.length < 8) {
       setAuthState({
@@ -87,32 +121,43 @@ export default function SignupPage() {
       });
       return;
     }
-    router.push("/subscription");
-    // try {
-    //   const res = await AuthService.signup({ ...formData });
+    const backendData = {
+      name: formData.name, // Company's Name from form
+      email: formData.email, // Company Email from form
+      company_name: formData.name, // Same as name
+      company_email: formData.email, // Same as email
+      phone: formData.phone, // Phone from form
+      company_phone: formData.phone, // Same as phone
+      country: formData.country,
+      password: formData.password,
+    };
 
-    //   if (res.success) {
-    //     setSuccessMsg(
-    //       res.message || "Account created! Please verify your email."
-    //     );
-    //     setAuthState({ isLoading: false, error: null });
-    //     // router.push(
-    //     //   `/verify-email?email=${encodeURIComponent(formData.email)}`
-    //     // );
-    //     router.push("/subscription");
-    //   } else {
-    //     setAuthState({
-    //       isLoading: false,
-    //       error: res?.message || "An error occurred during signup",
-    //     });
-    //   }
-    // } catch (error: any) {
-    //   setAuthState({
-    //     isLoading: false,
-    //     error:
-    //       error?.response?.data?.message || "An error occurred during signup",
-    //   });
-    // }
+    console.log("formData:", formData);
+    try {
+      const res = await AuthService.signup(backendData);
+
+      if (res.success) {
+        setSuccessMsg(
+          res.message || "Account created! Please verify your email."
+        );
+        setAuthState({ isLoading: false, error: null });
+        // router.push(
+        //   `/verify-email?email=${encodeURIComponent(formData.email)}`
+        // );
+        router.push("/subscription");
+      } else {
+        setAuthState({
+          isLoading: false,
+          error: res?.message || "An error occurred during signup",
+        });
+      }
+    } catch (error: any) {
+      setAuthState({
+        isLoading: false,
+        error:
+          error?.response?.data?.message || "An error occurred during signup",
+      });
+    }
   };
 
   return (

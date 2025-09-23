@@ -28,10 +28,9 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthState({ isLoading: true, error: null });
-    // router.push("/dashboard");
     try {
       const response = await AuthService.login(formData);
-      if (response.success && response.user) {
+      if (response.user) {
         setUser(response.user);
         router.push("/dashboard");
       }
@@ -126,6 +125,7 @@ export default function LoginPage() {
 
               <div className="w-full flex justify-end text-end text-sm font-medium text-[#ffff]">
                 <Button
+                  type="button"
                   variant="transparent"
                   className="text-[#ffff] hover:text-orange/80"
                   onClick={() => router.push("/forgot-password")}
@@ -150,6 +150,7 @@ export default function LoginPage() {
               <p className="flex items-center justify-center text-center text-sm text-[#ffff]">
                 Don&apos;t have an account?{" "}
                 <Button
+                  type="button"
                   variant="link"
                   className="text-orange hover:text-orange/80"
                   onClick={() => router.push("/signup")}

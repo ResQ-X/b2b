@@ -5,33 +5,35 @@ export interface LoginFormData {
 export interface ForgotPasswordFormData {
   email: string;
 }
-
 export interface SignupFormData {
   name: string;
   email: string;
-  country: string;
+  company_name: string;
+  company_email: string;
   phone: string;
-  userType: "ADMIN";
+  company_phone: string;
+  country: string;
   password: string;
 }
-
 export interface VerifyEmailData {
   email: string;
-  token: string;
+  code: string;
 }
-
-export type CreateNewPasswordData = {
-  email?: string;
+export interface ResendCodeData {
+  email: string;
+}
+export interface requestPasswordResetData {
+  email: string;
+}
+export interface resetPasswordData {
+  email: string;
   token: string;
-  password: string;
-  confirmPassword?: string;
-};
-
+  newPassword: string;
+}
 export interface AuthState {
   isLoading: boolean;
   error: string | null;
 }
-
 export interface AuthResponse {
   success: boolean;
   message: string;
@@ -39,25 +41,26 @@ export interface AuthResponse {
   refreshToken?: string;
   user?: User;
 }
-
 export interface User {
   id: string;
   name: string;
+  company_name: string;
+  company_address: string;
+  tax_id: string;
+  cac: string;
+  email: string;
+  company_email: string;
   country: string;
   phone: string;
-  email: string;
+  company_phone: string;
+  password: string;
   transaction_pin: string | null;
-  profile_picture: string | null;
   is_verified: boolean;
-  is_online: boolean;
   fcmToken: string | null;
-  longitude: number | null;
-  latitude: number | null;
-  userType: "ADMIN" | "CUSTOMER";
+  refreshToken: string | null;
   created_at: string;
   updated_at: string;
 }
-
 export interface CreateServiceData {
   service_name: string;
   unit_price: number;

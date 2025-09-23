@@ -4,7 +4,7 @@ import { Cookies } from "react-cookie";
 const cookies = new Cookies();
 
 const axiosInstance = axios.create({
-  baseURL: "https://internal-backend-rdhj.onrender.com",
+  baseURL: "https://backend-v2-dkn8.onrender.com",
   headers: {
     "Content-Type": "application/json",
     "x-resqx-key": "OGCALMDOWNLETMETHROUGH",

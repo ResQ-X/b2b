@@ -2,16 +2,15 @@
 import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import { useRouter, useSearchParams } from "next/navigation";
-// import { AuthService } from "@/services/auth.service";
+import { AuthService } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
 import { Suspense, useState } from "react";
 import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";
-import type { AuthState, CreateNewPasswordData } from "@/types/auth";
+import type { AuthState, resetPasswordData } from "@/types/auth";
 import { Eye, EyeOff } from "lucide-react";
 import CustomInput from "@/components/ui/CustomInput";
 
-// ✅ Wrapper adds the required Suspense boundary
 export default function CreateNewPasswordPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-black/70" />}>
@@ -23,12 +22,10 @@ export default function CreateNewPasswordPage() {
 function CreateNewPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  // From previous step (/verify-otp?email=...&token=...)
   const emailFromQuery = searchParams.get("email") || "";
   const tokenFromQuery = searchParams.get("token") || "";
 
-  const [data, setData] = useState<CreateNewPasswordData>({
+  const [data, setData] = useState<any>({
     email: emailFromQuery || undefined,
     token: tokenFromQuery,
     password: "",
@@ -45,19 +42,56 @@ function CreateNewPasswordForm() {
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setData((prev) => ({ ...prev, [name]: value }));
+    setData((prev: any) => ({ ...prev, [name]: value }));
   };
 
-  const passwordsMatch = data.password === (data.confirmPassword || "");
-  // const hasMinLen = data.password.length >= 8;
+  const passwordsMatch = data.newPassword === data.confirmPassword;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuccessMsg(null);
     setAuthState({ isLoading: true, error: null });
 
-    // TODO: re-enable validations + API call when ready
-    setTimeout(() => router.push("/login"), 1200);
+    if (!passwordsMatch) {
+      setAuthState({
+        isLoading: false,
+        error: "Passwords do not match.",
+      });
+      return;
+    }
+    const resetToken = tokenFromQuery || "temp-token";
+
+    try {
+      const resetPasswordPayload: resetPasswordData = {
+        email: emailFromQuery,
+        token: resetToken,
+        newPassword: data.password,
+      };
+
+      const response = await AuthService.resetPassword(resetPasswordPayload);
+
+      if (response?.success === true) {
+        setSuccessMsg("Password updated successfully!");
+        setAuthState({ isLoading: false, error: null });
+
+        setTimeout(() => {
+          router.push("/login");
+        }, 1200);
+      } else {
+        setAuthState({
+          isLoading: false,
+          error:
+            response?.message || "Failed to update password. Please try again.",
+        });
+      }
+    } catch (error: any) {
+      setAuthState({
+        isLoading: false,
+        error:
+          error?.response?.data?.message ||
+          "Failed to update password. Please try again.",
+      });
+    }
   };
 
   return (
@@ -96,7 +130,7 @@ function CreateNewPasswordForm() {
               </h1>
               <p className="mt-6 text-sm text-white/90 font-medium text-center">
                 Set a new password for{" "}
-                <span className="font-semibold">
+                <span className="font-semibold text-orange">
                   {data.email || "your account"}
                 </span>
               </p>
@@ -108,11 +142,11 @@ function CreateNewPasswordForm() {
                 <div className="relative w-full">
                   <CustomInput
                     label="Password"
-                    id="password"
-                    name="password"
+                    id="newPassword"
+                    name="newPassword"
                     type={show.password ? "text" : "password"}
                     placeholder="Enter new password"
-                    value={data.password}
+                    value={data.newPassword}
                     onChange={onChange}
                     required
                     className="pr-12 text-white placeholder:text-white/70"
@@ -141,7 +175,7 @@ function CreateNewPasswordForm() {
                     name="confirmPassword"
                     type={show.confirm ? "text" : "password"}
                     placeholder="Confirm new password"
-                    value={data.confirmPassword || ""}
+                    value={data.confirmPassword}
                     onChange={onChange}
                     required
                     className="pr-12 text-white placeholder:text-white/70"
@@ -161,7 +195,7 @@ function CreateNewPasswordForm() {
                     {show.confirm ? <EyeOff /> : <Eye />}
                   </button>
                 </div>
-                {!passwordsMatch && (data.confirmPassword?.length || 0) > 0 && (
+                {!passwordsMatch && data.confirmPassword.length > 0 && (
                   <p className="mt-2 text-xs text-red-300">
                     Passwords do not match.
                   </p>
@@ -192,6 +226,7 @@ function CreateNewPasswordForm() {
                 <Button
                   type="button"
                   variant="link"
+                  className="text-orange hover:text-orange/80"
                   onClick={() => router.push("/login")}
                 >
                   Back to Sign In

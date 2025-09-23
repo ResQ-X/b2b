@@ -6,6 +6,7 @@ import LogoSvg from "@/public/logo.svg";
 import AuthImage from "@/public/auth-page.png";
 import { Button } from "@/components/ui/button";
 import AuthText from "@/components/auth/auth-text";
+import { AuthService } from "@/services/auth.service";
 import type { AuthState, VerifyEmailData } from "@/types/auth";
 
 type OTPArray = [string, string, string, string, string, string];
@@ -28,10 +29,8 @@ function VerifyEmailContent() {
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
   const [verifyOtpData, setVerifyOtpData] = useState<VerifyEmailData>({
     email: emailFromQuery,
-    token: "",
+    code: "",
   });
-
-  console.log(verifyOtpData);
 
   const [authState, setAuthState] = useState<AuthState>({
     isLoading: false,
@@ -39,6 +38,11 @@ function VerifyEmailContent() {
   });
 
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [resendState, setResendState] = useState({
+    isLoading: false,
+    error: null as string | null,
+    success: null as string | null,
+  });
 
   const handleDigitChange = (index: number, value: string) => {
     if (!/^\d?$/.test(value)) return;
@@ -50,7 +54,7 @@ function VerifyEmailContent() {
     const joined = next.join("");
     setVerifyOtpData((prev) => ({
       email: prev.email || emailFromQuery,
-      token: joined,
+      code: joined,
     }));
 
     if (value && index < 5) inputsRef.current[index + 1]?.focus();
@@ -67,7 +71,7 @@ function VerifyEmailContent() {
         const next = [...otp] as OTPArray;
         next[index] = "";
         setOtp(next);
-        setVerifyOtpData((prev) => ({ ...prev, token: next.join("") }));
+        setVerifyOtpData((prev) => ({ ...prev, code: next.join("") }));
       }
     }
     if (e.key === "ArrowLeft" && index > 0) {
@@ -75,6 +79,64 @@ function VerifyEmailContent() {
     }
     if (e.key === "ArrowRight" && index < 5) {
       inputsRef.current[index + 1]?.focus();
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (!emailFromQuery) {
+      setResendState({
+        isLoading: false,
+        error: "Email not found. Please try the forgot password process again.",
+        success: null,
+      });
+      return;
+    }
+
+    setResendState({ isLoading: true, error: null, success: null });
+    setAuthState({ isLoading: false, error: null });
+
+    try {
+      const response = await AuthService.resendCode({
+        email: emailFromQuery,
+      });
+
+      if (response?.success === true) {
+        setResendState({
+          isLoading: false,
+          error: null,
+          success: response.message || "Verification code sent successfully!",
+        });
+
+        // Clear OTP inputs for new code
+        setOtp(["", "", "", "", "", ""]);
+        setVerifyOtpData({
+          email: emailFromQuery,
+          code: "",
+        });
+
+        // Focus first input
+        inputsRef.current[0]?.focus();
+
+        // Clear success message after 5 seconds
+        setTimeout(() => {
+          setResendState((prev) => ({ ...prev, success: null }));
+        }, 5000);
+      } else {
+        setResendState({
+          isLoading: false,
+          error:
+            response?.message || "Failed to resend code. Please try again.",
+          success: null,
+        });
+      }
+    } catch (error: any) {
+      setResendState({
+        isLoading: false,
+        error:
+          error?.response?.data?.message ||
+          "Failed to resend code. Please try again.",
+        success: null,
+      });
     }
   };
 
@@ -90,27 +152,64 @@ function VerifyEmailContent() {
     const joined = next.join("");
     setVerifyOtpData((prev) => ({
       email: prev.email || emailFromQuery,
-      token: joined,
+      code: joined,
     }));
 
     const last = Math.min(text.length, 6) - 1;
     inputsRef.current[last >= 0 ? last : 0]?.focus();
   };
 
-  const code = otp.join("");
-  console.log(code);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuccessMsg(null);
     setAuthState({ isLoading: true, error: null });
 
-    // Mock submit → redirect
-    setTimeout(() => {
-      setSuccessMsg("Email verified successfully!");
-      setAuthState({ isLoading: false, error: null });
-      router.push("/create-password");
-    }, 1200);
+    // Validate OTP is complete
+    if (verifyOtpData.code.length !== 6) {
+      setAuthState({
+        isLoading: false,
+        error: "Please enter the complete 6-digit code.",
+      });
+      return;
+    }
+
+    // Validate email exists
+    if (!verifyOtpData.email) {
+      setAuthState({
+        isLoading: false,
+        error: "Email not found. Please try the forgot password process again.",
+      });
+      return;
+    }
+
+    try {
+      // Send verifyOtpData directly to AuthService.verifyEmail
+      const response = await AuthService.verifyEmail(verifyOtpData);
+      if (response?.success === true) {
+        setSuccessMsg("Email verified successfully!");
+        setAuthState({ isLoading: false, error: null });
+
+        // ✅ Fixed: Use emailFromQuery and join the otp array to create a string
+        router.push(
+          `/create-password?email=${encodeURIComponent(
+            emailFromQuery
+          )}&token=${encodeURIComponent(otp.join(""))}`
+        );
+      } else {
+        // Handle unexpected response format
+        setAuthState({
+          isLoading: false,
+          error: response?.message || "Verification failed. Please try again.",
+        });
+      }
+    } catch (error: any) {
+      setAuthState({
+        isLoading: false,
+        error:
+          error?.response?.data?.message ||
+          "Invalid verification code. Please try again.",
+      });
+    }
   };
 
   return (
@@ -148,7 +247,9 @@ function VerifyEmailContent() {
               </h1>
               <p className="mt-6 text-sm text-white/90 font-medium text-center">
                 We sent a 6 digit code to{" "}
-                <span>{emailFromQuery || "your Email Address"}</span>
+                <span className="text-orange font-semibold">
+                  {emailFromQuery || "your Email Address"}
+                </span>
               </p>
             </div>
 
@@ -177,18 +278,47 @@ function VerifyEmailContent() {
               {successMsg && (
                 <p className="text-sm text-emerald-300">{successMsg}</p>
               )}
+              {resendState.success && (
+                <p className="text-sm text-emerald-300">
+                  {resendState.success}
+                </p>
+              )}
               {authState.error && (
                 <p className="text-sm text-red-400">{authState.error}</p>
+              )}
+              {resendState.error && (
+                <p className="text-sm text-red-400">{resendState.error}</p>
               )}
 
               <Button
                 type="submit"
                 variant="orange"
                 className="w-full h-[52px]"
-                disabled={authState.isLoading}
+                disabled={authState.isLoading || otp.join("").length !== 6}
               >
                 {authState.isLoading ? "Verifying..." : "Verify Email"}
               </Button>
+
+              <div className="flex items-center justify-between text-center text-sm text-white/90">
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-orange hover:text-orange/80 p-0"
+                  onClick={() => router.push("/forgot-password")}
+                >
+                  Back to Forgot Password
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-orange hover:text-orange/80 p-0"
+                  onClick={handleResendCode}
+                  disabled={resendState.isLoading}
+                >
+                  {resendState.isLoading ? "Sending..." : "Resend Code"}
+                </Button>
+              </div>
             </form>
           </div>
         </div>

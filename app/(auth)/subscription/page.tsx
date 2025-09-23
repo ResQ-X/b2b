@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import SubIcon from "@/public/sub.svg";
 import AuthImage from "@/public/auth-page.png";
@@ -8,6 +9,7 @@ import { PlanCard } from "@/components/subscription/PlanCard";
 import { Billing, CategoryKey, CardSpec, PLANS } from "@/lib/constants";
 
 export default function SubscriptionPage() {
+  const router = useRouter();
   const [billing, setBilling] = useState<Billing>("monthly");
   const [category, setCategory] = useState<CategoryKey>("rescue");
   const [index, setIndex] = useState(0); // active card within a category
@@ -50,17 +52,20 @@ export default function SubscriptionPage() {
   };
 
   function handleChoosePlan(
+    event: any,
     billing: Billing,
     category: CategoryKey,
     card: CardSpec,
     index: number
   ) {
+    event.preventDefault();
     console.log({
       billing,
       category,
       index,
       ...card,
     });
+    router.push("/dashboard");
   }
 
   return (
@@ -200,7 +205,7 @@ export default function SubscriptionPage() {
                     <PlanCard
                       card={card}
                       onChoose={() =>
-                        handleChoosePlan(billing, category, card, i)
+                        handleChoosePlan(event, billing, category, card, i)
                       }
                     />
                   </div>
