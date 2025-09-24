@@ -17,7 +17,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const cookies = new Cookies();
-    const accessToken = cookies.get("accessToken");
+    const accessToken = cookies.get("access_token");
 
     if (!accessToken) {
       router.replace("/login");

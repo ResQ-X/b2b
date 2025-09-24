@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const userFromCookie = cookies.get("user");
-    const token = cookies.get("token"); // Check for auth token too
+    const token = cookies.get("access_token");
 
     if (userFromCookie && token) {
       try {
@@ -81,12 +81,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("User loaded from cookie:", userFromCookie);
       } catch (error) {
         console.error("Error parsing user from cookie:", error);
-        // Clear invalid cookies
         cookies.remove("user");
-        cookies.remove("token");
+        cookies.remove("access_token");
       }
     } else {
-      // No valid auth data, ensure user is null
       setUser(null);
     }
   }, []);
@@ -94,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     setUser(null);
     cookies.remove("user");
-    cookies.remove("token");
+    cookies.remove("access_token");
     router.push("/login");
   };
 

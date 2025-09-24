@@ -14,7 +14,7 @@ import CustomInput from "@/components/ui/CustomInput";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setUser } = useAuth();
+  const { setUser, user } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
@@ -30,8 +30,10 @@ export default function LoginPage() {
     setAuthState({ isLoading: true, error: null });
     try {
       const response = await AuthService.login(formData);
+      console.log("Response", response)
       if (response.user) {
         setUser(response.user);
+        console.log(user);
         router.push("/dashboard");
       }
     } catch (error: any) {

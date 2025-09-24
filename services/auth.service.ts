@@ -43,9 +43,10 @@ export const AuthService = {
       "/auth/fleet-login",
       data
     );
-    if (response.data.accessToken) {
-      cookies.set("accessToken", response.data.accessToken, { path: "/" });
-      cookies.set("refreshToken", response.data.refreshToken, { path: "/" });
+    console.log("response", response);
+    if (response.data.access_token) {
+      cookies.set("access_token", response.data.access_token, { path: "/" });
+      // cookies.set("refreshToken", response.data.refreshToken, { path: "/" });
       cookies.set("user", JSON.stringify(response.data.user), { path: "/" });
     }
     return response.data;
@@ -79,7 +80,7 @@ export const AuthService = {
   },
 
   logout() {
-    cookies.remove("accessToken");
+    cookies.remove("access_token");
     cookies.remove("refreshToken");
     cookies.remove("user");
   },

@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
-import axiosInstance from "@/lib/axios";
+import { useMemo, useState } from "react";
+// import { useEffect, useMemo, useState } from "react";
+// import axiosInstance from "@/lib/axios";
 import { Rows3 } from "lucide-react";
 import { StatTile } from "@/components/dashboard/StatTile";
-import Loader from "@/components/ui/Loader";
+// import Loader from "@/components/ui/Loader";
 import FuelTable, {
   fuelData,
   type Order,
@@ -11,12 +12,12 @@ import FuelTable, {
 import FuelTabs from "@/components/fuel-delivery/FuelTabs";
 import { toCSV, downloadText } from "@/lib/export";
 
-interface DashboardMetrics {
-  active_order_count: number;
-  professionals: number;
-  active_order: unknown[];
-  wallet_balance?: number;
-}
+// interface DashboardMetrics {
+//   active_order_count: number;
+//   professionals: number;
+//   active_order: unknown[];
+//   wallet_balance?: number;
+// }
 
 const TABS = [
   { key: "all", label: "All Orders", shortLabel: "All" },
@@ -77,22 +78,22 @@ export default function FuelDeliveryPage() {
     });
   }, [filteredByTab, search]);
 
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-  useEffect(() => {
-    const fetchMetrics = async () => {
-      try {
-        const { data } = await axiosInstance.get(
-          "/admin/get_dashboard_metrics"
-        );
-        setMetrics(data.data);
-      } catch (error) {
-        console.error("Failed to fetch dashboard metrics:", error);
-      }
-    };
-    fetchMetrics();
-  }, []);
+  // const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  // useEffect(() => {
+  //   const fetchMetrics = async () => {
+  //     try {
+  //       const { data } = await axiosInstance.get(
+  //         "/admin/get_dashboard_metrics"
+  //       );
+  //       setMetrics(data.data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch dashboard metrics:", error);
+  //     }
+  //   };
+  //   fetchMetrics();
+  // }, []);
 
-  if (!metrics) return <Loader />;
+  // if (!metrics) return <Loader />;
 
   const tiles = [
     {

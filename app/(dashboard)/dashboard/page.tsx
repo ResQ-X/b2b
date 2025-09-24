@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
-import axiosInstance from "@/lib/axios";
+// import { useEffect, useState } from "react";
+import { useState } from "react";
+// import axiosInstance from "@/lib/axios";
 import { CarFront, Bolt, Wallet, Fuel, AlertTriangle } from "lucide-react";
 import FuelIcon from "@/public/gas-station.svg";
-import Loader from "@/components/ui/Loader";
+// import Loader from "@/components/ui/Loader";
 import { StatTile } from "@/components/dashboard/StatTile";
 import { CTABanner } from "@/components/dashboard/CTABanner";
 import { WalletCard } from "@/components/dashboard/WalletCard";
@@ -24,15 +25,15 @@ import RequestServiceModal, {
   type RequestServiceForm,
 } from "@/components/fuel-delivery/FuelModal";
 
-interface DashboardMetrics {
-  active_order_count: number;
-  professionals: number;
-  active_order: unknown[];
-  wallet_balance?: number;
-}
+// interface DashboardMetrics {
+//   active_order_count: number;
+//   professionals: number;
+//   active_order: unknown[];
+//   wallet_balance?: number;
+// }
 
 export default function DashboardPage() {
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  // const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [selectedYear, setSelectedYear] = useState(2025);
   const [open, setOpen] = useState(false);
 
@@ -43,19 +44,19 @@ export default function DashboardPage() {
   const upcomingSchedulesData = getUpcomingSchedulesForTable();
   const availableYears = getAvailableYears();
 
-  useEffect(() => {
-    const fetchMetrics = async () => {
-      try {
-        const { data } = await axiosInstance.get(
-          "/admin/get_dashboard_metrics"
-        );
-        setMetrics(data.data);
-      } catch (error) {
-        console.error("Failed to fetch dashboard metrics:", error);
-      }
-    };
-    fetchMetrics();
-  }, []);
+  // useEffect(() => {
+  //   const fetchMetrics = async () => {
+  //     try {
+  //       const { data } = await axiosInstance.get(
+  //         "/admin/get_dashboard_metrics"
+  //       );
+  //       setMetrics(data.data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch dashboard metrics:", error);
+  //     }
+  //   };
+  //   fetchMetrics();
+  // }, []);
 
   // Handler for year change
   const handleYearChange = (year: number) => {
@@ -64,12 +65,12 @@ export default function DashboardPage() {
     console.log(`Year changed to: ${year}`);
   };
 
-  if (!metrics) return <Loader />;
+  // if (!metrics) return <Loader />;
 
   const tiles = [
     {
       title: "Active Vehicles",
-      value: metrics.active_order_count ?? 0,
+      value: 0,
       sub: "89% uptime",
       icon: CarFront,
     },
@@ -153,7 +154,7 @@ export default function DashboardPage() {
         </div>
 
         <WalletCard
-          balance={metrics.wallet_balance ?? 64500}
+          balance={64500}
           onTopUp={() => console.log("Top up wallet")}
         />
       </div>

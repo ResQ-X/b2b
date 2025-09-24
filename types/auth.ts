@@ -35,11 +35,9 @@ export interface AuthState {
   error: string | null;
 }
 export interface AuthResponse {
-  success: boolean;
-  message: string;
-  accessToken?: string;
-  refreshToken?: string;
+  access_token?: string;
   user?: User;
+  status: string;
 }
 export interface User {
   id: string;
