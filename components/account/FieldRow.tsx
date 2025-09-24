@@ -7,10 +7,17 @@ type FieldProps = {
   label: string;
   value: string;
   optional?: boolean;
+  disabled?: boolean;
   onChange: (v: string) => void;
 };
 
-export function FieldRow({ label, value, onChange, optional }: FieldProps) {
+export function FieldRow({
+  label,
+  value,
+  onChange,
+  optional,
+  disabled = false,
+}: FieldProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
 
@@ -24,6 +31,13 @@ export function FieldRow({ label, value, onChange, optional }: FieldProps) {
     setEditing(false);
   };
 
+  // Update draft when value changes (useful when parent updates the value)
+  React.useEffect(() => {
+    if (!editing) {
+      setDraft(value);
+    }
+  }, [value, editing]);
+
   return (
     <div className="w-full">
       <div className="mb-2 flex items-center justify-between">
@@ -36,7 +50,8 @@ export function FieldRow({ label, value, onChange, optional }: FieldProps) {
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="group inline-flex items-center gap-1 text-sm font-semibold text-white/80 hover:text-white"
+              disabled={disabled}
+              className="group inline-flex items-center gap-1 text-sm font-semibold text-white/80 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Pencil className="h-4 w-4" />
               <span>Edit</span>
@@ -46,7 +61,8 @@ export function FieldRow({ label, value, onChange, optional }: FieldProps) {
               <button
                 type="button"
                 onClick={save}
-                className="inline-flex items-center gap-1 rounded-md bg-white/10 px-2 py-1 text-xs font-semibold text-white hover:bg-white/15"
+                disabled={disabled}
+                className="inline-flex items-center gap-1 rounded-md bg-white/10 px-2 py-1 text-xs font-semibold text-white hover:bg-white/15 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Check className="h-4 w-4" />
                 Save
@@ -54,7 +70,8 @@ export function FieldRow({ label, value, onChange, optional }: FieldProps) {
               <button
                 type="button"
                 onClick={cancel}
-                className="inline-flex items-center gap-1 rounded-md bg-white/5 px-2 py-1 text-xs font-semibold text-white/80 hover:bg-white/10"
+                disabled={disabled}
+                className="inline-flex items-center gap-1 rounded-md bg-white/5 px-2 py-1 text-xs font-semibold text-white/80 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <X className="h-4 w-4" />
                 Cancel
@@ -68,7 +85,7 @@ export function FieldRow({ label, value, onChange, optional }: FieldProps) {
         type="text"
         value={editing ? draft : value}
         onChange={(e) => setDraft(e.target.value)}
-        disabled={!editing}
+        disabled={!editing || disabled}
         className={[
           "block w-full rounded-lg border px-4 py-6 text-sm",
           "bg-[#3B3835] text-white placeholder-white/60",

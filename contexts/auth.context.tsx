@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // No valid auth data, ensure user is null
       setUser(null);
     }
-  }, []); // Remove the dependency
+  }, []);
 
   const logout = () => {
     setUser(null);
