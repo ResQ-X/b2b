@@ -119,7 +119,7 @@ export default function MaintenancePage() {
     })();
   }, []);
 
-  if (!metrics) return <Loader />;
+  if (!metrics) return <Loader content="Loading the maintenance data....." />;
 
   const tiles = [
     {

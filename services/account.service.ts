@@ -12,7 +12,7 @@ const cookies = new Cookies();
 
 export const AccountService = {
   async getProfile(): Promise<User> {
-    const res = await axiosInstance.get<User>("/account/me");
+    const res = await axiosInstance.get<User>("/fleets/profile");
     const user = res.data;
 
     // Keep cookie in sync (optional but handy if other parts read from cookie)
