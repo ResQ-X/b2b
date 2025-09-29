@@ -4,6 +4,8 @@ import { Raleway } from "next/font/google";
 import { LoadingProvider } from "@/providers/loading-providers";
 import { AuthProvider } from "@/contexts/auth.context";
 import { AccountProvider } from "@/contexts/account.context";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 
 const raleway = Raleway({
@@ -118,7 +120,10 @@ export default function RootLayout({
       <body className={`antialiased`}>
         <LoadingProvider>
           <AuthProvider>
-            <AccountProvider>{children}</AccountProvider>
+            <AccountProvider>
+              {children}
+              <ToastContainer position="top-right" autoClose={3000} />
+            </AccountProvider>
           </AuthProvider>
         </LoadingProvider>
       </body>
