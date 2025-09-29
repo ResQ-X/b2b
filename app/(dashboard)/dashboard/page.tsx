@@ -119,14 +119,14 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="">
+      {/* <div className="">
         <h1 className="text-[#F1F1F1] text-2xl font-semibold">
           Welcome Emtech,
         </h1>
         <p className="text-[#E2E2E2] text-base font-medium">
           Today&apos;s snapshot of your operations.
         </p>
-      </div>
+      </div> */}
 
       {/* Top tiles */}
       <div className="flex flex-col md:flex-row md:gap-[52px]">
@@ -143,7 +143,7 @@ export default function DashboardPage() {
 
       {/* Mid row: CTA + Wallet */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 border border-[#777777] rounded-2xl">
+        <div className="bg-[#3B3835] lg:col-span-2 border border-[#777777] rounded-2xl">
           <CTABanner
             title="Hey! Running low on Fuel?"
             desc="Place your orders in seconds and keep your fleet fueled | without the hassle."

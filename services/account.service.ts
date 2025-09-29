@@ -21,7 +21,7 @@ export const AccountService = {
   },
 
   async updateProfile(data: UpdateProfileData): Promise<UpdateProfileResponse> {
-    const res = await axiosInstance.put<UpdateProfileResponse>(
+    const res = await axiosInstance.patch<UpdateProfileResponse>(
       "/fleets/update-user-details",
       data
     );
@@ -33,12 +33,24 @@ export const AccountService = {
     return res.data;
   },
 
+  async initializeChangePassword(): Promise<ChangePasswordResponse> {
+    const res = await axiosInstance.post<ChangePasswordResponse>(
+      "/fleets/change-password-init"
+      // No body data - only token from headers/cookies
+    );
+    return res.data;
+  },
+
   async changePassword(
     data: ChangePasswordData
   ): Promise<ChangePasswordResponse> {
     const res = await axiosInstance.post<ChangePasswordResponse>(
-      "/account/change-password",
-      data
+      "/fleets/change-password-verify",
+      {
+        token: data.token,
+        newPassword: data.newPassword,
+        currentPassword: data.currentPassword,
+      }
     );
     return res.data;
   },

@@ -13,6 +13,7 @@ interface DashboardNavProps {
 
 export function DashboardNav({ onMenuClick }: DashboardNavProps) {
   const { user } = useAuth();
+  console.log("User:", user);
   // const pathname = usePathname();
 
   // const getPageTitle = (path: string) => {
@@ -42,12 +43,19 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
       </div>
 
       {/* Logo or Search Placeholder */}
-      <div className="flex-1 flex justify-center md:justify-start">
+      <div className="flex-1 flex flex-col justify-center md:justify-start">
         {/* Show only on md+ screens */}
         {/* <span className="text-lg md:text-2xl font-bold text-[#fff]">
           {getPageTitle(pathname)}
         </span> */}
+        <h1 className="text-[#F1F1F1] text-2xl font-semibold">
+          Welcome {user?.name || "User"},
+        </h1>
+        <p className="text-[#E2E2E2] text-base font-medium">
+          Today&apos;s snapshot of your operations.
+        </p>
       </div>
+
       {/* Right side user info */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-8">
@@ -69,7 +77,9 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
 
           {/* User info */}
           <div className="hidden sm:block text-left text-[#FFFFFF]">
-            <p className="text-sm font-semibold truncate">{user?.name}</p>
+            <p className="text-sm font-semibold truncate">
+              {user?.name || "User"}
+            </p>
             <p className="text-sm font-semibold truncate">Admin</p>
           </div>
 

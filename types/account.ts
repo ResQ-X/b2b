@@ -18,7 +18,6 @@ export interface User {
   created_at: string;
   updated_at: string;
 }
-
 export interface UpdateProfileData {
   name?: string;
   company_name?: string;
@@ -31,14 +30,12 @@ export interface UpdateProfileData {
   phone?: string;
   company_phone?: string;
 }
-
 export interface ChangePasswordData {
+  token: string;
   currentPassword: string;
   newPassword: string;
-  confirmPassword: string;
 }
 
-// Response types for API calls
 export interface UpdateProfileResponse {
   success: boolean;
   message: string;

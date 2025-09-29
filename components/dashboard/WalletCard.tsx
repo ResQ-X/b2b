@@ -18,7 +18,7 @@ export function WalletCard({
       </div>
       <hr className="mt-[27px] border-[#5E5E5E]" />
 
-      <div className="w-[159px] m-auto mt-[13px] mb-5">
+      <div className="flex justify-center w-[159px] m-auto mt-[13px] mb-5">
         <Button
           onClick={onTopUp}
           variant="orange"

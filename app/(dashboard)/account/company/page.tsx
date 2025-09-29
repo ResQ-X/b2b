@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
+import Loader from "@/components/ui/Loader";
 import Link from "next/link";
 import { FieldRow } from "@/components/account/FieldRow";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,10 @@ export default function CompanyInformationPage() {
       try {
         setLoading(true);
         setError(null);
-        const userData = await AccountService.getProfile();
+        const response = await AccountService.getProfile();
+
+        // Extract user data from the nested response structure
+        const userData = response.data || response;
         setUser(userData);
 
         // Populate form fields with user data
@@ -81,8 +85,10 @@ export default function CompanyInformationPage() {
 
       if (response.success) {
         // Update local user state with updated data
-        if (response.user) {
-          setUser(response.user);
+        // Handle nested response structure for update as well
+        const updatedUserData = response.user || response.data;
+        if (updatedUserData) {
+          setUser(updatedUserData);
         }
         // You might want to show a success message here
         console.log("Profile updated successfully:", response.message);
@@ -102,14 +108,7 @@ export default function CompanyInformationPage() {
 
   // Show loading state
   if (loading) {
-    return (
-      <div className="min-h-screen text-[#FFFFFF] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p>Loading user information...</p>
-        </div>
-      </div>
-    );
+    return <Loader content="Loading the Account details....." />;
   }
 
   return (
@@ -173,7 +172,6 @@ export default function CompanyInformationPage() {
               value={cac}
               onChange={setCac}
               disabled={updating}
-              optional
             />
           </div>
           <div /> {/* spacer */}
@@ -213,7 +211,6 @@ export default function CompanyInformationPage() {
               value={companyEmail}
               onChange={setCompanyEmail}
               disabled={updating}
-              optional
             />
 
             <FieldRow
@@ -221,7 +218,6 @@ export default function CompanyInformationPage() {
               value={companyPhone}
               onChange={setCompanyPhone}
               disabled={updating}
-              optional
             />
           </div>
           <div /> {/* spacer */}
