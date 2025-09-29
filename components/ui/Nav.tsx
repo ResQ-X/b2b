@@ -13,7 +13,7 @@ interface DashboardNavProps {
 
 export function DashboardNav({ onMenuClick }: DashboardNavProps) {
   const { user } = useAuth();
-  console.log(user);
+  // console.log(user);
   // const pathname = usePathname();
 
   // const getPageTitle = (path: string) => {

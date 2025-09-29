@@ -7,6 +7,7 @@ export function UpcomingSchedules({
 }: {
   items: { title: string; where: string; when: string; vol: string }[];
 }) {
+  console.log(items);
   return (
     <div className="border border-[#777777] rounded-2xl bg-[#3B3835] p-6 text-white">
       <h3 className="text-[#FFFFFF] text-2xl font-semibold">

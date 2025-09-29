@@ -7,7 +7,7 @@ export function FuelBarChart({
   data,
   labels,
   note,
-  availableYears = [2023, 2024, 2025],
+  availableYears = [2025],
   onYearChange,
 }: {
   title: string;

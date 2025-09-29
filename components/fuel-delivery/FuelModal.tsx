@@ -16,6 +16,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import CustomInput from "@/components/ui/CustomInput";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
@@ -24,6 +25,7 @@ export type RequestServiceForm = {
   vehicle: string;
   location: string;
   slot: string;
+  quantity: number;
   notes: string;
 };
 
@@ -38,7 +40,7 @@ export default function RequestServiceModal({
   vehicleOptions = [],
   locationOptions = [],
   slotOptions = [],
-  title = "Request Service",
+  title = "Request Fuel Service",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -56,6 +58,7 @@ export default function RequestServiceModal({
     vehicle: initialValues?.vehicle || "",
     location: initialValues?.location || "",
     slot: initialValues?.slot || "",
+    quantity: initialValues?.quantity || 0,
     notes: initialValues?.notes || "",
   });
 
@@ -67,6 +70,7 @@ export default function RequestServiceModal({
         vehicle: initialValues?.vehicle || "",
         location: initialValues?.location || "",
         slot: initialValues?.slot || "",
+        quantity: initialValues?.quantity || 0,
         notes: initialValues?.notes || "",
       });
     }
@@ -74,7 +78,12 @@ export default function RequestServiceModal({
   }, [open]);
 
   const canSubmit = useMemo(
-    () => form.type && form.vehicle && form.location && form.slot,
+    () =>
+      form.type &&
+      form.vehicle &&
+      form.location &&
+      form.slot &&
+      form.quantity > 0,
     [form]
   );
 
@@ -85,6 +94,17 @@ export default function RequestServiceModal({
     try {
       await onSubmit(form);
       onOpenChange(false);
+      // Reset form after successful submission
+      setForm({
+        type: "",
+        vehicle: "",
+        location: "",
+        slot: "",
+        quantity: 0,
+        notes: "",
+      });
+    } catch (error) {
+      console.error("Form submission error:", error);
     } finally {
       setSubmitting(false);
     }
@@ -110,13 +130,13 @@ export default function RequestServiceModal({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Fuel Service */}
-          <Field label="Fuel Service">
+          {/* Fuel Type */}
+          <Field label="Fuel Type">
             <Select
               value={form.type}
               onValueChange={(v) => setForm((p) => ({ ...p, type: v }))}
             >
-              <Trigger />
+              <Trigger placeholder="Select fuel type" />
               <List options={typeOptions} />
             </Select>
           </Field>
@@ -127,7 +147,7 @@ export default function RequestServiceModal({
               value={form.vehicle}
               onValueChange={(v) => setForm((p) => ({ ...p, vehicle: v }))}
             >
-              <Trigger />
+              <Trigger placeholder="Select vehicle" />
               <List options={vehicleOptions} />
             </Select>
           </Field>
@@ -138,7 +158,7 @@ export default function RequestServiceModal({
               value={form.location}
               onValueChange={(v) => setForm((p) => ({ ...p, location: v }))}
             >
-              <Trigger />
+              <Trigger placeholder="Select location" />
               <List options={locationOptions} />
             </Select>
           </Field>
@@ -149,9 +169,32 @@ export default function RequestServiceModal({
               value={form.slot}
               onValueChange={(v) => setForm((p) => ({ ...p, slot: v }))}
             >
-              <Trigger />
+              <Trigger placeholder="Select time slot" />
               <List options={slotOptions} />
             </Select>
+          </Field>
+
+          {/* Quantity */}
+          <Field label="Quantity (Liters)">
+            <CustomInput
+              type="number"
+              min="1"
+              value={form.quantity || ""}
+              onChange={(e) =>
+                setForm((p) => ({
+                  ...p,
+                  quantity: parseInt(e.target.value) || 0,
+                }))
+              }
+              placeholder="Enter quantity in liters"
+              className="
+                h-14
+                rounded-2xl
+                border border-white/10
+                bg-[#2D2A27]
+                text-white placeholder:text-white/60
+              "
+            />
           </Field>
 
           {/* Notes */}
@@ -175,17 +218,21 @@ export default function RequestServiceModal({
 
           <DialogFooter className="mt-4 flex w-full gap-4">
             <Button
+              type="button"
               variant="black"
+              onClick={() => onOpenChange(false)}
               className="flex-1 w-full lg:w-[254px] h-[58px] lg:h-[60px]"
             >
               Cancel
             </Button>
 
             <Button
+              type="submit"
               variant="orange"
-              className="flex-1 w-full lg:w-[254px] h-[58px] lg:h-[60px]"
+              disabled={!canSubmit || submitting}
+              className="flex-1 w-full lg:w-[254px] h-[58px] lg:h-[60px] disabled:opacity-50"
             >
-              {submitting ? "Submitting..." : "Request Serviced"}
+              {submitting ? "Submitting..." : "Request Service"}
             </Button>
           </DialogFooter>
         </form>
@@ -211,7 +258,7 @@ function Field({
   );
 }
 
-function Trigger() {
+function Trigger({ placeholder = "Select" }: { placeholder?: string }) {
   return (
     <SelectTrigger
       className="
@@ -222,7 +269,7 @@ function Trigger() {
         text-white
       "
     >
-      <SelectValue placeholder="Select" />
+      <SelectValue placeholder={placeholder} />
     </SelectTrigger>
   );
 }
