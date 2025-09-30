@@ -1,4 +1,5 @@
 "use client";
+import { toast } from "react-toastify";
 import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import Link from "next/link";
@@ -14,15 +15,6 @@ import CustomInput from "@/components/ui/CustomInput";
 
 export default function SignupPage() {
   const router = useRouter();
-
-  // name: string;
-  // email: string;
-  // company_name: string;
-  // company_email: string;
-  // phone: string;
-  // company_phone: string;
-  // country: string;
-  // password: string;
 
   const [formData, setFormData] = useState<SignupFormData>({
     name: "",
@@ -44,20 +36,6 @@ export default function SignupPage() {
     isLoading: false,
     error: null,
   });
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
-
-  // const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const { name, value } = e.target;
-
-  //   if (name === "phone") {
-  //     // keep digits and a leading +
-  //     const cleaned = value.replace(/[^\d+]/g, "");
-  //     setFormData((p) => ({ ...p, phone: cleaned }));
-  //     return;
-  //   }
-
-  //   setFormData((p) => ({ ...p, [name]: value }));
-  // };
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -94,40 +72,35 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSuccessMsg(null);
     setAuthState({ isLoading: true, error: null });
 
     if (!formData.password || formData.password.length < 8) {
-      setAuthState({
-        isLoading: false,
-        error: "Password must be at least 8 characters.",
-      });
+      setAuthState({ isLoading: false, error: null });
+      toast.error("Password must be at least 8 characters.");
       return;
     }
 
     if (!passwordsMatch) {
-      setAuthState({
-        isLoading: false,
-        error: "Passwords do not match.",
-      });
+      setAuthState({ isLoading: false, error: null });
+      toast.error("Passwords do not match.");
       return;
     }
 
     if (!agreeToTerms) {
-      setAuthState({
-        isLoading: false,
-        error:
-          "Please agree to the Terms of Service and Privacy Policy to continue.",
-      });
+      setAuthState({ isLoading: false, error: null });
+      toast.error(
+        "Please agree to the Terms of Service and Privacy Policy to continue."
+      );
       return;
     }
+
     const backendData = {
-      name: formData.name, // Company's Name from form
-      email: formData.email, // Company Email from form
-      company_name: formData.name, // Same as name
-      company_email: formData.email, // Same as email
-      phone: formData.phone, // Phone from form
-      company_phone: formData.phone, // Same as phone
+      name: formData.name,
+      email: formData.email,
+      company_name: formData.name,
+      company_email: formData.email,
+      phone: formData.phone,
+      company_phone: formData.phone,
       country: formData.country,
       password: formData.password,
     };
@@ -137,26 +110,20 @@ export default function SignupPage() {
       const res = await AuthService.signup(backendData);
 
       if (res.success) {
-        setSuccessMsg(
+        toast.success(
           res.message || "Account created! Please verify your email."
         );
         setAuthState({ isLoading: false, error: null });
-        // router.push(
-        //   `/verify-email?email=${encodeURIComponent(formData.email)}`
-        // );
         router.push("/subscription");
       } else {
-        setAuthState({
-          isLoading: false,
-          error: res?.message || "An error occurred during signup",
-        });
+        setAuthState({ isLoading: false, error: null });
+        toast.error(res?.message || "An error occurred during signup");
       }
     } catch (error: any) {
-      setAuthState({
-        isLoading: false,
-        error:
-          error?.response?.data?.message || "An error occurred during signup",
-      });
+      setAuthState({ isLoading: false, error: null });
+      toast.error(
+        error?.response?.data?.message || "An error occurred during signup"
+      );
     }
   };
 
@@ -173,12 +140,12 @@ export default function SignupPage() {
       {/* overlay */}
       <div className="absolute inset-0 bg-black/30" />
 
-      <div className="relative z-10 w-full max-w-7xl flex justify-around items-center mx-auto">
+      <div className="relative z-10 w-full max-w-7xl flex items-center justify-around mx-auto">
         {/* Left: marketing text */}
         <AuthText />
 
         {/* Right: form card */}
-        <div className="flex w-full flex-col justify-center max-w-[900px] px-4 sm:px-6 xl:px-12">
+        <div className="flex w-full flex-col justify-center max-w-[600px] px-4 sm:px-6 xl:px-12">
           <div className="mx-auto w-full flex justify-center flex-col max-w-lg">
             <div className="mb-8 flex items-center flex-col">
               <div className="relative mb-8" style={{ width: 181, height: 70 }}>
@@ -195,7 +162,7 @@ export default function SignupPage() {
                 Welcome!
               </h1>
               <p className="mt-6 text-sm text-white/90 font-medium text-center">
-                Let’s get started, create an account
+                Let's get started, create an account
               </p>
             </div>
 
@@ -203,11 +170,11 @@ export default function SignupPage() {
               {/* Company Name */}
               <div className="w-full">
                 <CustomInput
-                  label="Company’s Name"
+                  label="Company's Name"
                   id="name"
                   name="name"
                   type="text"
-                  placeholder="Enter Company’s Name"
+                  placeholder="Enter Company's Name"
                   value={formData.name}
                   onChange={onChange}
                   required
@@ -335,20 +302,12 @@ export default function SignupPage() {
                 </label>
               </div>
 
-              {/* Messages */}
-              {successMsg && (
-                <p className="text-sm text-emerald-300">{successMsg}</p>
-              )}
-              {authState.error && (
-                <p className="text-sm text-red-400">{authState.error}</p>
-              )}
-
               {/* Submit */}
               <Button
                 type="submit"
                 variant="orange"
                 className="w-full h-[52px]"
-                // disabled={authState.isLoading || !agreeToTerms}
+                disabled={authState.isLoading}
               >
                 {authState.isLoading ? "Creating Account..." : "Sign Up"}
               </Button>

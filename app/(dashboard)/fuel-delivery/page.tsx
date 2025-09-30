@@ -1,12 +1,11 @@
 "use client";
-import { useMemo, useState } from "react";
-// import { useEffect, useMemo, useState } from "react";
-// import axiosInstance from "@/lib/axios";
+import { useEffect, useMemo, useState } from "react";
+import axiosInstance from "@/lib/axios";
 import { Rows3 } from "lucide-react";
 import { StatTile } from "@/components/dashboard/StatTile";
 // import Loader from "@/components/ui/Loader";
 import FuelTable, {
-  fuelData,
+  // fuelData,
   type Order,
 } from "@/components/fuel-delivery/FuelTable";
 import FuelTabs from "@/components/fuel-delivery/FuelTabs";
@@ -26,18 +25,32 @@ const TABS = [
   { key: "scheduled", label: "Scheduled Orders", shortLabel: "Scheduled" },
 ];
 
+type Asset = {
+  id: string;
+  asset_name: string;
+  plate_number: string | null;
+};
+
+type Location = {
+  id: string;
+  location_name: string;
+};
+
 export default function FuelDeliveryPage() {
   const [tab, setTab] = useState<string>("all");
   const [search, setSearch] = useState<string>("");
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
 
   const counts = useMemo(
     () => ({
-      all: fuelData.length,
-      completed: fuelData.filter((o) => o.status === "Completed").length,
-      inprogress: fuelData.filter((o) => o.status === "In Progress").length,
-      scheduled: fuelData.filter((o) => o.status === "Scheduled").length,
+      all: orders.length,
+      completed: orders.filter((o) => o.status === "Completed").length,
+      inprogress: orders.filter((o) => o.status === "In Progress").length,
+      scheduled: orders.filter((o) => o.status === "Scheduled").length,
     }),
-    []
+    [orders]
   );
 
   const tabsWithCounts = TABS.map((t) => ({
@@ -54,13 +67,13 @@ export default function FuelDeliveryPage() {
 
   const filteredByTab: Order[] = useMemo(() => {
     if (tab === "completed")
-      return fuelData.filter((o) => o.status === "Completed");
+      return orders.filter((o) => o.status === "Completed");
     if (tab === "inprogress")
-      return fuelData.filter((o) => o.status === "In Progress");
+      return orders.filter((o) => o.status === "In Progress");
     if (tab === "scheduled")
-      return fuelData.filter((o) => o.status === "Scheduled");
-    return fuelData;
-  }, [tab]);
+      return orders.filter((o) => o.status === "Scheduled");
+    return orders;
+  }, [tab, orders]);
 
   const filtered: Order[] = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -78,20 +91,64 @@ export default function FuelDeliveryPage() {
     });
   }, [filteredByTab, search]);
 
-  // const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-  // useEffect(() => {
-  //   const fetchMetrics = async () => {
-  //     try {
-  //       const { data } = await axiosInstance.get(
-  //         "/admin/get_dashboard_metrics"
-  //       );
-  //       setMetrics(data.data);
-  //     } catch (error) {
-  //       console.error("Failed to fetch dashboard metrics:", error);
-  //     }
-  //   };
-  //   fetchMetrics();
-  // }, []);
+  useEffect(() => {
+    const fetchInit = async () => {
+      try {
+        const [assetsRes, locationsRes, ordersRes] = await Promise.all([
+          axiosInstance.get("/fleet-asset/get-asset"),
+          axiosInstance.get("/fleet-asset/get-locations"),
+          axiosInstance.get("/fleet-service/get-fuel-service", {
+            params: { page: 1, limit: 5 },
+          }),
+        ]);
+
+        setAssets(assetsRes.data.assets || []);
+        setLocations(locationsRes.data.data || []);
+
+        type ApiOrder = {
+          id: string;
+          status: string;
+          date_time: string;
+          fuel_type?: string;
+          service_time_type?: string;
+          quantity?: number;
+          note?: string;
+          location: string;
+          location_longitude?: string;
+          location_latitude?: string;
+          business_id?: string;
+          asset_id?: string;
+          created_at?: string;
+          updated_at?: string;
+          asset?: {
+            id: string;
+            asset_name: string;
+            plate_number: string | null;
+          };
+        };
+
+        const apiOrders = (ordersRes.data.data || []) as ApiOrder[];
+        const mapped: Order[] = apiOrders.map((o) => ({
+          id: o.id,
+          vehicle: o.asset?.plate_number || o.asset?.asset_name || "N/A",
+          location: o.location,
+          quantityL: o.quantity ?? 0,
+          costNaira: 0,
+          status:
+            o.status === "COMPLETED"
+              ? "Completed"
+              : o.status === "IN_PROGRESS"
+              ? "In Progress"
+              : "Scheduled",
+          dateISO: o.date_time,
+        }));
+        setOrders(mapped);
+      } catch (e) {
+        console.error("Failed to fetch fuel delivery data", e);
+      }
+    };
+    fetchInit();
+  }, []);
 
   // if (!metrics) return <Loader />;
 
@@ -164,7 +221,7 @@ export default function FuelDeliveryPage() {
       />
 
       {/* Table */}
-      <FuelTable orders={filtered} />
+      <FuelTable orders={filtered} assets={assets} locations={locations} />
     </div>
   );
 }

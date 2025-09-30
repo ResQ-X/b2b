@@ -1,4 +1,5 @@
 "use client";
+import { toast } from "react-toastify";
 import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -38,7 +39,6 @@ function CreateNewPasswordForm() {
     isLoading: false,
     error: null,
   });
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -49,16 +49,14 @@ function CreateNewPasswordForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSuccessMsg(null);
     setAuthState({ isLoading: true, error: null });
 
     if (!passwordsMatch) {
-      setAuthState({
-        isLoading: false,
-        error: "Passwords do not match.",
-      });
+      setAuthState({ isLoading: false, error: null });
+      toast.error("Passwords do not match.");
       return;
     }
+
     const resetToken = tokenFromQuery || "temp-token";
 
     try {
@@ -71,26 +69,24 @@ function CreateNewPasswordForm() {
       const response = await AuthService.resetPassword(resetPasswordPayload);
 
       if (response?.success === true) {
-        setSuccessMsg("Password updated successfully!");
+        toast.success("Password updated successfully!");
         setAuthState({ isLoading: false, error: null });
 
         setTimeout(() => {
           router.push("/login");
         }, 1200);
       } else {
-        setAuthState({
-          isLoading: false,
-          error:
-            response?.message || "Failed to update password. Please try again.",
-        });
+        setAuthState({ isLoading: false, error: null });
+        toast.error(
+          response?.message || "Failed to update password. Please try again."
+        );
       }
     } catch (error: any) {
-      setAuthState({
-        isLoading: false,
-        error:
-          error?.response?.data?.message ||
-          "Failed to update password. Please try again.",
-      });
+      setAuthState({ isLoading: false, error: null });
+      toast.error(
+        error?.response?.data?.message ||
+          "Failed to update password. Please try again."
+      );
     }
   };
 
@@ -107,12 +103,12 @@ function CreateNewPasswordForm() {
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/30" />
 
-      <div className="relative z-10 w-full max-w-7xl flex justify-around mx-auto">
+      <div className="relative z-10 w-full max-w-7xl flex items-center justify-around mx-auto">
         {/* Left side */}
         <AuthText />
 
         {/* Form side */}
-        <div className="flex w-full flex-col justify-center max-w-[900px] px-4 sm:px-6 xl:px-12">
+        <div className="flex w-full flex-col justify-center max-w-[600px] px-4 sm:px-6 xl:px-12">
           <div className="mx-auto w-full flex justify-center flex-col max-w-lg">
             <div className="mb-8 flex items-center flex-col">
               <div className="relative mb-8" style={{ width: 181, height: 70 }}>
@@ -201,14 +197,6 @@ function CreateNewPasswordForm() {
                   </p>
                 )}
               </div>
-
-              {/* Messages */}
-              {successMsg && (
-                <p className="text-sm text-emerald-300">{successMsg}</p>
-              )}
-              {authState.error && (
-                <p className="text-sm text-red-400">{authState.error}</p>
-              )}
 
               {/* Submit */}
               <Button

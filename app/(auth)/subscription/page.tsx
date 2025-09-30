@@ -12,7 +12,7 @@ export default function SubscriptionPage() {
   const router = useRouter();
   const [billing, setBilling] = useState<Billing>("monthly");
   const [category, setCategory] = useState<CategoryKey>("rescue");
-  const [index, setIndex] = useState(0); // active card within a category
+  const [index, setIndex] = useState(0);
 
   const touchStartX = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);

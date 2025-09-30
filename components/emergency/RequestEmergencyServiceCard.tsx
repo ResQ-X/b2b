@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Select,
   SelectTrigger,
@@ -8,16 +8,54 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
-export function RequestEmergencyServiceCard() {
+type Option = { label: string; value: string };
+
+export function RequestEmergencyServiceCard({
+  vehicleOptions = [],
+  locationOptions = [],
+  typeOptions = [],
+  slotOptions = [],
+  onSubmit,
+}: {
+  vehicleOptions?: Option[];
+  locationOptions?: Option[];
+  typeOptions?: Option[];
+  slotOptions?: Option[];
+  onSubmit?: (data: {
+    type: string;
+    vehicle: string;
+    location: string;
+    slot: string;
+    notes: string;
+  }) => Promise<void> | void;
+}) {
   const [form, setForm] = useState({
     vehicle: "",
-    service: "",
+    type: "",
     location: "",
+    slot: "",
+    notes: "",
   });
 
-  const canSubmit = form.vehicle && form.service && form.location;
+  const canSubmit = useMemo(
+    () => form.vehicle && form.type && form.location && form.slot,
+    [form]
+  );
+
+  const handleSubmit = async () => {
+    if (!canSubmit || !onSubmit) return;
+    await onSubmit({
+      type: form.type,
+      vehicle: form.vehicle,
+      location: form.location,
+      slot: form.slot,
+      notes: form.notes,
+    });
+    setForm({ vehicle: "", type: "", location: "", slot: "", notes: "" });
+  };
 
   return (
     <div className="bg-[#2B2A28] rounded-2xl text-white p-6 md:p-8 border border-white/10">
@@ -31,24 +69,27 @@ export function RequestEmergencyServiceCard() {
           >
             <Trigger />
             <SelectContent className="bg-[#2D2A27] text-white border-white/10">
-              <SelectItem value="LND-234-CC">LND-234-CC</SelectItem>
-              <SelectItem value="LND-789-DD">LND-789-DD</SelectItem>
-              <SelectItem value="LND-451-AA">LND-451-AA</SelectItem>
+              {vehicleOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Field>
 
         <Field label="Service Needed">
           <Select
-            value={form.service}
-            onValueChange={(v) => setForm((p) => ({ ...p, service: v }))}
+            value={form.type}
+            onValueChange={(v) => setForm((p) => ({ ...p, type: v }))}
           >
             <Trigger />
             <SelectContent className="bg-[#2D2A27] text-white border-white/10">
-              <SelectItem value="flat-tire">Flat Tire</SelectItem>
-              <SelectItem value="jump-start">Jump Start</SelectItem>
-              <SelectItem value="fuel-delivery">Fuel Delivery</SelectItem>
-              <SelectItem value="towing">Towing</SelectItem>
+              {typeOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Field>
@@ -60,19 +101,45 @@ export function RequestEmergencyServiceCard() {
           >
             <Trigger />
             <SelectContent className="bg-[#2D2A27] text-white border-white/10">
-              <SelectItem value="lekki-epe">Lekki-Epe Expressway</SelectItem>
-              <SelectItem value="vi">Victoria Island</SelectItem>
-              <SelectItem value="third-mainland">
-                Third Mainland Bridge
-              </SelectItem>
+              {locationOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
+        </Field>
+
+        <Field label="Preferred Time Slot">
+          <Select
+            value={form.slot}
+            onValueChange={(v) => setForm((p) => ({ ...p, slot: v }))}
+          >
+            <Trigger />
+            <SelectContent className="bg-[#2D2A27] text-white border-white/10">
+              {slotOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+
+        <Field label="Additional Notes">
+          <Textarea
+            value={form.notes}
+            onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
+            placeholder="Add any details to help us locate and assist quickly"
+            className="min-h-[110px] rounded-xl border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
+          />
         </Field>
 
         <Button
           disabled={!canSubmit}
           variant="orange"
           className="w-full h-[48px] lg:h-[52px]"
+          onClick={handleSubmit}
         >
           Request Service
         </Button>

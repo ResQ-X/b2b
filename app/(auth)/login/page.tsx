@@ -1,4 +1,5 @@
 "use client";
+import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
@@ -33,13 +34,12 @@ export default function LoginPage() {
       if (response.user) {
         setUser(response.user);
         console.log("User Details:", user);
+        toast.success("Login successful! Redirecting...");
         router.push("/dashboard");
       }
     } catch (error: any) {
-      setAuthState({
-        isLoading: false,
-        error: error.response?.data?.message || "Invalid credentials",
-      });
+      setAuthState({ isLoading: false, error: null });
+      toast.error(error.response?.data?.message || "Invalid credentials");
     }
   };
 
@@ -63,7 +63,7 @@ export default function LoginPage() {
       {/* Optional dark overlay for readability */}
       <div className="absolute inset-0 bg-black/30" />
 
-      <div className="relative z-10 w-full max-w-7xl flex justify-around mx-auto">
+      <div className="relative z-10 w-full max-w-7xl flex items-center justify-around mx-auto">
         <AuthText />
 
         <div className="flex w-full flex-col justify-center max-w-[600px] px-4 sm:px-6 xl:px-12">
@@ -134,10 +134,6 @@ export default function LoginPage() {
                   Forgot password?
                 </Button>
               </div>
-
-              {authState.error && (
-                <p className="text-sm text-red-500">{authState.error}</p>
-              )}
 
               <Button
                 type="submit"

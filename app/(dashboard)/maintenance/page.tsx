@@ -1,25 +1,21 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "@/lib/axios";
-import { Wallet } from "lucide-react";
+import { Wallet, Plus } from "lucide-react";
 import { StatTile } from "@/components/dashboard/StatTile";
-import Loader from "@/components/ui/Loader";
+import { Button } from "@/components/ui/button";
 import MaintenanceTable, {
   maintenanceData,
   type Order,
 } from "@/components/maintenance/MaintenanceTable";
 import MaintenanceTabs from "@/components/maintenance/MaintenanceTabs";
+import RequestServiceModal from "@/components/maintenance/RequestServiceModal";
 import ServiceHistoryCard, {
   type ServiceHistoryItem,
 } from "@/components/maintenance/ServiceHistoryCard";
 import { toCSV, downloadText } from "@/lib/export";
 
-interface DashboardMetrics {
-  active_order_count: number;
-  professionals: number;
-  active_order: unknown[];
-  wallet_balance?: number;
-}
+// (removed unused DashboardMetrics)
 
 const TABS = [
   { key: "all", label: "All Orders", shortLabel: "All" },
@@ -37,20 +33,34 @@ const formatDate = (iso: string) => {
   return { dd, mm, yyyy, full: `${dd}-${mm}-${yyyy}` };
 };
 
+type Asset = {
+  id: string;
+  asset_name: string;
+  plate_number: string | null;
+};
+
+type Location = {
+  id: string;
+  location_name: string;
+};
+
 export default function MaintenancePage() {
   const [tab, setTab] = useState<string>("all");
   const [search, setSearch] = useState<string>("");
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [orders, setOrders] = useState<Order[]>(maintenanceData);
+  const [open, setOpen] = useState(false);
 
   const counts = useMemo(
     () => ({
-      all: maintenanceData.length,
-      completed: maintenanceData.filter((o) => o.status === "Completed").length,
-      inprogress: maintenanceData.filter((o) => o.status === "In Progress")
-        .length,
-      scheduled: maintenanceData.filter((o) => o.status === "Scheduled").length,
-      overdue: maintenanceData.filter((o) => o.status === "Overdue").length,
+      all: orders.length,
+      completed: orders.filter((o) => o.status === "Completed").length,
+      inprogress: orders.filter((o) => o.status === "In Progress").length,
+      scheduled: orders.filter((o) => o.status === "Scheduled").length,
+      overdue: orders.filter((o) => o.status === "Overdue").length,
     }),
-    []
+    [orders]
   );
 
   const tabsWithCounts = TABS.map((t) => ({
@@ -62,17 +72,17 @@ export default function MaintenancePage() {
   const filteredByTab: Order[] = useMemo(() => {
     switch (tab) {
       case "completed":
-        return maintenanceData.filter((o) => o.status === "Completed");
+        return orders.filter((o) => o.status === "Completed");
       case "inprogress":
-        return maintenanceData.filter((o) => o.status === "In Progress");
+        return orders.filter((o) => o.status === "In Progress");
       case "scheduled":
-        return maintenanceData.filter((o) => o.status === "Scheduled");
+        return orders.filter((o) => o.status === "Scheduled");
       case "overdue":
-        return maintenanceData.filter((o) => o.status === "Overdue");
+        return orders.filter((o) => o.status === "Overdue");
       default:
-        return maintenanceData;
+        return orders;
     }
-  }, [tab]);
+  }, [tab, orders]);
 
   // Step 2: filter by search (supports id, vehicle, serviceType, status, mileage, cost, and date)
   const filtered: Order[] = useMemo(() => {
@@ -101,25 +111,57 @@ export default function MaintenancePage() {
     });
   }, [filteredByTab, search]);
 
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const fetchAll = async () => {
+    const [assetsRes, locationsRes, listRes] = await Promise.all([
+      axiosInstance.get("/fleet-asset/get-asset"),
+      axiosInstance.get("/fleet-asset/get-locations"),
+      axiosInstance.get("/fleet-service/get-maintenance-service", {
+        params: { page: 1, limit: 20 },
+      }),
+    ]);
+
+    setAssets(assetsRes.data.assets || []);
+    setLocations(locationsRes.data.data || []);
+
+    type ApiItem = {
+      id: string;
+      status: string; // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+      date_time: string;
+      maintenance_type: string; // BRAKE_INSPECTION, FULL_SERVICE, OIL_CHANGE, TIRE_ROTATION, OTHER
+      note?: string;
+      location: string;
+      asset?: { id: string; asset_name: string; plate_number: string | null };
+    };
+
+    const apiOrders = (listRes.data.data || []) as ApiItem[];
+    const mapped: Order[] = apiOrders.map((o) => ({
+      id: o.id,
+      vehicle: o.asset?.plate_number || o.asset?.asset_name || "N/A",
+      serviceType: formatMaintenanceType(o.maintenance_type),
+      mileageKm: 0,
+      status:
+        o.status === "COMPLETED"
+          ? "Completed"
+          : o.status === "IN_PROGRESS"
+          ? "In Progress"
+          : o.status === "PENDING"
+          ? "Scheduled"
+          : "Completed",
+      dueDateISO: o.date_time,
+      costNaira: 0,
+    }));
+    setOrders(mapped);
+  };
+
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await axiosInstance.get(
-          "/admin/get_dashboard_metrics"
-        );
-        setMetrics(data.data);
-      } catch {
-        setMetrics({
-          active_order_count: 0,
-          professionals: 0,
-          active_order: [],
-        });
+        await fetchAll();
+      } catch (e) {
+        console.error("Failed to fetch maintenance data", e);
       }
     })();
   }, []);
-
-  if (!metrics) return <Loader content="Loading the maintenance data....." />;
 
   const tiles = [
     {
@@ -141,6 +183,34 @@ export default function MaintenancePage() {
       icon: Wallet,
     },
   ];
+
+  // Build select options for the modal
+  const vehicleOptions = useMemo(() => vehicleOptionsFrom(assets), [assets]);
+  const locationOptions = useMemo(
+    () => locationOptionsFrom(locations),
+    [locations]
+  );
+
+  const handleSubmit = async (data: {
+    type: string;
+    vehicle: string;
+    location: string;
+    slot: string;
+    notes: string;
+  }) => {
+    const payload = {
+      maintenance_type: data.type,
+      asset_id: data.vehicle,
+      location_id: data.location,
+      time_slot: data.slot,
+      note: data.notes,
+    };
+    await axiosInstance.post(
+      "/fleet-service/place-maintenance-service",
+      payload
+    );
+    await fetchAll();
+  };
 
   const history: ServiceHistoryItem[] = [
     {
@@ -205,7 +275,86 @@ export default function MaintenancePage() {
 
       <MaintenanceTable orders={filtered} />
 
+      <div className="flex justify-center">
+        <Button
+          variant="orange"
+          className="w-[180px] lg:w-[262px] h-[58px] lg:h-[60px]"
+          onClick={() => setOpen(true)}
+          leftIcon={<Plus className="h-4 w-4" />}
+        >
+          New Maintenance
+        </Button>
+      </div>
+
       <ServiceHistoryCard items={history} />
+
+      {/* Request Maintenance Modal */}
+      <RequestServiceModal
+        open={open}
+        onOpenChange={setOpen}
+        onSubmit={handleSubmit}
+        typeOptions={maintenanceTypeOptions}
+        vehicleOptions={vehicleOptions}
+        locationOptions={locationOptions}
+        slotOptions={slotOptions}
+        title="Request Maintenance Service"
+      />
     </div>
   );
 }
+
+function formatMaintenanceType(t: string) {
+  const map: Record<string, string> = {
+    BRAKE_INSPECTION: "Brake Inspection",
+    FULL_SERVICE: "Full Service",
+    OIL_CHANGE: "Oil Change",
+    TIRE_ROTATION: "Tire Rotation",
+    OTHER: "Other",
+  };
+  return map[t] || t;
+}
+
+// Select options
+const maintenanceTypeOptions = [
+  { label: "Brake Inspection", value: "BRAKE_INSPECTION" },
+  { label: "Full Service", value: "FULL_SERVICE" },
+  { label: "Oil Change", value: "OIL_CHANGE" },
+  { label: "Tire Rotation", value: "TIRE_ROTATION" },
+  { label: "Other", value: "OTHER" },
+];
+
+const vehicleOptionsFrom = (assets: Asset[]) =>
+  assets.map((asset) => ({
+    label: asset.plate_number
+      ? `${asset.asset_name} (${asset.plate_number})`
+      : asset.asset_name,
+    value: asset.id,
+  }));
+
+const locationOptionsFrom = (locations: Location[]) =>
+  locations.map((l) => ({ label: l.location_name, value: l.id }));
+
+const slotOptions = [
+  {
+    label: "08:00–10:00",
+    value: new Date(new Date().setHours(8, 0, 0, 0)).toISOString(),
+  },
+  {
+    label: "10:00–12:00",
+    value: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
+  },
+  {
+    label: "12:00–14:00",
+    value: new Date(new Date().setHours(12, 0, 0, 0)).toISOString(),
+  },
+  {
+    label: "14:00–16:00",
+    value: new Date(new Date().setHours(14, 0, 0, 0)).toISOString(),
+  },
+  {
+    label: "16:00–18:00",
+    value: new Date(new Date().setHours(16, 0, 0, 0)).toISOString(),
+  },
+];
+
+// Derived options bound to current state will be computed in component

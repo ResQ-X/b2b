@@ -6,6 +6,7 @@ import Link from "next/link";
 import RequestServiceModal, {
   type RequestServiceForm,
 } from "@/components/fuel-delivery/FuelModal";
+import axiosInstance from "@/lib/axios";
 
 export type OrderStatus = "Completed" | "In Progress" | "Scheduled";
 
@@ -18,162 +19,6 @@ export type Order = {
   status: OrderStatus;
   dateISO: string;
 };
-
-export const fuelData: Order[] = [
-  {
-    id: "RF-2024-1000",
-    vehicle: "LND-451-AA",
-    location: "Lekki Office",
-    quantityL: 45,
-    costNaira: 22500,
-    status: "Completed",
-    dateISO: "2025-04-05",
-  },
-  {
-    id: "RF-2024-1001",
-    vehicle: "ABC-123-XY",
-    location: "VI Branch",
-    quantityL: 60,
-    costNaira: 30000,
-    status: "In Progress",
-    dateISO: "2025-04-05",
-  },
-  {
-    id: "RF-2024-1002",
-    vehicle: "GGE-772-BX",
-    location: "Ikeja Depot",
-    quantityL: 80,
-    costNaira: 40000,
-    status: "Scheduled",
-    dateISO: "2025-04-06",
-  },
-  {
-    id: "RF-2024-1003",
-    vehicle: "KJA-220-KD",
-    location: "Surulere",
-    quantityL: 35,
-    costNaira: 17500,
-    status: "Completed",
-    dateISO: "2025-04-06",
-  },
-  {
-    id: "RF-2024-1004",
-    vehicle: "LND-991-ZZ",
-    location: "Yaba Office",
-    quantityL: 55,
-    costNaira: 27500,
-    status: "In Progress",
-    dateISO: "2025-04-06",
-  },
-  {
-    id: "RF-2024-1005",
-    vehicle: "APP-883-QW",
-    location: "Lekki Office",
-    quantityL: 45,
-    costNaira: 22500,
-    status: "Completed",
-    dateISO: "2025-04-07",
-  },
-  {
-    id: "RF-2024-1006",
-    vehicle: "FKJ-001-AB",
-    location: "Ikoyi HQ",
-    quantityL: 70,
-    costNaira: 35000,
-    status: "Scheduled",
-    dateISO: "2025-04-07",
-  },
-  {
-    id: "RF-2024-1007",
-    vehicle: "LND-777-TT",
-    location: "Ajah Yard",
-    quantityL: 90,
-    costNaira: 45000,
-    status: "Completed",
-    dateISO: "2025-04-07",
-  },
-  {
-    id: "RF-2024-1008",
-    vehicle: "ABC-555-PQ",
-    location: "VI Branch",
-    quantityL: 45,
-    costNaira: 22500,
-    status: "In Progress",
-    dateISO: "2025-04-08",
-  },
-  {
-    id: "RF-2024-1009",
-    vehicle: "GGE-100-CC",
-    location: "Ikeja Depot",
-    quantityL: 65,
-    costNaira: 32500,
-    status: "Scheduled",
-    dateISO: "2025-04-08",
-  },
-  {
-    id: "RF-2024-1010",
-    vehicle: "KJA-220-KD",
-    location: "Surulere",
-    quantityL: 40,
-    costNaira: 20000,
-    status: "Completed",
-    dateISO: "2025-04-08",
-  },
-  {
-    id: "RF-2024-1011",
-    vehicle: "LND-451-AA",
-    location: "Lekki Office",
-    quantityL: 45,
-    costNaira: 22500,
-    status: "In Progress",
-    dateISO: "2025-04-09",
-  },
-  {
-    id: "RF-2024-1012",
-    vehicle: "APP-883-QW",
-    location: "Yaba Office",
-    quantityL: 55,
-    costNaira: 27500,
-    status: "Scheduled",
-    dateISO: "2025-04-09",
-  },
-  {
-    id: "RF-2024-1013",
-    vehicle: "FKJ-001-AB",
-    location: "Ikoyi HQ",
-    quantityL: 60,
-    costNaira: 30000,
-    status: "Completed",
-    dateISO: "2025-04-09",
-  },
-  {
-    id: "RF-2024-1014",
-    vehicle: "LND-777-TT",
-    location: "Ajah Yard",
-    quantityL: 50,
-    costNaira: 25000,
-    status: "In Progress",
-    dateISO: "2025-04-10",
-  },
-  {
-    id: "RF-2024-1015",
-    vehicle: "ABC-555-PQ",
-    location: "VI Branch",
-    quantityL: 45,
-    costNaira: 22500,
-    status: "Scheduled",
-    dateISO: "2025-04-10",
-  },
-  {
-    id: "RF-2024-1016",
-    vehicle: "GGE-100-CC",
-    location: "Ikeja Depot",
-    quantityL: 80,
-    costNaira: 40000,
-    status: "Completed",
-    dateISO: "2025-04-10",
-  },
-];
 
 const PER_PAGE = 5;
 
@@ -209,14 +54,33 @@ const StatusPill = ({ status }: { status: OrderStatus }) => {
   );
 };
 
-export default function OrdersTable({ orders }: { orders?: Order[] }) {
-  const source = orders ?? fuelData;
+type Asset = {
+  id: string;
+  asset_name: string;
+  plate_number: string | null;
+};
+
+type Location = {
+  id: string;
+  location_name: string;
+};
+
+export default function OrdersTable({
+  orders,
+  assets = [],
+  locations = [],
+}: {
+  orders?: Order[];
+  assets?: Asset[];
+  locations?: Location[];
+}) {
+  const source = useMemo(() => orders ?? [], [orders]);
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(source.length / PER_PAGE);
 
   const data = useMemo(() => {
     const start = (page - 1) * PER_PAGE;
-    return source.slice(start, start + PER_PAGE);
+    return source?.slice(start, start + PER_PAGE);
   }, [page, source]);
 
   const canPrev = page > 1;
@@ -224,33 +88,87 @@ export default function OrdersTable({ orders }: { orders?: Order[] }) {
 
   const [open, setOpen] = useState(false);
 
-  const typeOptions = [
-    { label: "Oil Change", value: "oil-change" },
-    { label: "Brake Inspection", value: "brake-inspection" },
-    { label: "Tire Rotation", value: "tire-rotation" },
-    { label: "Full Service", value: "full-service" },
+  // Fuel type options
+  const fuelTypeOptions = [
+    { label: "Petrol", value: "PETROL" },
+    { label: "Diesel", value: "DIESEL" },
   ];
 
-  const vehicleOptions = [
-    { label: "LND-451-AA", value: "LND-451-AA" },
-    { label: "KJA-220-KD", value: "KJA-220-KD" },
-    { label: "ABC-123-XY", value: "ABC-123-XY" },
-  ];
-  const locationOptions = [
-    { label: "Lekki Office", value: "lekki-office" },
-    { label: "VI Branch", value: "vi-branch" },
-    { label: "Ikeja Depot", value: "ikeja-depot" },
-  ];
+  // Generate vehicle options from assets
+  const vehicleOptions = assets.map((asset) => ({
+    label: asset.plate_number
+      ? `${asset.asset_name} (${asset.plate_number})`
+      : asset.asset_name,
+    value: asset.id,
+  }));
+
+  // Generate location options from locations
+  const locationOptions = locations.map((location) => ({
+    label: location.location_name,
+    value: location.id,
+  }));
+
+  // Time slot options (generate for today and tomorrow)
   const slotOptions = [
-    { label: "08:00–10:00", value: "08:00-10:00" },
-    { label: "10:00–12:00", value: "10:00-12:00" },
-    { label: "12:00–14:00", value: "12:00-14:00" },
+    { label: "Now", value: "NOW" },
+    {
+      label: "08:00–10:00",
+      value: new Date(new Date().setHours(8, 0, 0, 0)).toISOString(),
+    },
+    {
+      label: "10:00–12:00",
+      value: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
+    },
+    {
+      label: "12:00–14:00",
+      value: new Date(new Date().setHours(12, 0, 0, 0)).toISOString(),
+    },
+    {
+      label: "14:00–16:00",
+      value: new Date(new Date().setHours(14, 0, 0, 0)).toISOString(),
+    },
+    {
+      label: "16:00–18:00",
+      value: new Date(new Date().setHours(16, 0, 0, 0)).toISOString(),
+    },
   ];
 
   const handleSubmit = async (data: RequestServiceForm) => {
-    // TODO: call your API
-    // await axios.post('/api/maintenance/request', data)
-    console.log("submit", data);
+    try {
+      const requestBody = {
+        fuel_type: data.type, // "PETROL" or "DIESEL"
+        asset_id: data.vehicle,
+        location_id: data.location,
+        time_slot: data.slot === "NOW" ? new Date().toISOString() : data.slot,
+        quantity: data.quantity,
+        note: data.notes,
+        is_scheduled: data.slot !== "NOW",
+      };
+
+      const response = await axiosInstance.post(
+        "/fleet-service/place-fuel-service",
+        requestBody
+      );
+
+      console.log("Fuel service request successful:", response.data);
+
+      // Refresh dashboard stats and assets
+      // const [statsResponse, assetsResponse] = await Promise.all([
+      //   axiosInstance.get("/fleets/dashboard-stats"),
+      //   axiosInstance.get("/fleet-asset/get-asset"),
+      // ]);
+
+      // setStats(statsResponse.data.data);
+      // setAssets(assetsResponse.data.assets || []);
+
+      // Show success message (you can use a toast notification here)
+      alert("Fuel service requested successfully!");
+    } catch (error) {
+      console.error("Failed to request fuel service:", error);
+      // Show error message (you can use a toast notification here)
+      alert("Failed to request fuel service. Please try again.");
+      throw error; // Re-throw to let modal handle the error state
+    }
   };
 
   return (
@@ -360,11 +278,21 @@ export default function OrdersTable({ orders }: { orders?: Order[] }) {
         </Button>
       </div>
 
-      <RequestServiceModal
+      {/* <RequestServiceModal
         open={open}
         onOpenChange={setOpen}
         onSubmit={handleSubmit}
         typeOptions={typeOptions}
+        vehicleOptions={vehicleOptions}
+        locationOptions={locationOptions}
+        slotOptions={slotOptions}
+      /> */}
+
+      <RequestServiceModal
+        open={open}
+        onOpenChange={setOpen}
+        onSubmit={handleSubmit}
+        typeOptions={fuelTypeOptions}
         vehicleOptions={vehicleOptions}
         locationOptions={locationOptions}
         slotOptions={slotOptions}

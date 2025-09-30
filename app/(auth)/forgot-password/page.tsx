@@ -1,4 +1,5 @@
 "use client";
+import { toast } from "react-toastify";
 import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import { useRouter } from "next/navigation";
@@ -20,11 +21,9 @@ export default function ForgotPasswordPage() {
     isLoading: false,
     error: null,
   });
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSuccessMsg(null);
     setAuthState({ isLoading: true, error: null });
 
     try {
@@ -34,22 +33,20 @@ export default function ForgotPasswordPage() {
         response?.message === "Verification code sent successfully"
       ) {
         setAuthState({ isLoading: false, error: null });
-        setSuccessMsg(response.message);
+        toast.success(response.message);
         router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
       } else {
-        // Handle unexpected response format
-        setAuthState({
-          isLoading: false,
-          error: response?.message || "Unexpected response. Please try again.",
-        });
+        setAuthState({ isLoading: false, error: null });
+        toast.error(
+          response?.message || "Unexpected response. Please try again."
+        );
       }
     } catch (error: any) {
-      setAuthState({
-        isLoading: false,
-        error:
-          error?.response?.data?.message ||
-          "Unable to send reset link. Please try again.",
-      });
+      setAuthState({ isLoading: false, error: null });
+      toast.error(
+        error?.response?.data?.message ||
+          "Unable to send reset link. Please try again."
+      );
     }
   };
 
@@ -69,12 +66,12 @@ export default function ForgotPasswordPage() {
     >
       <div className="absolute inset-0 bg-black/30" />
 
-      <div className="relative z-10 w-full max-w-7xl flex justify-around mx-auto">
-        {/* Left side text (kept) */}
+      <div className="relative z-10 w-full max-w-7xl flex items-center justify-around mx-auto">
+        {/* Left side text */}
         <AuthText />
 
         {/* Form */}
-        <div className="flex w-full flex-col justify-center max-w-[900px] px-4 sm:px-6 xl:px-12">
+        <div className="flex w-full flex-col justify-center max-w-[600px] px-4 sm:px-6 xl:px-12">
           <div className="mx-auto w-full flex justify-center flex-col max-w-lg">
             <div className="mb-8 flex items-center flex-col">
               <div className="relative mb-8" style={{ width: 181, height: 70 }}>
@@ -108,13 +105,6 @@ export default function ForgotPasswordPage() {
                   required
                 />
               </div>
-
-              {successMsg && (
-                <p className="text-sm text-emerald-300">{successMsg}</p>
-              )}
-              {authState.error && (
-                <p className="text-sm text-red-400">{authState.error}</p>
-              )}
 
               <Button
                 type="submit"

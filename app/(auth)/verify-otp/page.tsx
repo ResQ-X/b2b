@@ -1,4 +1,5 @@
 "use client";
+import { toast } from "react-toastify";
 import { Suspense, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -11,7 +12,7 @@ import type { AuthState, VerifyEmailData } from "@/types/auth";
 
 type OTPArray = [string, string, string, string, string, string];
 
-// ✅ Wrapper adds the required Suspense boundary
+// Wrapper adds the required Suspense boundary
 export default function VerifyEmailPage() {
   return (
     <Suspense fallback={<div className="text-white">Loading...</div>}>
@@ -37,11 +38,8 @@ function VerifyEmailContent() {
     error: null,
   });
 
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [resendState, setResendState] = useState({
     isLoading: false,
-    error: null as string | null,
-    success: null as string | null,
   });
 
   const handleDigitChange = (index: number, value: string) => {
@@ -84,15 +82,13 @@ function VerifyEmailContent() {
 
   const handleResendCode = async () => {
     if (!emailFromQuery) {
-      setResendState({
-        isLoading: false,
-        error: "Email not found. Please try the forgot password process again.",
-        success: null,
-      });
+      toast.error(
+        "Email not found. Please try the forgot password process again."
+      );
       return;
     }
 
-    setResendState({ isLoading: true, error: null, success: null });
+    setResendState({ isLoading: true });
     setAuthState({ isLoading: false, error: null });
 
     try {
@@ -101,11 +97,10 @@ function VerifyEmailContent() {
       });
 
       if (response?.success === true) {
-        setResendState({
-          isLoading: false,
-          error: null,
-          success: response.message || "Verification code sent successfully!",
-        });
+        setResendState({ isLoading: false });
+        toast.success(
+          response.message || "Verification code sent successfully!"
+        );
 
         // Clear OTP inputs for new code
         setOtp(["", "", "", "", "", ""]);
@@ -116,27 +111,18 @@ function VerifyEmailContent() {
 
         // Focus first input
         inputsRef.current[0]?.focus();
-
-        // Clear success message after 5 seconds
-        setTimeout(() => {
-          setResendState((prev) => ({ ...prev, success: null }));
-        }, 5000);
       } else {
-        setResendState({
-          isLoading: false,
-          error:
-            response?.message || "Failed to resend code. Please try again.",
-          success: null,
-        });
+        setResendState({ isLoading: false });
+        toast.error(
+          response?.message || "Failed to resend code. Please try again."
+        );
       }
     } catch (error: any) {
-      setResendState({
-        isLoading: false,
-        error:
-          error?.response?.data?.message ||
-          "Failed to resend code. Please try again.",
-        success: null,
-      });
+      setResendState({ isLoading: false });
+      toast.error(
+        error?.response?.data?.message ||
+          "Failed to resend code. Please try again."
+      );
     }
   };
 
@@ -161,54 +147,47 @@ function VerifyEmailContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSuccessMsg(null);
     setAuthState({ isLoading: true, error: null });
 
     // Validate OTP is complete
     if (verifyOtpData.code.length !== 6) {
-      setAuthState({
-        isLoading: false,
-        error: "Please enter the complete 6-digit code.",
-      });
+      setAuthState({ isLoading: false, error: null });
+      toast.error("Please enter the complete 6-digit code.");
       return;
     }
 
     // Validate email exists
     if (!verifyOtpData.email) {
-      setAuthState({
-        isLoading: false,
-        error: "Email not found. Please try the forgot password process again.",
-      });
+      setAuthState({ isLoading: false, error: null });
+      toast.error(
+        "Email not found. Please try the forgot password process again."
+      );
       return;
     }
 
     try {
-      // Send verifyOtpData directly to AuthService.verifyEmail
       const response = await AuthService.verifyEmail(verifyOtpData);
       if (response?.success === true) {
-        setSuccessMsg("Email verified successfully!");
+        toast.success("Email verified successfully!");
         setAuthState({ isLoading: false, error: null });
 
-        // ✅ Fixed: Use emailFromQuery and join the otp array to create a string
         router.push(
           `/create-password?email=${encodeURIComponent(
             emailFromQuery
           )}&token=${encodeURIComponent(otp.join(""))}`
         );
       } else {
-        // Handle unexpected response format
-        setAuthState({
-          isLoading: false,
-          error: response?.message || "Verification failed. Please try again.",
-        });
+        setAuthState({ isLoading: false, error: null });
+        toast.error(
+          response?.message || "Verification failed. Please try again."
+        );
       }
     } catch (error: any) {
-      setAuthState({
-        isLoading: false,
-        error:
-          error?.response?.data?.message ||
-          "Invalid verification code. Please try again.",
-      });
+      setAuthState({ isLoading: false, error: null });
+      toast.error(
+        error?.response?.data?.message ||
+          "Invalid verification code. Please try again."
+      );
     }
   };
 
@@ -224,12 +203,12 @@ function VerifyEmailContent() {
     >
       <div className="absolute inset-0 bg-black/30" />
 
-      <div className="relative z-10 w-full max-w-7xl flex justify-around mx-auto">
+      <div className="relative z-10 w-full max-w-7xl flex items-center justify-around mx-auto">
         {/* Left side */}
         <AuthText />
 
         {/* Form side */}
-        <div className="flex w-full flex-col justify-center max-w-[900px] px-4 sm:px-6 xl:px-12">
+        <div className="flex w-full flex-col justify-center max-w-[600px] px-4 sm:px-6 xl:px-12">
           <div className="mx-auto w-full flex justify-center flex-col max-w-lg">
             <div className="mb-8 flex items-center flex-col">
               <div className="relative mb-8" style={{ width: 181, height: 70 }}>
@@ -274,21 +253,6 @@ function VerifyEmailContent() {
                   />
                 ))}
               </div>
-
-              {successMsg && (
-                <p className="text-sm text-emerald-300">{successMsg}</p>
-              )}
-              {resendState.success && (
-                <p className="text-sm text-emerald-300">
-                  {resendState.success}
-                </p>
-              )}
-              {authState.error && (
-                <p className="text-sm text-red-400">{authState.error}</p>
-              )}
-              {resendState.error && (
-                <p className="text-sm text-red-400">{resendState.error}</p>
-              )}
 
               <Button
                 type="submit"
