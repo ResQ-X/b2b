@@ -121,10 +121,9 @@ export default function EmergencyPage() {
         }))}
         typeOptions={[
           { label: "Flat Tire", value: "FLAT_TIRE" },
-          { label: "Jump Start", value: "JUMP_START" },
-          { label: "Out of Fuel", value: "OUT_OF_FUEL" },
-          { label: "Towing", value: "TOWING" },
-          { label: "Other", value: "OTHER" },
+          { label: "Battery Jump Start", value: "BATTERY_JUMP_START" },
+          { label: "Towing Service", value: "TOWING" },
+          { label: "Health Check", value: "HEALTH_CHECK" },
         ]}
         slotOptions={buildTimeSlots()}
         onSubmit={async (data) => {

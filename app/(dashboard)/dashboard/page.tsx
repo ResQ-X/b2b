@@ -327,7 +327,7 @@ export default function DashboardPage() {
     });
   };
 
-  if (loading) return <Loader content="" />;
+  if (loading) return <Loader content="Loading dashbaord data..." />;
 
   const tiles = [
     {
