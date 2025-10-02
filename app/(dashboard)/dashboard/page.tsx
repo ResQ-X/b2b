@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axiosInstance from "@/lib/axios";
 import { CarFront, Bolt, Wallet, Fuel, AlertTriangle } from "lucide-react";
@@ -99,6 +100,7 @@ interface DashboardStats {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -502,7 +504,7 @@ export default function DashboardPage() {
             } vehicles need maintenance`}
             actionText="View Schedule"
             icon={FuelIcon}
-            onAction={() => console.log("View Schedule")}
+            onAction={() => router.push("/schedule")}
           />
 
           <SideCard
@@ -511,7 +513,7 @@ export default function DashboardPage() {
             actionText="Get Help Here"
             icon={FuelIcon}
             tone="danger"
-            onAction={() => console.log("Get Help")}
+            onAction={() => router.push("/emergency")}
           />
 
           <ServiceBundle

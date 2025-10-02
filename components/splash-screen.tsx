@@ -21,7 +21,7 @@ export function SplashScreen() {
   return (
     <div className="bg-primaryBg flex min-h-screen flex-col items-center justify-between p-8">
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-64 h-24 relative">
+        <div className="w-80 h-40 relative">
           <Image
             src="/ressqx.png"
             alt="RESQ-X Logo"

@@ -1,4 +1,5 @@
 "use client";
+import { toast } from "react-toastify";
 import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import Loader from "@/components/ui/Loader";
@@ -92,14 +93,17 @@ export default function CompanyInformationPage() {
         }
         // You might want to show a success message here
         console.log("Profile updated successfully:", response.message);
+        toast.success(response.message);
 
         // Optionally redirect or show success notification
         // router.push("/account") or show toast notification
       } else {
         setError(response.message || "Failed to update profile");
+        toast.error(response.message);
       }
     } catch (err) {
       console.error("Error updating profile:", err);
+      toast.error("Error updating profile:", err as any);
       setError("Failed to update profile. Please try again.");
     } finally {
       setUpdating(false);

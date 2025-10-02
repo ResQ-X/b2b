@@ -162,7 +162,7 @@ export default function SignupPage() {
                 Welcome!
               </h1>
               <p className="mt-6 text-sm text-white/90 font-medium text-center">
-                Let's get started, create an account
+                Let&#39;s get started, create an account
               </p>
             </div>
 
@@ -285,14 +285,14 @@ export default function SignupPage() {
                   <span>
                     By using ResQ-X, you agree to our{" "}
                     <Link
-                      href="/terms"
+                      href="#"
                       className="text-orange underline underline-offset-4 hover:opacity-80"
                     >
                       Terms of Service
                     </Link>{" "}
                     and{" "}
                     <Link
-                      href="/privacy"
+                      href="#"
                       className="text-orange underline underline-offset-4 hover:opacity-80"
                     >
                       Privacy Policy

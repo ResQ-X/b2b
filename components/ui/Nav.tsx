@@ -2,6 +2,8 @@
 import React from "react";
 import Image from "next/image";
 import { Menu } from "lucide-react";
+// import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 // import { usePathname } from "next/navigation";
 // import { Input } from "@/components/ui/input";
 // import Search from "@/components/ui/Search";
@@ -13,6 +15,7 @@ interface DashboardNavProps {
 
 export function DashboardNav({ onMenuClick }: DashboardNavProps) {
   const { user } = useAuth();
+  const router = useRouter();
   // console.log(user);
   // const pathname = usePathname();
 
@@ -60,7 +63,10 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-8">
           {/* Notification Icon with badge */}
-          <div className="relative">
+          <div
+            className="relative cursor-pointer"
+            onClick={() => router.push("/account/notifications")}
+          >
             <div className="flex justify-center items-center bg-[#D8D8D8] w-11 h-11 rounded-full">
               <Image
                 src="/notification-bing.svg"
@@ -70,9 +76,9 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
                 className="rounded-full"
               />
             </div>
-            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#F87171] text-[10px] text-white flex items-center justify-center">
+            {/* <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#F87171] text-[10px] text-white flex items-center justify-center">
               6
-            </span>
+            </span> */}
           </div>
 
           {/* User info */}
@@ -84,7 +90,10 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
           </div>
 
           {/* User avatar */}
-          <div className="flex justify-center items-center bg-[#D8D8D8] w-11 h-11 rounded-full">
+          <div
+            className="flex justify-center items-center bg-[#D8D8D8] w-11 h-11 rounded-full cursor-pointer"
+            onClick={() => router.push("/account/company")}
+          >
             <Image
               src="/user-round.svg"
               alt="User Avatar"
