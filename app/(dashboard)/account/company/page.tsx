@@ -39,7 +39,7 @@ export default function CompanyInformationPage() {
 
         // Extract user data from the nested response structure
         const userData = response.data || response;
-        setUser(userData);
+        setUser(userData as unknown as User);
 
         // Populate form fields with user data
         setCompanyName(userData.company_name || "");
