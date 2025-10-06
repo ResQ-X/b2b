@@ -22,6 +22,35 @@ export interface Location {
   updated_at: string;
 }
 
+export interface FuelBarData {
+  month: string;
+  quantity: number;
+}
+
+export interface FuelChartData {
+  data: number[];
+  labels: string[];
+}
+
+export interface PieChartData {
+  legend: Array<{ label: string; value: string; color: string }>;
+  slices: number[];
+  colors: string[];
+}
+
+export interface PieDataResponse {
+  fuelCost: number;
+  emergencyDeliveries: number;
+  maintenanceCost: number;
+  serviceCharges: number;
+  percentages: {
+    fuel: string;
+    emergency: string;
+    maintenance: string;
+    service: string;
+  };
+}
+
 export interface UpcomingOrder {
   id: string;
   status: string;

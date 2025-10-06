@@ -3,9 +3,9 @@ import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import RequestServiceModal, {
-  type RequestServiceForm,
-} from "@/components/fuel-delivery/FuelModal";
+import RequestFuelModal, {
+  type RequestFuelForm,
+} from "@/components/fuel-delivery/RequestFuelModal";
 import axiosInstance from "@/lib/axios";
 
 export type OrderStatus = "Completed" | "In Progress" | "Scheduled";
@@ -133,15 +133,15 @@ export default function OrdersTable({
     },
   ];
 
-  const handleSubmit = async (data: RequestServiceForm) => {
+  const handleSubmit = async (data: RequestFuelForm) => {
     try {
       const requestBody = {
-        fuel_type: data.type, // "PETROL" or "DIESEL"
+        fuel_type: data.type,
         asset_id: data.vehicle,
         location_id: data.location,
         time_slot: data.slot === "NOW" ? new Date().toISOString() : data.slot,
         quantity: data.quantity,
-        note: data.notes,
+        note: data.note,
         is_scheduled: data.slot !== "NOW",
       };
 
@@ -288,7 +288,16 @@ export default function OrdersTable({
         slotOptions={slotOptions}
       /> */}
 
-      <RequestServiceModal
+      {/* <RequestServiceModal
+        open={open}
+        onOpenChange={setOpen}
+        onSubmit={handleSubmit}
+        typeOptions={fuelTypeOptions}
+        vehicleOptions={vehicleOptions}
+        locationOptions={locationOptions}
+        slotOptions={slotOptions}
+      /> */}
+      <RequestFuelModal
         open={open}
         onOpenChange={setOpen}
         onSubmit={handleSubmit}

@@ -10,12 +10,10 @@ import MaintenanceTable, {
 } from "@/components/maintenance/MaintenanceTable";
 import MaintenanceTabs from "@/components/maintenance/MaintenanceTabs";
 import RequestServiceModal from "@/components/maintenance/RequestServiceModal";
-import ServiceHistoryCard, {
-  type ServiceHistoryItem,
-} from "@/components/maintenance/ServiceHistoryCard";
+// import ServiceHistoryCard, {
+//   type ServiceHistoryItem,
+// } from "@/components/maintenance/ServiceHistoryCard";
 import { toCSV, downloadText } from "@/lib/export";
-
-// (removed unused DashboardMetrics)
 
 const TABS = [
   { key: "all", label: "All Orders", shortLabel: "All" },
@@ -51,6 +49,7 @@ export default function MaintenancePage() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [orders, setOrders] = useState<Order[]>(maintenanceData);
   const [open, setOpen] = useState(false);
+  const [menTMetrics, setMenTMetrics] = useState<any>(null);
 
   const counts = useMemo(
     () => ({
@@ -83,6 +82,8 @@ export default function MaintenancePage() {
         return orders;
     }
   }, [tab, orders]);
+
+  console.log("Filtered by tab:", menTMetrics);
 
   // Step 2: filter by search (supports id, vehicle, serviceType, status, mileage, cost, and date)
   const filtered: Order[] = useMemo(() => {
@@ -151,6 +152,7 @@ export default function MaintenancePage() {
       costNaira: 0,
     }));
     setOrders(mapped);
+    setMenTMetrics(listRes.data.metrics);
   };
 
   useEffect(() => {
@@ -165,21 +167,27 @@ export default function MaintenancePage() {
 
   const tiles = [
     {
-      title: "Monthly Cost",
-      value: "₦450K",
-      sub: "12% with bundled services",
+      title: "Pending Maintenance",
+      value: menTMetrics?.pending ?? "0",
+      sub: "Maintenance",
       icon: Wallet,
     },
     {
-      title: "Avg Service Time",
-      value: "2.5 days",
-      sub: "Industry avg: 4 days",
+      title: "In Progress Maintenance",
+      value: menTMetrics?.inProgress ?? "0",
+      sub: "Maintenance",
       icon: Wallet,
     },
     {
-      title: "Vehicle Uptime",
-      value: "98.5%",
-      sub: "Vehicle Uptime",
+      title: "Completed Maintenance",
+      value: menTMetrics?.completed ?? "0",
+      sub: "Maintenance",
+      icon: Wallet,
+    },
+    {
+      title: "Cancelled Maintenance",
+      value: menTMetrics?.cancelled ?? "0",
+      sub: "Maintenance",
       icon: Wallet,
     },
   ];
@@ -212,23 +220,23 @@ export default function MaintenancePage() {
     await fetchAll();
   };
 
-  const history: ServiceHistoryItem[] = [
-    {
-      title: "LND-234-CC - Full Service",
-      subtitle: "ResQ-X Service Center • 5 days ago",
-      amount: 22500,
-    },
-    {
-      title: "LND-789-DD - Brake Replacement",
-      subtitle: "Ajose, Lekki",
-      amount: 30900,
-    },
-    {
-      title: "LND-451-AA - Oil Change",
-      subtitle: "Ogba, Ikeja",
-      amount: 50000,
-    },
-  ];
+  // const history: ServiceHistoryItem[] = [
+  //   {
+  //     title: "LND-234-CC - Full Service",
+  //     subtitle: "ResQ-X Service Center • 5 days ago",
+  //     amount: 22500,
+  //   },
+  //   {
+  //     title: "LND-789-DD - Brake Replacement",
+  //     subtitle: "Ajose, Lekki",
+  //     amount: 30900,
+  //   },
+  //   {
+  //     title: "LND-451-AA - Oil Change",
+  //     subtitle: "Ogba, Ikeja",
+  //     amount: 50000,
+  //   },
+  // ];
 
   const exportMaintenance = () => {
     const fmt = (iso: string) => {
@@ -258,7 +266,7 @@ export default function MaintenancePage() {
 
   return (
     <div className="space-y-6">
-      <div className="grid lg:grid-cols-3 gap-4">
+      <div className="grid lg:grid-cols-4 gap-4">
         {tiles.map((t) => (
           <StatTile key={t.title} {...t} />
         ))}
@@ -286,7 +294,7 @@ export default function MaintenancePage() {
         </Button>
       </div>
 
-      <ServiceHistoryCard items={history} />
+      {/* <ServiceHistoryCard items={history} /> */}
 
       {/* Request Maintenance Modal */}
       <RequestServiceModal
@@ -356,5 +364,3 @@ const slotOptions = [
     value: new Date(new Date().setHours(16, 0, 0, 0)).toISOString(),
   },
 ];
-
-// Derived options bound to current state will be computed in component

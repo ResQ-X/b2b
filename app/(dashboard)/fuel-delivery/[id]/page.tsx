@@ -9,6 +9,7 @@ export default function FuelDetailsPage({
 }: {
   params: { id: string };
 }) {
+  // Todo: Use react.use
   const decodedId = decodeURIComponent(params.id);
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(true);

@@ -21,13 +21,15 @@ export function FuelBarChart({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const max = Math.max(...data, 1);
-  const chartHeight = 480; // Fixed height in pixels
+  const chartHeight = 480;
 
   const handleYearSelect = (year: number) => {
     setSelectedYear(year);
     setIsDropdownOpen(false);
     onYearChange?.(year);
   };
+
+  console.log(data.length);
 
   return (
     <div className="rounded-2xl bg-[#3B3835] p-6 text-white">
@@ -77,44 +79,52 @@ export function FuelBarChart({
         </div>
       </div>
 
-      <div className="my-10 h-[482px]">
-        {/* Chart container with fixed height */}
-        <div
-          className="grid grid-cols-12 gap-2 items-end"
-          style={{ height: `${chartHeight}px` }}
-        >
-          {data.map((value, index) => {
-            const barHeight = (value / max) * chartHeight;
-            return (
-              <div
-                key={index}
-                className="flex flex-col items-center gap-2 h-full"
-              >
-                {/* Bar container that takes full height and aligns bar to bottom */}
-                <div className="flex-1 flex items-end justify-center w-full">
-                  <div
-                    className="w-4 rounded-t-md bg-[#FF8500] transition-all duration-300 hover:bg-[#FF9500] cursor-pointer relative group"
-                    style={{
-                      height: `${barHeight}px`,
-                      minHeight: value > 0 ? "2px" : "0px",
-                    }}
-                    title={`${labels[index]}: ${value}L`}
-                  >
-                    {/* Tooltip on hover */}
-                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                      {value}L
+      {data.length > 0 ? (
+        <div className="my-10 h-[482px]">
+          {/* Chart container with fixed height */}
+          <div
+            className="grid grid-cols-12 gap-2 items-end"
+            style={{ height: `${chartHeight}px` }}
+          >
+            {data.map((value, index) => {
+              const barHeight = (value / max) * chartHeight;
+              return (
+                <div
+                  key={index}
+                  className="flex flex-col items-center gap-2 h-full"
+                >
+                  {/* Bar container that takes full height and aligns bar to bottom */}
+                  <div className="flex-1 flex items-end justify-center w-full">
+                    <div
+                      className="w-4 rounded-t-md bg-[#FF8500] transition-all duration-300 hover:bg-[#FF9500] cursor-pointer relative group"
+                      style={{
+                        height: `${barHeight}px`,
+                        minHeight: value > 0 ? "2px" : "0px",
+                      }}
+                      title={`${labels[index]}: ${value}L`}
+                    >
+                      {/* Tooltip on hover */}
+                      <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                        {value}L
+                      </div>
                     </div>
                   </div>
+                  {/* Label */}
+                  <span className="text-[11px] text-white/70 text-center">
+                    {labels[index]}
+                  </span>
                 </div>
-                {/* Label */}
-                <span className="text-[11px] text-white/70 text-center">
-                  {labels[index]}
-                </span>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="my-10 h-[482px]">
+          <div className="flex justify-center items-center h-full">
+            <span className="text-sm text-white/70">No data available</span>
+          </div>
+        </div>
+      )}
 
       {note && (
         <div className="mt-4 text-xs text-white/80">

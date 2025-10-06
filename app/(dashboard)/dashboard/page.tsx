@@ -1,4 +1,5 @@
 "use client";
+import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axiosInstance from "@/lib/axios";
@@ -14,90 +15,18 @@ import { RecentDeliveries } from "@/components/dashboard/RecentDeliveries";
 import { UpcomingSchedules } from "@/components/dashboard/UpcomingSchedules";
 import { SideCard } from "@/components/dashboard/SideCard";
 import { ServiceBundle } from "@/components/dashboard/ServiceBundle";
-import RequestServiceModal, {
-  type RequestServiceForm,
-} from "@/components/fuel-delivery/FuelModal";
-
-interface Asset {
-  id: string;
-  asset_name: string;
-  asset_type: string;
-  asset_subtype: string;
-  fuel_type: string;
-  capacity: number;
-  plate_number: string | null;
-  business_id: string;
-  location_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface Location {
-  id: string;
-  location_name: string;
-  location_longitude: string;
-  location_latitude: string;
-  business_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface FuelBarData {
-  month: string;
-  quantity: number;
-}
-
-interface FuelChartData {
-  data: number[];
-  labels: string[];
-}
-
-interface PieChartData {
-  legend: Array<{ label: string; value: string; color: string }>;
-  slices: number[];
-  colors: string[];
-}
-
-interface PieDataResponse {
-  fuelCost: number;
-  emergencyDeliveries: number;
-  maintenanceCost: number;
-  serviceCharges: number;
-  percentages: {
-    fuel: string;
-    emergency: string;
-    maintenance: string;
-    service: string;
-  };
-}
-
-interface UpcomingOrder {
-  id: string;
-  status: string;
-  date_time: string;
-  fuel_type?: string;
-  service_time_type?: string;
-  quantity?: number;
-  maintenance_type?: string;
-  emergency_type?: string;
-  note: string;
-  location: string;
-  location_longitude: string;
-  location_latitude: string;
-  business_id: string;
-  asset_id: string;
-  created_at: string;
-  updated_at: string;
-  asset: Asset;
-}
-
-interface DashboardStats {
-  assetCount: number;
-  pendingMaintenanceServices: number;
-  recentDeliveries: any[];
-  upcomingOrdersCount: number;
-  upcomingOrders: UpcomingOrder[];
-}
+import RequestFuelModal, {
+  type RequestFuelForm,
+} from "@/components/fuel-delivery/RequestFuelModal";
+import {
+  Asset,
+  Location,
+  FuelBarData,
+  FuelChartData,
+  PieChartData,
+  PieDataResponse,
+  DashboardStats,
+} from "@/types/dashboard";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -116,6 +45,24 @@ export default function DashboardPage() {
   const [selectedYear, setSelectedYear] = useState(2025);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [walletBalance, setWalletBalance] = useState(null);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const response = await axiosInstance.get(
+          "/fleet-wallet/get-wallet-balance"
+        );
+        setWalletBalance(response?.data?.data);
+      } catch (error) {
+        console.error("Failed to fetch wallet balance", error);
+      }
+    };
+
+    fetchBalance();
+  }, []);
+
+  console.log("Wallet Balance:", walletBalance);
 
   // Get available years - only 2025 since project just started
   const availableYears = [2025];
@@ -397,41 +344,38 @@ export default function DashboardPage() {
     },
   ];
 
-  const handleSubmit = async (data: RequestServiceForm) => {
+  const handleSubmit = async (data: RequestFuelForm) => {
     try {
-      const requestBody = {
-        fuel_type: data.type, // "PETROL" or "DIESEL"
-        asset_id: data.vehicle,
-        location_id: data.location,
-        time_slot: data.slot === "NOW" ? new Date().toISOString() : data.slot,
-        quantity: data.quantity,
-        note: data.notes,
-        is_scheduled: data.slot !== "NOW",
-      };
+      // Check if it's a manual location (location_id will be MANUAL_LOCATION_VALUE)
+      const isManualLocation = data.location_id === "__manual__";
 
-      const response = await axiosInstance.post(
+      const requestBody = {
+        fuel_type: data.fuel_type, // "PETROL" or "DIESEL"
+        asset_id: data.asset_id,
+        // Only send location_id if it's NOT a manual location
+        ...(isManualLocation ? {} : { location_id: data.location_id }),
+        // Send manual location details if applicable
+        ...(isManualLocation
+          ? {
+              location_address: data.location_address || "",
+              location_longitude: data.location_longitude || "",
+              location_latitude: data.location_latitude || "",
+            }
+          : {}),
+        time_slot:
+          data.time_slot === "NOW" ? new Date().toISOString() : data.time_slot,
+        quantity: data.quantity,
+        note: data.note,
+        is_scheduled: data.time_slot !== "NOW",
+      };
+      await axiosInstance.post(
         "/fleet-service/place-fuel-service",
         requestBody
       );
-
-      console.log("Fuel service request successful:", response.data);
-
-      // Refresh dashboard stats and assets
-      const [statsResponse, assetsResponse] = await Promise.all([
-        axiosInstance.get("/fleets/dashboard-stats"),
-        axiosInstance.get("/fleet-asset/get-asset"),
-      ]);
-
-      setStats(statsResponse.data.data);
-      setAssets(assetsResponse.data.assets || []);
-
-      // Show success message (you can use a toast notification here)
-      alert("Fuel service requested successfully!");
+      toast.success("Fuel service requested successfully!");
     } catch (error) {
-      console.error("Failed to request fuel service:", error);
-      // Show error message (you can use a toast notification here)
-      alert("Failed to request fuel service. Please try again.");
-      throw error; // Re-throw to let modal handle the error state
+      toast.error(`Failed to request fuel service. Please try again. ${error}`);
+      throw error;
     }
   };
 
@@ -463,7 +407,7 @@ export default function DashboardPage() {
         </div>
 
         <WalletCard
-          balance={64500}
+          balance={walletBalance?.balance ?? 0}
           onTopUp={() => console.log("Top up wallet")}
         />
       </div>
@@ -491,9 +435,16 @@ export default function DashboardPage() {
       {/* Lists row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <RecentDeliveries items={getRecentDeliveriesData()} />
+          {/* <RecentDeliveries items={getRecentDeliveriesData().slice(0, 2)} />
 
-          <UpcomingSchedules items={getUpcomingSchedulesData()} />
+          <UpcomingSchedules items={getUpcomingSchedulesData().slice(0, 3)} /> */}
+
+          <RecentDeliveries
+            items={[...getRecentDeliveriesData()].reverse().slice(0, 2)}
+          />
+          <UpcomingSchedules
+            items={[...getUpcomingSchedulesData()].reverse().slice(0, 3)}
+          />
         </div>
 
         <div className="space-y-6">
@@ -539,7 +490,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <RequestServiceModal
+      <RequestFuelModal
         open={open}
         onOpenChange={setOpen}
         onSubmit={handleSubmit}

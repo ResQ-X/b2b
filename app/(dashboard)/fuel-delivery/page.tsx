@@ -45,7 +45,10 @@ export default function FuelDeliveryPage() {
 
   const counts = useMemo(
     () => ({
-      all: orders.length,
+      all:
+        orders.filter((o) => o.status === "Completed").length +
+        orders.filter((o) => o.status === "In Progress").length +
+        orders.filter((o) => o.status === "Scheduled").length,
       completed: orders.filter((o) => o.status === "Completed").length,
       inprogress: orders.filter((o) => o.status === "In Progress").length,
       scheduled: orders.filter((o) => o.status === "Scheduled").length,
@@ -156,7 +159,7 @@ export default function FuelDeliveryPage() {
     {
       title: "All Orders",
       value: counts.all,
-      sub: "Maintenance & Fuel Delivery",
+      sub: "Fuel Delivery",
       icon: Rows3,
     },
     {

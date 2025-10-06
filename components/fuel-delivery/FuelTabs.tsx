@@ -20,6 +20,7 @@ export default function FuelTabs({
   onSearchChange: (q: string) => void;
   onExport: () => void;
 }) {
+  console.log("Rendering FuelTabs with tabs:", tabs, "and value:", value);
   return (
     <div className="rounded-2xl bg-[#2C2926] border border-[#ABABAB] p-2 text-[#fff]">
       <div className="flex flex-wrap items-center gap-2">
