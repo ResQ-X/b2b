@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axiosInstance from "@/lib/axios";
 import Image from "next/image";
 import { Menu } from "lucide-react";
 // import { useRouter } from "next/router";
@@ -7,15 +8,44 @@ import { useRouter } from "next/navigation";
 // import { usePathname } from "next/navigation";
 // import { Input } from "@/components/ui/input";
 // import Search from "@/components/ui/Search";
-import { useAuth } from "@/contexts/auth.context";
+// import { useAuth } from "@/contexts/auth.context";
 
 interface DashboardNavProps {
   onMenuClick?: () => void;
 }
 
+type UserProfile = {
+  id: string;
+  name: string;
+  company_name: string;
+  email: string;
+  company_email: string;
+  phone: string;
+  company_phone: string;
+  // Add other fields if needed
+};
+
 export function DashboardNav({ onMenuClick }: DashboardNavProps) {
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const router = useRouter();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get("/fleets/profile");
+        setUserProfile(response.data.data);
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
   // console.log(user);
   // const pathname = usePathname();
 
@@ -52,7 +82,7 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
           {getPageTitle(pathname)}
         </span> */}
         <h1 className="text-[#F1F1F1] text-2xl font-semibold">
-          Welcome {user?.name || "User"},
+          Welcome {loading ? "..." : userProfile?.name || "User"},
         </h1>
         <p className="text-[#E2E2E2] text-base font-medium">
           Today&apos;s snapshot of your operations.
@@ -84,7 +114,7 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
           {/* User info */}
           <div className="hidden sm:block text-left text-[#FFFFFF]">
             <p className="text-sm font-semibold truncate">
-              {user?.name || "User"}
+              {loading ? "..." : userProfile?.name || "User"}
             </p>
             <p className="text-sm font-semibold truncate">Admin</p>
           </div>
