@@ -76,7 +76,7 @@ export default function DashboardLayout({
         <meta httpEquiv="Expires" content="0" />
       </Head>
 
-      <div className="flex h-screen">
+      <div className="flex h-screen bg-[#242220]">
         {/* Sidebar for desktop */}
         <div className="hidden md:flex">
           <Sidebar />

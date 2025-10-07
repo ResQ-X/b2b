@@ -30,6 +30,7 @@ import {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const [topUpOpen, setTopUpOpen] = useState(false);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -45,7 +46,12 @@ export default function DashboardPage() {
   const [selectedYear, setSelectedYear] = useState(2025);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [walletBalance, setWalletBalance] = useState(null);
+  type WalletBalance = { balance: number };
+  const [walletBalance, setWalletBalance] = useState<WalletBalance | null>(
+    null
+  );
+  const [topUpAmount, setTopUpAmount] = useState<string>("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -379,6 +385,90 @@ export default function DashboardPage() {
     }
   };
 
+  const handleTopUpInitiate = async () => {
+    try {
+      setIsProcessing(true);
+
+      const response = await axiosInstance.post(
+        "/fleet-wallet/top-up-initiate",
+        {
+          amount: parseFloat(topUpAmount),
+        }
+      );
+
+      const { authorization_url, reference } = response.data.data;
+
+      // Store reference to verify later
+      sessionStorage.setItem("paystack_reference", reference);
+
+      // Open Paystack in a popup window
+      const popup = window.open(
+        authorization_url,
+        "PaystackPayment",
+        "width=600,height=700,left=200,top=100"
+      );
+
+      // Check if popup was blocked
+      if (!popup) {
+        toast.error("Please allow popups for this site to complete payment");
+        setIsProcessing(false);
+        return;
+      }
+
+      // Close the top-up modal
+      setTopUpOpen(false);
+      setTopUpAmount("");
+      setIsProcessing(false);
+
+      // Monitor popup window
+      const checkPopup = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkPopup);
+          // When popup closes, verify payment
+          verifyPayment(reference);
+        }
+      }, 500);
+    } catch (error) {
+      console.error("Failed to initiate top-up:", error);
+      toast.error("Failed to initiate payment. Please try again.");
+      setIsProcessing(false);
+    }
+  };
+
+  const verifyPayment = async (ref: string) => {
+    try {
+      toast.info("Verifying payment...");
+
+      const response = await axiosInstance.post(
+        "/fleet-wallet/verify-payment",
+        {
+          ref,
+          action: "TOP_UP",
+        }
+      );
+
+      if (response.data.status === "OK") {
+        toast.success(response.data.message);
+
+        // Refresh wallet balance
+        const balanceResponse = await axiosInstance.get(
+          "/fleet-wallet/get-wallet-balance"
+        );
+        setWalletBalance(balanceResponse?.data?.data);
+
+        // Remove stored reference
+        sessionStorage.removeItem("paystack_reference");
+      } else {
+        toast.error("Payment verification failed.");
+        sessionStorage.removeItem("paystack_reference");
+      }
+    } catch (error) {
+      console.error("Payment verification failed:", error);
+      toast.error("Payment verification failed. Please contact support.");
+      sessionStorage.removeItem("paystack_reference");
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Top tiles */}
@@ -408,7 +498,7 @@ export default function DashboardPage() {
 
         <WalletCard
           balance={walletBalance?.balance ?? 0}
-          onTopUp={() => console.log("Top up wallet")}
+          onTopUp={() => setTopUpOpen(true)}
         />
       </div>
 
@@ -499,6 +589,54 @@ export default function DashboardPage() {
         locationOptions={locationOptions}
         slotOptions={slotOptions}
       />
+
+      {topUpOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-[90%] max-w-md">
+            <h2 className="text-xl font-semibold mb-4">Top Up Wallet</h2>
+            <p className="text-gray-600 mb-4">
+              Enter the amount you want to add to your wallet
+            </p>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Amount (₦)
+              </label>
+              <input
+                type="number"
+                value={topUpAmount}
+                onChange={(e) => setTopUpAmount(e.target.value)}
+                placeholder="Enter amount"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="1"
+                disabled={isProcessing}
+              />
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
+                onClick={() => {
+                  setTopUpOpen(false);
+                  setTopUpAmount("");
+                }}
+                disabled={isProcessing}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                onClick={handleTopUpInitiate}
+                disabled={
+                  !topUpAmount || parseFloat(topUpAmount) <= 0 || isProcessing
+                }
+              >
+                {isProcessing ? "Processing..." : "Continue"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

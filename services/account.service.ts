@@ -20,6 +20,16 @@ export const AccountService = {
     return user;
   },
 
+  async getScheduleData(): Promise<any> {
+    const res = await axiosInstance.get<any>("/fleets/schedule");
+    const scheduleData = res.data;
+
+    // Keep cookie in sync (optional but handy if other parts read from cookie)
+    // cookies.set("schedule", JSON.stringify(scheduleData), { path: "/" });
+    return scheduleData;
+    // return user;
+  },
+
   async updateProfile(data: UpdateProfileData): Promise<UpdateProfileResponse> {
     const res = await axiosInstance.patch<UpdateProfileResponse>(
       "/fleets/update-user-details",
