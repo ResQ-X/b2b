@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import CustomInput from "@/components/ui/CustomInput";
 
 type Option = {
   label: string;
@@ -18,9 +19,12 @@ type Option = {
   longitude?: string;
 };
 
+type GooglePlacePrediction = {
+  description: string;
+  place_id: string;
+};
+
 const MANUAL_LOCATION_VALUE = "__manual__";
-const GOOGLE_SCRIPT_SRC = (key?: string) =>
-  `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`;
 
 export function RequestEmergencyServiceCard({
   vehicleOptions = [],
@@ -30,199 +34,242 @@ export function RequestEmergencyServiceCard({
   onSubmit,
 }: {
   vehicleOptions?: Option[];
-  locationOptions?: Option[]; // optionally include latitude/longitude per item
+  locationOptions?: Option[];
   typeOptions?: Option[];
   slotOptions?: Option[];
-  onSubmit?: (data: {
-    type: string;
-    vehicle: string;
-    location?: string;
-    slot: string;
-    notes: string;
-    towing_method?: string;
-    pickup_location_id?: string;
-    pickup_location_name?: string;
-    pickup_latitude?: string;
-    pickup_longitude?: string;
-    dropoff_location_id?: string;
-    dropoff_location_name?: string;
-    dropoff_latitude?: string;
-    dropoff_longitude?: string;
-  }) => Promise<void> | void;
+  onSubmit?: (data: any) => Promise<void> | void;
 }) {
-  /* ---------- Google script loader (auto) ---------- */
-  const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
+  /* ---------- Google Maps loader (same as RequestServiceModal) ---------- */
+  const [isMounted, setIsMounted] = useState(false);
+  const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
+
+  useEffect(() => setIsMounted(true), []);
+
   useEffect(() => {
-    // already available?
+    if (!isMounted) return;
+
     if (
       typeof window !== "undefined" &&
       (window as any).google &&
       (window as any).google.maps
     ) {
-      setIsGoogleLoaded(true);
+      setIsGoogleMapsLoaded(true);
       return;
     }
 
-    // script present?
-    const existing = document.querySelector(
-      `script[src^="https://maps.googleapis.com/maps/api/js"]`
-    );
-    if (existing) {
-      const onLoad = () =>
-        setIsGoogleLoaded(Boolean((window as any).google?.maps));
-      existing.addEventListener?.("load", onLoad);
-      if ((window as any).google?.maps) setIsGoogleLoaded(true);
-      return () => existing.removeEventListener?.("load", onLoad);
+    const existingScript = document.querySelector(
+      'script[src*="maps.googleapis.com"]'
+    ) as HTMLScriptElement | null;
+
+    if (existingScript) {
+      const onLoad = () => setIsGoogleMapsLoaded(true);
+      existingScript.addEventListener("load", onLoad);
+      if ((window as any).google && (window as any).google.maps)
+        setIsGoogleMapsLoaded(true);
+      return () => existingScript.removeEventListener("load", onLoad);
     }
 
-    // inject script
-    const key = process?.env?.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!key) {
-      console.warn(
-        "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY not set; Places autocomplete will be disabled."
-      );
-      return;
-    }
     const script = document.createElement("script");
-    script.src = GOOGLE_SCRIPT_SRC(key);
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
     script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      console.log("Google Maps script loaded.");
-      setIsGoogleLoaded(Boolean((window as any).google?.maps));
-    };
-    script.onerror = (e) => {
-      console.error("Failed to load Google Maps script", e);
-    };
+    script.onload = () => setIsGoogleMapsLoaded(true);
+    script.onerror = () => console.error("Failed to load Google Maps script");
     document.head.appendChild(script);
 
     return () => {
-      // don't remove script (avoids reloads), but if you want to remove uncomment next lines:
-      // if (document.head.contains(script)) document.head.removeChild(script);
+      if (document.head.contains(script)) document.head.removeChild(script);
     };
-  }, []);
+  }, [isMounted]);
 
-  /* ---------- basic form ---------- */
+  /* ---------- base form ---------- */
   const [form, setForm] = useState({
     vehicle: "",
     type: "",
-    location: "", // non-towing
     slot: "",
     notes: "",
   });
-
   const isTowing = form.type === "TOWING";
 
-  /* ---------- towing fields & coords ---------- */
+  /* ---------- NON-TOWING location ---------- */
+  const [locationId, setLocationId] = useState<string>("");
+  const [locationManualName, setLocationManualName] = useState<string>("");
+  const [locationLatitude, setLocationLatitude] = useState<string>("");
+  const [locationLongitude, setLocationLongitude] = useState<string>("");
+  const [locationPredictions, setLocationPredictions] = useState<
+    GooglePlacePrediction[]
+  >([]);
+  const locationTimer = useRef<number | null>(null);
+  const [lookupError, setLookupError] = useState<string | null>(null);
+
+  /* ---------- TOWING fields & coords ---------- */
   const [towingMethod, setTowingMethod] = useState<string>("");
 
   const [pickupLocationId, setPickupLocationId] = useState<string>("");
   const [pickupManualName, setPickupManualName] = useState<string>("");
   const [pickupLatitude, setPickupLatitude] = useState<string>("");
   const [pickupLongitude, setPickupLongitude] = useState<string>("");
+  const [pickupPredictions, setPickupPredictions] = useState<
+    GooglePlacePrediction[]
+  >([]);
+  const pickupTimer = useRef<number | null>(null);
 
   const [dropoffLocationId, setDropoffLocationId] = useState<string>("");
   const [dropoffManualName, setDropoffManualName] = useState<string>("");
   const [dropoffLatitude, setDropoffLatitude] = useState<string>("");
   const [dropoffLongitude, setDropoffLongitude] = useState<string>("");
-
-  /* ---------- predictions per field ---------- */
-  const [pickupPredictions, setPickupPredictions] = useState<
-    { description: string; place_id?: string }[]
-  >([]);
   const [dropoffPredictions, setDropoffPredictions] = useState<
-    { description: string; place_id?: string }[]
+    GooglePlacePrediction[]
   >([]);
-
-  /* ---------- separate debounce refs ---------- */
-  const pickupTimer = useRef<number | null>(null);
   const dropoffTimer = useRef<number | null>(null);
 
-  /* ---------- helpers: predictions & geocode ---------- */
-  const fetchPredictions = (
+  /* ---------- Predictions helper (same as RequestServiceModal) ---------- */
+  const getPredictions = (
     input: string,
-    setter: typeof setPickupPredictions
+    setter: (x: GooglePlacePrediction[]) => void,
+    timer: React.MutableRefObject<number | null>
   ) => {
-    if (!isGoogleLoaded || !input.trim()) {
-      setter([]);
+    if (timer.current) window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(async () => {
+      if (!isMounted || !isGoogleMapsLoaded || !input.trim()) {
+        setter([]);
+        return;
+      }
+
+      try {
+        const service = new (
+          window as any
+        ).google.maps.places.AutocompleteService();
+        const results: GooglePlacePrediction[] = await new Promise(
+          (resolve) => {
+            service.getPlacePredictions(
+              { input, componentRestrictions: { country: "ng" } },
+              (preds: any, status: string) => {
+                if (status === "OK" && preds) {
+                  resolve(
+                    preds.map((p: any) => ({
+                      description: p.description,
+                      place_id: p.place_id,
+                    }))
+                  );
+                } else {
+                  resolve([]);
+                }
+              }
+            );
+          }
+        );
+
+        setter(results);
+      } catch (err) {
+        console.error("Predictions error:", err);
+        setter([]);
+      }
+    }, 200);
+  };
+
+  /* ---------- Geocoding helper (same as RequestServiceModal) ---------- */
+  const handleSuggestionSelect = async (
+    description: string,
+    setName: (v: string) => void,
+    setLat: (v: string) => void,
+    setLng: (v: string) => void,
+    setPreds: (v: GooglePlacePrediction[]) => void,
+    setError?: (v: string | null) => void
+  ) => {
+    setPreds([]);
+    setName(description);
+
+    if (
+      typeof window !== "undefined" &&
+      (window as any).google &&
+      (window as any).google.maps &&
+      (window as any).google.maps.Geocoder
+    ) {
+      try {
+        const geocoder = new (window as any).google.maps.Geocoder();
+        const results: any = await new Promise((resolve, reject) => {
+          geocoder.geocode(
+            { address: description },
+            (res: any, status: string) => {
+              if (status === "OK" && res && res[0]) resolve(res);
+              else reject(status);
+            }
+          );
+        });
+
+        if (results && results[0] && results[0].geometry) {
+          const loc = results[0].geometry.location;
+          const lat = loc.lat();
+          const lng = loc.lng();
+          setLat(String(lat));
+          setLng(String(lng));
+          return;
+        }
+      } catch (err) {
+        console.warn("Geocoder failed:", err);
+        if (setError) {
+          setError("Failed to resolve coordinates for that place.");
+        }
+      }
+    } else {
+      if (setError) {
+        setError("Google Maps geocoder not available.");
+      }
+    }
+  };
+
+  /* ---------- NON-TOWING manual input handlers ---------- */
+  const onLocationInputChange = (value: string) => {
+    setLocationManualName(value);
+    setLocationLatitude("");
+    setLocationLongitude("");
+    setLocationPredictions([]);
+    setLookupError(null);
+    getPredictions(value, setLocationPredictions, locationTimer);
+  };
+
+  const selectLocationPrediction = async (pred: GooglePlacePrediction) => {
+    await handleSuggestionSelect(
+      pred.description,
+      setLocationManualName,
+      setLocationLatitude,
+      setLocationLongitude,
+      setLocationPredictions,
+      setLookupError
+    );
+    setLocationId(MANUAL_LOCATION_VALUE);
+  };
+
+  const handleLocationSelect = async (value: string) => {
+    setLocationPredictions([]);
+    setLocationManualName("");
+    setLocationLatitude("");
+    setLocationLongitude("");
+    setLocationId(value);
+
+    if (!value || value === MANUAL_LOCATION_VALUE) return;
+
+    const sel = locationOptions.find((o) => o.value === value);
+    const label = sel?.label || "";
+
+    if (sel?.latitude && sel?.longitude) {
+      setLocationLatitude(String(sel.latitude));
+      setLocationLongitude(String(sel.longitude));
+      setLocationManualName(label);
       return;
     }
-    try {
-      const service = new (
-        window as any
-      ).google.maps.places.AutocompleteService();
-      service.getPlacePredictions(
-        { input, componentRestrictions: { country: "ng" } },
-        (preds: any, status: string) => {
-          if (status === "OK" && preds) {
-            setter(
-              preds.map((p: any) => ({
-                description: p.description,
-                place_id: p.place_id,
-              }))
-            );
-          } else {
-            setter([]);
-            // useful debug:
-            // status could be "ZERO_RESULTS" or "OVER_QUERY_LIMIT" etc.
-            // console.debug("Predictions status:", status, preds);
-          }
-        }
-      );
-    } catch (err) {
-      console.warn("fetchPredictions error:", err);
-      setter([]);
-    }
+
+    // fallback geocoding
+    setLocationManualName(label);
   };
 
-  const geocodeByPlaceId = (placeId: string) => {
-    return new Promise<{ lat: number; lng: number }>((resolve, reject) => {
-      if (!isGoogleLoaded) return reject(new Error("Google not loaded"));
-      try {
-        const geocoder = new (window as any).google.maps.Geocoder();
-        geocoder.geocode({ placeId }, (results: any, status: string) => {
-          if (status === "OK" && results && results[0] && results[0].geometry) {
-            const loc = results[0].geometry.location;
-            resolve({ lat: loc.lat(), lng: loc.lng() });
-          } else {
-            reject(status || "NO_RESULTS");
-          }
-        });
-      } catch (err) {
-        reject(err);
-      }
-    });
-  };
-
-  const geocodeByAddress = (address: string) => {
-    return new Promise<{ lat: number; lng: number }>((resolve, reject) => {
-      if (!isGoogleLoaded) return reject(new Error("Google not loaded"));
-      try {
-        const geocoder = new (window as any).google.maps.Geocoder();
-        geocoder.geocode({ address }, (results: any, status: string) => {
-          if (status === "OK" && results && results[0] && results[0].geometry) {
-            const loc = results[0].geometry.location;
-            resolve({ lat: loc.lat(), lng: loc.lng() });
-          } else {
-            reject(status || "NO_RESULTS");
-          }
-        });
-      } catch (err) {
-        reject(err);
-      }
-    });
-  };
-
-  /* ---------- handlers for typing & selecting predictions ---------- */
+  /* ---------- TOWING manual input handlers ---------- */
   const onPickupInputChange = (value: string) => {
     setPickupManualName(value);
     setPickupLatitude("");
     setPickupLongitude("");
     setPickupPredictions([]);
-    if (pickupTimer.current) window.clearTimeout(pickupTimer.current);
-    pickupTimer.current = window.setTimeout(() => {
-      fetchPredictions(value, setPickupPredictions);
-    }, 250);
+    getPredictions(value, setPickupPredictions, pickupTimer);
   };
 
   const onDropoffInputChange = (value: string) => {
@@ -230,58 +277,32 @@ export function RequestEmergencyServiceCard({
     setDropoffLatitude("");
     setDropoffLongitude("");
     setDropoffPredictions([]);
-    if (dropoffTimer.current) window.clearTimeout(dropoffTimer.current);
-    dropoffTimer.current = window.setTimeout(() => {
-      fetchPredictions(value, setDropoffPredictions);
-    }, 250);
+    getPredictions(value, setDropoffPredictions, dropoffTimer);
   };
 
-  const selectPickupPrediction = async (pred: {
-    description: string;
-    place_id?: string;
-  }) => {
-    setPickupPredictions([]);
-    setPickupManualName(pred.description);
+  const selectPickupPrediction = async (pred: GooglePlacePrediction) => {
+    await handleSuggestionSelect(
+      pred.description,
+      setPickupManualName,
+      setPickupLatitude,
+      setPickupLongitude,
+      setPickupPredictions
+    );
     setPickupLocationId(MANUAL_LOCATION_VALUE);
-    try {
-      if (pred.place_id) {
-        const coords = await geocodeByPlaceId(pred.place_id);
-        setPickupLatitude(String(coords.lat));
-        setPickupLongitude(String(coords.lng));
-      } else {
-        const coords = await geocodeByAddress(pred.description);
-        setPickupLatitude(String(coords.lat));
-        setPickupLongitude(String(coords.lng));
-      }
-    } catch (err) {
-      console.warn("pickup geocode failed:", err);
-      // leave coords blank and let backend handle, but keep name
-    }
   };
 
-  const selectDropoffPrediction = async (pred: {
-    description: string;
-    place_id?: string;
-  }) => {
-    setDropoffPredictions([]);
-    setDropoffManualName(pred.description);
+  const selectDropoffPrediction = async (pred: GooglePlacePrediction) => {
+    await handleSuggestionSelect(
+      pred.description,
+      setDropoffManualName,
+      setDropoffLatitude,
+      setDropoffLongitude,
+      setDropoffPredictions
+    );
     setDropoffLocationId(MANUAL_LOCATION_VALUE);
-    try {
-      if (pred.place_id) {
-        const coords = await geocodeByPlaceId(pred.place_id);
-        setDropoffLatitude(String(coords.lat));
-        setDropoffLongitude(String(coords.lng));
-      } else {
-        const coords = await geocodeByAddress(pred.description);
-        setDropoffLatitude(String(coords.lat));
-        setDropoffLongitude(String(coords.lng));
-      }
-    } catch (err) {
-      console.warn("dropoff geocode failed:", err);
-    }
   };
 
-  /* ---------- selecting saved location fallback (use provided coords if present, otherwise geocode label) ---------- */
+  /* ---------- Saved location handlers for towing ---------- */
   const handlePickupLocationSelect = async (value: string) => {
     setPickupPredictions([]);
     setPickupManualName("");
@@ -301,16 +322,7 @@ export function RequestEmergencyServiceCard({
       return;
     }
 
-    // fallback geocode the label
-    try {
-      const coords = await geocodeByAddress(label);
-      setPickupLatitude(String(coords.lat));
-      setPickupLongitude(String(coords.lng));
-      setPickupManualName(label);
-    } catch (err) {
-      console.warn("pickup fallback geocode failed:", err);
-      setPickupManualName(label);
-    }
+    setPickupManualName(label);
   };
 
   const handleDropoffLocationSelect = async (value: string) => {
@@ -332,26 +344,17 @@ export function RequestEmergencyServiceCard({
       return;
     }
 
-    try {
-      const coords = await geocodeByAddress(label);
-      setDropoffLatitude(String(coords.lat));
-      setDropoffLongitude(String(coords.lng));
-      setDropoffManualName(label);
-    } catch (err) {
-      console.warn("dropoff fallback geocode failed:", err);
-      setDropoffManualName(label);
-    }
+    setDropoffManualName(label);
   };
 
-  /* ---------- validation & submit ---------- */
+  /* ---------- validation ---------- */
   const canSubmit = useMemo(() => {
-    const base =
-      !!form.vehicle &&
-      !!form.type &&
-      !!form.slot &&
-      (isTowing ? true : !!form.location);
-    if (!base) return false;
-    if (!isTowing) return true;
+    const hasVehicleTypeSlot = !!form.vehicle && !!form.type && !!form.slot;
+    if (!hasVehicleTypeSlot) return false;
+
+    if (!isTowing) {
+      return !!(locationId || locationManualName.trim());
+    }
 
     const pickupOk =
       (pickupLocationId && pickupLocationId !== MANUAL_LOCATION_VALUE) ||
@@ -364,10 +367,11 @@ export function RequestEmergencyServiceCard({
   }, [
     form.vehicle,
     form.type,
-    form.location,
     form.slot,
     isTowing,
     towingMethod,
+    locationId,
+    locationManualName,
     pickupLocationId,
     pickupManualName,
     pickupLatitude,
@@ -378,6 +382,7 @@ export function RequestEmergencyServiceCard({
     dropoffLongitude,
   ]);
 
+  /* ---------- submit ---------- */
   const handleSubmit = async () => {
     if (!canSubmit || !onSubmit) return;
 
@@ -389,10 +394,26 @@ export function RequestEmergencyServiceCard({
     };
 
     if (!isTowing) {
-      payload.location = form.location;
+      if (locationId && locationId !== MANUAL_LOCATION_VALUE) {
+        payload.location_id = locationId;
+        const sel = locationOptions.find((o) => o.value === locationId);
+        if (sel) {
+          payload.location_name = sel.label;
+          if (sel.latitude) payload.location_latitude = String(sel.latitude);
+          if (sel.longitude) payload.location_longitude = String(sel.longitude);
+        }
+        if (!payload.location_latitude && locationLatitude)
+          payload.location_latitude = locationLatitude;
+        if (!payload.location_longitude && locationLongitude)
+          payload.location_longitude = locationLongitude;
+      } else {
+        payload.location_name = locationManualName;
+        if (locationLatitude) payload.location_latitude = locationLatitude;
+        if (locationLongitude) payload.location_longitude = locationLongitude;
+      }
     } else {
       payload.towing_method = towingMethod;
-      // pickup
+
       if (pickupLocationId && pickupLocationId !== MANUAL_LOCATION_VALUE) {
         payload.pickup_location_id = pickupLocationId;
         const sel = locationOptions.find((o) => o.value === pickupLocationId);
@@ -411,7 +432,6 @@ export function RequestEmergencyServiceCard({
         if (pickupLongitude) payload.pickup_longitude = pickupLongitude;
       }
 
-      // dropoff
       if (dropoffLocationId && dropoffLocationId !== MANUAL_LOCATION_VALUE) {
         payload.dropoff_location_id = dropoffLocationId;
         const sel = locationOptions.find((o) => o.value === dropoffLocationId);
@@ -431,11 +451,16 @@ export function RequestEmergencyServiceCard({
       }
     }
 
-    console.debug("Submitting payload:", payload);
     await onSubmit(payload);
 
     // reset state
-    setForm({ vehicle: "", type: "", location: "", slot: "", notes: "" });
+    setForm({ vehicle: "", type: "", slot: "", notes: "" });
+    setLocationId("");
+    setLocationManualName("");
+    setLocationLatitude("");
+    setLocationLongitude("");
+    setLocationPredictions([]);
+    setLookupError(null);
     setTowingMethod("");
     setPickupLocationId("");
     setPickupManualName("");
@@ -454,6 +479,7 @@ export function RequestEmergencyServiceCard({
     return () => {
       if (pickupTimer.current) window.clearTimeout(pickupTimer.current);
       if (dropoffTimer.current) window.clearTimeout(dropoffTimer.current);
+      if (locationTimer.current) window.clearTimeout(locationTimer.current);
     };
   }, []);
 
@@ -482,13 +508,17 @@ export function RequestEmergencyServiceCard({
         <Field label="Service Needed">
           <Select
             value={form.type}
-            onValueChange={(v) =>
-              setForm((p) => ({
-                ...p,
-                type: v,
-                location: v === "TOWING" ? "" : p.location,
-              }))
-            }
+            onValueChange={(v) => {
+              if (v === "TOWING") {
+                setLocationId("");
+                setLocationManualName("");
+                setLocationLatitude("");
+                setLocationLongitude("");
+                setLocationPredictions([]);
+                setLookupError(null);
+              }
+              setForm((p) => ({ ...p, type: v }));
+            }}
           >
             <Trigger />
             <SelectContent className="bg-[#2D2A27] text-white border-white/10">
@@ -501,7 +531,6 @@ export function RequestEmergencyServiceCard({
           </Select>
         </Field>
 
-        {/* TOWING UI */}
         {isTowing && (
           <>
             <Field label="Towing Method">
@@ -520,30 +549,39 @@ export function RequestEmergencyServiceCard({
             </Field>
 
             <Field label="Pick Up Location">
-              <Select
-                value={pickupLocationId}
-                onValueChange={(v) => handlePickupLocationSelect(v)}
-              >
-                <Trigger />
-                <SelectContent className="bg-[#2D2A27] text-white border-white/10">
-                  {locationOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
+              {pickupLocationId !== MANUAL_LOCATION_VALUE && (
+                <Select
+                  value={pickupLocationId}
+                  onValueChange={(v) => handlePickupLocationSelect(v)}
+                >
+                  <Trigger />
+                  <SelectContent className="bg-[#2D2A27] text-white border-white/10">
+                    {locationOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value={MANUAL_LOCATION_VALUE}>
+                      Enter manually
                     </SelectItem>
-                  ))}
-                  <SelectItem value={MANUAL_LOCATION_VALUE}>
-                    Enter manually
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
+              )}
 
               {pickupLocationId === MANUAL_LOCATION_VALUE && (
                 <div className="relative mt-2">
-                  <input
+                  <CustomInput
+                    type="text"
                     value={pickupManualName}
                     onChange={(e) => onPickupInputChange(e.target.value)}
                     placeholder="Type an address or place"
-                    className="w-full h-12 rounded-xl bg-[#2D2A27] placeholder:text-white/60 text-white border border-white/10 px-3"
+                    className="
+                      h-14
+                      rounded-2xl
+                      border border-white/10
+                      bg-[#2D2A27]
+                      text-white placeholder:text-white/60
+                    "
                   />
 
                   {pickupPredictions.length > 0 && (
@@ -552,7 +590,9 @@ export function RequestEmergencyServiceCard({
                         <div
                           key={p.place_id || idx}
                           className="p-2 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => selectPickupPrediction(p)}
+                          onClick={async () => {
+                            await selectPickupPrediction(p);
+                          }}
                         >
                           {p.description}
                         </div>
@@ -561,16 +601,71 @@ export function RequestEmergencyServiceCard({
                   )}
                 </div>
               )}
-
-              {pickupLatitude && pickupLongitude && (
-                <p className="text-sm text-white/60 mt-2">{`Coords: ${pickupLatitude}, ${pickupLongitude}`}</p>
-              )}
             </Field>
 
             <Field label="Drop Off Location">
+              {dropoffLocationId !== MANUAL_LOCATION_VALUE && (
+                <Select
+                  value={dropoffLocationId}
+                  onValueChange={(v) => handleDropoffLocationSelect(v)}
+                >
+                  <Trigger />
+                  <SelectContent className="bg-[#2D2A27] text-white border-white/10">
+                    {locationOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value={MANUAL_LOCATION_VALUE}>
+                      Enter manually
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+
+              {dropoffLocationId === MANUAL_LOCATION_VALUE && (
+                <div className="relative mt-2">
+                  <CustomInput
+                    type="text"
+                    value={dropoffManualName}
+                    onChange={(e) => onDropoffInputChange(e.target.value)}
+                    placeholder="Type an address or place"
+                    className="
+                      h-14
+                      rounded-2xl
+                      border border-white/10
+                      bg-[#2D2A27]
+                      text-white placeholder:text-white/60
+                    "
+                  />
+
+                  {dropoffPredictions.length > 0 && (
+                    <div className="absolute z-[1000] left-0 right-0 mt-1 bg-white text-black rounded-md shadow-lg max-h-56 overflow-auto">
+                      {dropoffPredictions.map((p, idx) => (
+                        <div
+                          key={p.place_id || idx}
+                          className="p-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={async () => {
+                            await selectDropoffPrediction(p);
+                          }}
+                        >
+                          {p.description}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </Field>
+          </>
+        )}
+
+        {!isTowing && (
+          <Field label="Location">
+            {locationId !== MANUAL_LOCATION_VALUE && (
               <Select
-                value={dropoffLocationId}
-                onValueChange={(v) => handleDropoffLocationSelect(v)}
+                value={locationId || ""}
+                onValueChange={handleLocationSelect}
               >
                 <Trigger />
                 <SelectContent className="bg-[#2D2A27] text-white border-white/10">
@@ -584,55 +679,45 @@ export function RequestEmergencyServiceCard({
                   </SelectItem>
                 </SelectContent>
               </Select>
+            )}
 
-              {dropoffLocationId === MANUAL_LOCATION_VALUE && (
-                <div className="relative mt-2">
-                  <input
-                    value={dropoffManualName}
-                    onChange={(e) => onDropoffInputChange(e.target.value)}
-                    placeholder="Type an address or place"
-                    className="w-full h-12 rounded-xl bg-[#2D2A27] placeholder:text-white/60 text-white border border-white/10 px-3"
-                  />
+            {locationId === MANUAL_LOCATION_VALUE && (
+              <div className="relative mt-2">
+                <CustomInput
+                  type="text"
+                  value={locationManualName}
+                  onChange={(e) => onLocationInputChange(e.target.value)}
+                  placeholder="Enter address or location name"
+                  className="
+                    h-14
+                    rounded-2xl
+                    border border-white/10
+                    bg-[#2D2A27]
+                    text-white placeholder:text-white/60
+                  "
+                />
 
-                  {dropoffPredictions.length > 0 && (
-                    <div className="absolute z-[1000] left-0 right-0 mt-1 bg-white text-black rounded-md shadow-lg max-h-56 overflow-auto">
-                      {dropoffPredictions.map((p, idx) => (
-                        <div
-                          key={p.place_id || idx}
-                          className="p-2 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => selectDropoffPrediction(p)}
-                        >
-                          {p.description}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+                {locationPredictions.length > 0 && (
+                  <div className="absolute z-[1000] left-0 right-0 mt-1 bg-white text-black rounded-md shadow-lg max-h-56 overflow-auto">
+                    {locationPredictions.map((p, idx) => (
+                      <div
+                        key={p.place_id || idx}
+                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={async () => {
+                          await selectLocationPrediction(p);
+                        }}
+                      >
+                        {p.description}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-              {dropoffLatitude && dropoffLongitude && (
-                <p className="text-sm text-white/60 mt-2">{`Coords: ${dropoffLatitude}, ${dropoffLongitude}`}</p>
-              )}
-            </Field>
-          </>
-        )}
-
-        {/* NON-TOWING: normal location */}
-        {!isTowing && (
-          <Field label="Location">
-            <Select
-              value={form.location}
-              onValueChange={(v) => setForm((p) => ({ ...p, location: v }))}
-            >
-              <Trigger />
-              <SelectContent className="bg-[#2D2A27] text-white border-white/10">
-                {locationOptions.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                {lookupError && (
+                  <p className="text-sm text-rose-400 mt-2">{lookupError}</p>
+                )}
+              </div>
+            )}
           </Field>
         )}
 
@@ -674,7 +759,6 @@ export function RequestEmergencyServiceCard({
   );
 }
 
-/* ---------- small helpers ---------- */
 function Field({
   label,
   children,

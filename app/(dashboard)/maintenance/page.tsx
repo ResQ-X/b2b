@@ -1,11 +1,12 @@
 "use client";
+import { toast } from "react-toastify";
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "@/lib/axios";
 import { Wallet, Plus } from "lucide-react";
 import { StatTile } from "@/components/dashboard/StatTile";
 import { Button } from "@/components/ui/button";
 import MaintenanceTable, {
-  maintenanceData,
+  // maintenanceData,
   type Order,
 } from "@/components/maintenance/MaintenanceTable";
 import MaintenanceTabs from "@/components/maintenance/MaintenanceTabs";
@@ -14,6 +15,7 @@ import RequestServiceModal from "@/components/maintenance/RequestServiceModal";
 //   type ServiceHistoryItem,
 // } from "@/components/maintenance/ServiceHistoryCard";
 import { toCSV, downloadText } from "@/lib/export";
+import type { RequestServiceForm } from "@/components/maintenance/RequestServiceModal";
 
 const TABS = [
   { key: "all", label: "All Orders", shortLabel: "All" },
@@ -47,17 +49,17 @@ export default function MaintenancePage() {
   const [search, setSearch] = useState<string>("");
   const [assets, setAssets] = useState<Asset[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
-  const [orders, setOrders] = useState<Order[]>(maintenanceData);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [open, setOpen] = useState(false);
   const [menTMetrics, setMenTMetrics] = useState<any>(null);
 
   const counts = useMemo(
     () => ({
-      all: orders.length,
-      completed: orders.filter((o) => o.status === "Completed").length,
-      inprogress: orders.filter((o) => o.status === "In Progress").length,
-      scheduled: orders.filter((o) => o.status === "Scheduled").length,
-      overdue: orders.filter((o) => o.status === "Overdue").length,
+      all: orders?.length,
+      completed: orders.filter((o) => o.status === "Completed")?.length,
+      inprogress: orders.filter((o) => o.status === "In Progress")?.length,
+      scheduled: orders.filter((o) => o.status === "Scheduled")?.length,
+      overdue: orders.filter((o) => o.status === "Overdue")?.length,
     }),
     [orders]
   );
@@ -199,27 +201,86 @@ export default function MaintenancePage() {
     [locations]
   );
 
-  const handleSubmit = async (data: {
-    type: string;
-    vehicle: string;
-    location: string;
-    slot: string;
-    notes: string;
-  }) => {
-    const payload = {
-      maintenance_type: data.type,
-      asset_id: data.vehicle,
-      location_id: data.location,
-      time_slot: data.slot,
-      note: data.notes,
-    };
-    await axiosInstance.post(
-      "/fleet-service/place-maintenance-service",
-      payload
-    );
-    await fetchAll();
-  };
+  // const handleSubmit = async (data: {
+  //   type: string;
+  //   vehicle: string;
+  //   location: string;
+  //   slot: string;
+  //   notes: string;
+  // }) => {
+  //   const payload = {
+  //     maintenance_type: data.type,
+  //     asset_id: data.vehicle,
+  //     location_id: data.location,
+  //     time_slot: data.slot,
+  //     note: data.notes,
+  //   };
+  //   await axiosInstance.post(
+  //     "/fleet-service/place-maintenance-service",
+  //     payload
+  //   );
+  //   await fetchAll();
+  // };
 
+  // Fixed handleSubmit in MaintenancePage component
+
+  const handleSubmit = async (data: RequestServiceForm) => {
+    try {
+      // Check if user selected manual location
+      const isManual = data.location_id === "__manual__";
+
+      // Determine if service is scheduled (not "NOW")
+      const isScheduled = data.time_slot !== "NOW";
+
+      // Build the payload
+      const payload: any = {
+        maintenance_type: data.maintenance_type,
+        asset_id: data.asset_id,
+        // Convert "NOW" to current ISO string, otherwise use the selected slot
+        time_slot:
+          data.time_slot === "NOW" ? new Date().toISOString() : data.time_slot,
+        is_scheduled: isScheduled,
+        note: data.note || "", // Ensure note is always a string
+      };
+
+      // Add location data based on selection type
+      if (isManual) {
+        // Manual location: send address and coordinates
+        if (data.location_address) {
+          payload.location_address = data.location_address;
+        }
+        if (data.location_longitude) {
+          payload.location_longitude = data.location_longitude;
+        }
+        if (data.location_latitude) {
+          payload.location_latitude = data.location_latitude;
+        }
+      } else {
+        // Preset location: send location_id
+        payload.location_id = data.location_id;
+      }
+
+      console.log("Submitting maintenance request:", payload);
+
+      // Send request to backend
+      const response = await axiosInstance.post(
+        "/fleet-service/place-maintenance-service",
+        payload
+      );
+
+      console.log("Maintenance request successful:", response.data);
+
+      // Refresh the data
+      await fetchAll();
+
+      // Show success message
+      toast.success("Maintenance service requested successfully!");
+    } catch (error) {
+      console.error("Failed to request maintenance service:", error);
+      toast.error("Failed to request maintenance service. Please try again.");
+      throw error; // Re-throw to let modal handle error state
+    }
+  };
   // const history: ServiceHistoryItem[] = [
   //   {
   //     title: "LND-234-CC - Full Service",
@@ -343,6 +404,7 @@ const locationOptionsFrom = (locations: Location[]) =>
   locations.map((l) => ({ label: l.location_name, value: l.id }));
 
 const slotOptions = [
+  { label: "Now", value: "NOW" },
   {
     label: "08:00–10:00",
     value: new Date(new Date().setHours(8, 0, 0, 0)).toISOString(),

@@ -17,29 +17,6 @@ export type FleetRow = {
   status?: "In Transit" | "Available" | "Maintenance" | "Offline";
 };
 
-export const fleetData: FleetRow[] = [
-  {
-    vehicleId: "#RF-2024-1000",
-    fuelLevelPct: 65,
-    lastRefuelISO: "2025-01-12T12:53:00Z",
-    location: "Lekki Office",
-    vehicleType: "SUV",
-    fuelType: "Diesel",
-    fuelCapacityL: 80,
-    status: "In Transit",
-  },
-  {
-    vehicleId: "#LND-234-CC",
-    fuelLevelPct: 89,
-    lastRefuelISO: "2025-01-12T12:53:00Z",
-    location: "VI Branch",
-    vehicleType: "Truck",
-    fuelType: "Diesel",
-    fuelCapacityL: 120,
-    status: "Available",
-  },
-];
-
 /* --- helper to format ISO datetimes into your short format --- */
 const fmtRefuel = (iso: string | undefined | null) => {
   if (!iso) return "—";
@@ -74,7 +51,7 @@ export default function FleetTable({
   data?: FleetAssetFromApi[] | FleetRow[];
 }) {
   // if API data provided, render that; otherwise fallback to mock fleetData
-  const rows = (data && data.length ? data : fleetData) as any[];
+  const rows = (data && data.length ? data : []) as any[];
   const [open, setOpen] = useState(false);
 
   return (

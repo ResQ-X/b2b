@@ -66,7 +66,6 @@ function Sub() {
           Choose your plan
         </h1>
       </div>
-
       {/* Billing toggle */}
       <div className="flex items-center justify-center gap-3 mb-6">
         <div className="inline-flex rounded-full bg-white/10 p-1">
@@ -92,9 +91,8 @@ function Sub() {
           </button>
         </div>
       </div>
-
       {/* Category tabs */}
-      <div className="w-11/12 lg:w-full m-auto lg:m-0 flex items-center justify-center gap-8 mb-6 text-[#FFFFFF]">
+      <div className="relative z-10 w-11/12 lg:w-full m-auto lg:m-0 flex items-center justify-center gap-8 mb-6 text-[#FFFFFF]">
         {(
           [
             ["Rescue", "rescue"],
@@ -106,7 +104,7 @@ function Sub() {
           <button
             key={key}
             onClick={() => selectCategory(key)}
-            className={`pb-2 text-sm md:text-lg font-medium hover:font-semibold transition relative ${
+            className={`pb-1 text-sm md:text-lg font-medium hover:font-semibold transition relative ${
               category === key ? "text-orange" : ""
             }`}
           >
@@ -117,9 +115,11 @@ function Sub() {
           </button>
         ))}
       </div>
-
       {/* Carousel */}
-      <div className="relative mx-auto max-w-[450px]" ref={containerRef}>
+      <div
+        className="lg:mt-[-2em] relative mx-auto max-w-[450px]"
+        ref={containerRef}
+      >
         {/* arrows */}
         {index > 0 && (
           <button

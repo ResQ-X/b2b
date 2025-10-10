@@ -23,7 +23,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   };
 
   return (
-    <div className="w-[242px] h-screen bg-[#3B3835] gap-4 flex flex-col py-3">
+    <div className="w-[242px] h-auto bg-[#3B3835] gap-4 flex flex-col py-3">
       <div className="w-full h-[93px]">
         <div className="flex justify-end">
           <button onClick={onClose} className="md:hidden p-2 rounded-md">

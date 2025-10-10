@@ -16,72 +16,6 @@ export type Order = {
   costNaira: number; // 22500
 };
 
-export const maintenanceData: Order[] = [
-  {
-    id: "RF-2024-1000",
-    vehicle: "LND-451-AA",
-    serviceType: "Oil Change",
-    mileageKm: 45000,
-    status: "Completed",
-    dueDateISO: "2025-04-05",
-    costNaira: 22500,
-  },
-  {
-    id: "RF-2024-1001",
-    vehicle: "ABC-123-XY",
-    serviceType: "Brake Inspection",
-    mileageKm: 65000,
-    status: "In Progress",
-    dueDateISO: "2025-04-07",
-    costNaira: 35000,
-  },
-  {
-    id: "RF-2024-1002",
-    vehicle: "GGE-772-BX",
-    serviceType: "Tire Rotation",
-    mileageKm: 38000,
-    status: "Overdue",
-    dueDateISO: "2025-05-05",
-    costNaira: 15000,
-  },
-  {
-    id: "RF-2024-1003",
-    vehicle: "KJA-220-KD",
-    serviceType: "Full Service",
-    mileageKm: 50000,
-    status: "Scheduled",
-    dueDateISO: "2025-09-05",
-    costNaira: 55000,
-  },
-  {
-    id: "RF-2024-1004",
-    vehicle: "LND-991-ZZ",
-    serviceType: "Full Service",
-    mileageKm: 72000,
-    status: "Scheduled",
-    dueDateISO: "2025-09-10",
-    costNaira: 48000,
-  },
-  {
-    id: "RF-2024-1005",
-    vehicle: "APP-883-QW",
-    serviceType: "Oil Change",
-    mileageKm: 28000,
-    status: "Completed",
-    dueDateISO: "2025-08-15",
-    costNaira: 22500,
-  },
-  {
-    id: "RF-2024-1006",
-    vehicle: "FKJ-001-AB",
-    serviceType: "Brake Inspection",
-    mileageKm: 41000,
-    status: "In Progress",
-    dueDateISO: "2025-09-25",
-    costNaira: 32000,
-  },
-];
-
 const PER_PAGE = 5;
 
 const formatMoney = (n: number) =>
@@ -118,7 +52,7 @@ const StatusPill = ({ status }: { status: OrderStatus }) => {
 };
 
 export default function MaintenanceTable({ orders }: { orders?: Order[] }) {
-  const source = orders ?? maintenanceData;
+  const source = useMemo(() => orders ?? [], [orders]);
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(source.length / PER_PAGE);
 
@@ -151,57 +85,90 @@ export default function MaintenanceTable({ orders }: { orders?: Order[] }) {
 
           {/* Rows */}
           <ul className="bg-[#3B3835] w-full">
-            {data.map((o, i) => (
-              <li
-                key={o.id + i}
-                className="grid grid-cols-7 items-center px-3 sm:px-6 py-4 sm:py-8 gap-1 sm:gap-2 border-b border-white/5 last:border-b-0"
-              >
-                <div className="text-white/90 text-xs sm:text-sm font-medium truncate">
-                  {o.vehicle}
-                </div>
-                <div className="text-white/90 text-xs sm:text-sm truncate">
-                  <span className="sm:hidden">
-                    {o.serviceType.split(" ")[0]}
-                  </span>
-                  <span className="hidden sm:inline">{o.serviceType}</span>
-                </div>
-                <div className="text-white/90 text-xs sm:text-sm truncate">
-                  <span className="sm:hidden">
-                    {Math.round(o.mileageKm / 1000)}k
-                  </span>
-                  <span className="hidden sm:inline">
-                    {o.mileageKm.toLocaleString()}km
-                  </span>
-                </div>
-                <div className="truncate">
-                  <StatusPill status={o.status} />
-                </div>
-                <div className="text-white/90 text-xs sm:text-sm truncate">
-                  <span className="sm:hidden">
-                    {formatDate(o.dueDateISO).slice(0, 5)}
-                  </span>
-                  <span className="hidden sm:inline">
-                    {formatDate(o.dueDateISO)}
-                  </span>
-                </div>
-                <div className="text-white/90 text-xs sm:text-sm truncate">
-                  <span className="sm:hidden">
-                    ₦{Math.round(o.costNaira / 1000)}k
-                  </span>
-                  <span className="hidden sm:inline">
-                    {formatMoney(o.costNaira)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-end">
-                  <Link
-                    href={`/maintenance/${encodeURIComponent(o.id)}`}
-                    className="text-[#FF8500] font-semibold hover:underline text-xs sm:text-sm whitespace-nowrap"
+            {data.length === 0 ? (
+              <li className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
+                <div className="text-white/40 mb-3">
+                  <svg
+                    className="w-16 h-16 sm:w-20 sm:h-20"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    View
-                  </Link>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
                 </div>
+                <h3 className="text-white text-lg sm:text-xl font-semibold mb-2">
+                  No maintenance records
+                </h3>
+                <p className="text-white/60 text-sm sm:text-base text-center ">
+                  Your vehicle maintenance history will appear here once
+                  services are scheduled or completed
+                </p>
               </li>
-            ))}
+            ) : (
+              data.map((o, i) => (
+                <li
+                  key={o.id + i}
+                  className="grid grid-cols-7 items-center px-3 sm:px-6 py-4 sm:py-8 gap-1 sm:gap-2 border-b border-white/5 last:border-b-0"
+                >
+                  <div className="text-white/90 text-xs sm:text-sm font-medium truncate">
+                    {o.vehicle}
+                  </div>
+                  <div className="text-white/90 text-xs sm:text-sm truncate">
+                    <span className="sm:hidden">
+                      {o.serviceType.split(" ")[0]}
+                    </span>
+                    <span className="hidden sm:inline">{o.serviceType}</span>
+                  </div>
+                  <div className="text-white/90 text-xs sm:text-sm truncate">
+                    <span className="sm:hidden">
+                      {Math.round(o.mileageKm / 1000)}k
+                    </span>
+                    <span className="hidden sm:inline">
+                      {o.mileageKm.toLocaleString()}km
+                    </span>
+                  </div>
+                  <div className="truncate">
+                    <StatusPill status={o.status} />
+                  </div>
+                  <div className="text-white/90 text-xs sm:text-sm truncate">
+                    <span className="sm:hidden">
+                      {formatDate(o.dueDateISO).slice(0, 5)}
+                    </span>
+                    <span className="hidden sm:inline">
+                      {formatDate(o.dueDateISO)}
+                    </span>
+                  </div>
+                  <div className="text-white/90 text-xs sm:text-sm truncate">
+                    <span className="sm:hidden">
+                      ₦{Math.round(o.costNaira / 1000)}k
+                    </span>
+                    <span className="hidden sm:inline">
+                      {formatMoney(o.costNaira)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-end">
+                    <Link
+                      href={`/maintenance/${encodeURIComponent(o.id)}`}
+                      className="text-[#FF8500] font-semibold hover:underline text-xs sm:text-sm whitespace-nowrap"
+                    >
+                      View
+                    </Link>
+                  </div>
+                </li>
+              ))
+            )}
           </ul>
         </div>
       </div>

@@ -2,7 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #242220;
+    --foreground: #ededed;
+    --radius: 0.5rem;
+  }
+}
+
 body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* body {
   font-family: var(--font-raleway), Arial, Helvetica, sans-serif;
 }
 
@@ -75,7 +96,7 @@ body {
   .input {
     @apply w-full max-w-[400px] h-[60px] rounded-[10px] border border-beige bg-dark;
   }
-}
+} */
 
 .orange-checkbox {
   appearance: none;
@@ -86,7 +107,7 @@ body {
 }
 
 .orange-checkbox:checked {
-  border-color: #f97316 !important; /* orange-500 */
+  border-color: #f97316 !important;
   background-color: transparent !important;
 }
 
@@ -96,7 +117,7 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #f97316; /* orange-500 */
+  color: #f97316;
   font-size: 12px;
   font-weight: bold;
   line-height: 1;

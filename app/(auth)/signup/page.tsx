@@ -37,31 +37,61 @@ export default function SignupPage() {
     error: null,
   });
 
+  // const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value } = e.target;
+
+  //   if (name === "phone") {
+  //     // Remove all non-digits
+  //     const digitsOnly = value.replace(/\D/g, "");
+
+  //     let formattedPhone = "";
+
+  //     if (digitsOnly.length > 0) {
+  //       // If starts with 0, remove it and add +234
+  //       if (digitsOnly.startsWith("0")) {
+  //         formattedPhone = "+234" + digitsOnly.substring(1);
+  //       }
+  //       // If starts with 234, add + prefix
+  //       else if (digitsOnly.startsWith("234")) {
+  //         formattedPhone = "+" + digitsOnly;
+  //       }
+  //       // If doesn't start with 0 or 234, assume it's a local number and add +234
+  //       else {
+  //         formattedPhone = "+234" + digitsOnly;
+  //       }
+  //     }
+
+  //     setFormData((p) => ({ ...p, phone: formattedPhone }));
+  //     return;
+  //   }
+
+  //   setFormData((p) => ({ ...p, [name]: value }));
+  // };
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     if (name === "phone") {
-      // Remove all non-digits
-      const digitsOnly = value.replace(/\D/g, "");
-
-      let formattedPhone = "";
-
-      if (digitsOnly.length > 0) {
-        // If starts with 0, remove it and add +234
-        if (digitsOnly.startsWith("0")) {
-          formattedPhone = "+234" + digitsOnly.substring(1);
-        }
-        // If starts with 234, add + prefix
-        else if (digitsOnly.startsWith("234")) {
-          formattedPhone = "+" + digitsOnly;
-        }
-        // If doesn't start with 0 or 234, assume it's a local number and add +234
-        else {
-          formattedPhone = "+234" + digitsOnly;
-        }
+      if (!value) {
+        setFormData((p) => ({ ...p, phone: "" }));
+        return;
       }
 
-      setFormData((p) => ({ ...p, phone: formattedPhone }));
+      // Keep only digits (ignore + for counting)
+      const digitsOnly = value.replace(/\D/g, "");
+
+      let formatted = value;
+
+      if (digitsOnly.startsWith("234")) {
+        // User includes country code (allow +234 + 10 digits = 14 total)
+        const local10 = digitsOnly.slice(3, 13); // only 10 digits after 234
+        formatted = `+234${local10}`;
+      } else {
+        // User enters a local Nigerian number (allow 11 digits total)
+        const local11 = digitsOnly.slice(0, 11);
+        formatted = local11;
+      }
+
+      setFormData((p) => ({ ...p, phone: formatted }));
       return;
     }
 
@@ -70,13 +100,77 @@ export default function SignupPage() {
 
   const passwordsMatch = formData.password === confirmPassword;
 
+  const isStrongPassword = (pwd: string) => {
+    // min 8 chars, at least: 1 lower, 1 upper, 1 digit, 1 special
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(pwd);
+  };
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setAuthState({ isLoading: true, error: null });
+
+  //   if (!formData.password || formData.password.length < 8) {
+  //     setAuthState({ isLoading: false, error: null });
+  //     toast.error("Password must be at least 8 characters.");
+  //     return;
+  //   }
+
+  //   if (!passwordsMatch) {
+  //     setAuthState({ isLoading: false, error: null });
+  //     toast.error("Passwords do not match.");
+  //     return;
+  //   }
+
+  //   if (!agreeToTerms) {
+  //     setAuthState({ isLoading: false, error: null });
+  //     toast.error(
+  //       "Please agree to the Terms of Service and Privacy Policy to continue."
+  //     );
+  //     return;
+  //   }
+
+  //   const backendData = {
+  //     name: formData.name,
+  //     email: formData.email,
+  //     company_name: formData.name,
+  //     company_email: formData.email,
+  //     phone: formData.phone,
+  //     company_phone: formData.phone,
+  //     country: formData.country,
+  //     password: formData.password,
+  //   };
+
+  //   console.log("formData:", formData);
+  //   try {
+  //     const res = await AuthService.signup(backendData);
+
+  //     if (res.success) {
+  //       toast.success(
+  //         res.message || "Account created! Please verify your email."
+  //       );
+  //       setAuthState({ isLoading: false, error: null });
+  //       router.push("/subscription");
+  //     } else {
+  //       setAuthState({ isLoading: false, error: null });
+  //       toast.error(res?.message || "An error occurred during signup");
+  //     }
+  //   } catch (error: any) {
+  //     setAuthState({ isLoading: false, error: null });
+  //     toast.error(
+  //       error?.response?.data?.message || "An error occurred during signup"
+  //     );
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthState({ isLoading: true, error: null });
 
-    if (!formData.password || formData.password.length < 8) {
+    if (!isStrongPassword(formData.password)) {
       setAuthState({ isLoading: false, error: null });
-      toast.error("Password must be at least 8 characters.");
+      toast.error(
+        "Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character."
+      );
       return;
     }
 
@@ -105,10 +199,8 @@ export default function SignupPage() {
       password: formData.password,
     };
 
-    console.log("formData:", formData);
     try {
       const res = await AuthService.signup(backendData);
-
       if (res.success) {
         toast.success(
           res.message || "Account created! Please verify your email."
@@ -126,7 +218,6 @@ export default function SignupPage() {
       );
     }
   };
-
   return (
     <div
       className="relative flex min-h-screen w-full items-center justify-center"
@@ -209,6 +300,7 @@ export default function SignupPage() {
                   onChange={onChange}
                   required
                   className="text-white placeholder:text-white/70"
+                  maxLength={11}
                 />
               </div>
 
@@ -238,6 +330,11 @@ export default function SignupPage() {
                   </button>
                 </div>
               </div>
+
+              <p className="mt-2 text-xs text-white/80">
+                Must include at least 1 uppercase, 1 lowercase, 1 number, and 1
+                special character.
+              </p>
 
               {/* Confirm Password */}
               <div className="relative w-full">
@@ -285,14 +382,18 @@ export default function SignupPage() {
                   <span>
                     By using ResQ-X, you agree to our{" "}
                     <Link
-                      href="#"
+                      href="https://www.resqx.ng/terms"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-orange underline underline-offset-4 hover:opacity-80"
                     >
                       Terms of Service
                     </Link>{" "}
                     and{" "}
                     <Link
-                      href="#"
+                      href="https://www.resqx.ng/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-orange underline underline-offset-4 hover:opacity-80"
                     >
                       Privacy Policy

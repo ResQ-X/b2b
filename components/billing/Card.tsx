@@ -9,10 +9,10 @@ export function Card({
   onChoose: () => void;
 }) {
   return (
-    <div className="bg-[#272727] relative w-11/12 lg:w-full lg:max-w-[392px] h-auto lg:h-[423px] mx-auto rounded-2xl lg:rounded-3xl text-[#fff] px-4 lg:px-[30px] py-10">
-      <p className="text-[#FF8500] text-center text-sm lg:text-xl font-medium lg:font-semibold mb-5">
+    <div className="bg-[#272727] relative w-11/12 lg:w-full lg:max-w-[392px] h-auto lg:h-[500px] mx-auto rounded-2xl lg:rounded-3xl text-[#fff] px-4 lg:px-[30px] py-10">
+      {/* <p className="text-[#FF8500] text-center text-sm lg:text-xl font-medium lg:font-semibold mb-5">
         Current Plan
-      </p>
+      </p> */}
       <p className="text-center text-sm lg:text-xl font-medium lg:font-semibold mb-5">
         {card.title}
       </p>

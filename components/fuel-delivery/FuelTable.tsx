@@ -1,4 +1,5 @@
 "use client";
+import { toast } from "react-toastify";
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -135,14 +136,29 @@ export default function OrdersTable({
 
   const handleSubmit = async (data: RequestFuelForm) => {
     try {
+      // Check if it's a manual location
+      const isManualLocation = data.location_id === "__manual__";
+
       const requestBody = {
-        fuel_type: data.type,
-        asset_id: data.vehicle,
-        location_id: data.location,
-        time_slot: data.slot === "NOW" ? new Date().toISOString() : data.slot,
+        fuel_type: data.fuel_type, // Fixed: was data.type
+        asset_id: data.asset_id, // Fixed: was data.vehicle
+        // Only send location_id if it's NOT a manual location
+        ...(isManualLocation ? {} : { location_id: data.location_id }), // Fixed: was data.location
+        // Send manual location details if applicable
+        ...(isManualLocation
+          ? {
+              location_address: data.location_address || "",
+              location_longitude: data.location_longitude || "",
+              location_latitude: data.location_latitude || "",
+            }
+          : {}),
+        time_slot:
+          data.time_slot === "NOW" // Fixed: was data.slot
+            ? new Date().toISOString()
+            : data.time_slot, // Fixed: was data.slot
         quantity: data.quantity,
         note: data.note,
-        is_scheduled: data.slot !== "NOW",
+        is_scheduled: data.time_slot !== "NOW", // Fixed: was data.slot
       };
 
       const response = await axiosInstance.post(
@@ -152,22 +168,15 @@ export default function OrdersTable({
 
       console.log("Fuel service request successful:", response.data);
 
-      // Refresh dashboard stats and assets
-      // const [statsResponse, assetsResponse] = await Promise.all([
-      //   axiosInstance.get("/fleets/dashboard-stats"),
-      //   axiosInstance.get("/fleet-asset/get-asset"),
-      // ]);
+      toast.success("Fuel service requested successfully!");
 
-      // setStats(statsResponse.data.data);
-      // setAssets(assetsResponse.data.assets || []);
-
-      // Show success message (you can use a toast notification here)
-      alert("Fuel service requested successfully!");
+      // Optionally close the modal and refresh the orders list
+      setOpen(false);
+      // You may want to add a callback to refresh the orders list here
     } catch (error) {
       console.error("Failed to request fuel service:", error);
-      // Show error message (you can use a toast notification here)
-      alert("Failed to request fuel service. Please try again.");
-      throw error; // Re-throw to let modal handle the error state
+      toast.error(`Failed to request fuel service. Please try again. ${error}`);
+      throw error;
     }
   };
 
@@ -191,54 +200,82 @@ export default function OrdersTable({
 
           {/* Rows */}
           <ul className="bg-[#3B3835] w-full">
-            {data.map((o, i) => (
-              <li
-                key={o.id + i}
-                className="grid grid-cols-7 items-center px-3 sm:px-6 py-4 sm:py-8 gap-1 sm:gap-2 border-b border-white/5 last:border-b-0"
-              >
-                <div className="font-medium text-xs sm:text-sm truncate">
-                  <span className="sm:hidden">{o.id.split("-")[2]}</span>
-                  <span className="hidden sm:inline">{o.id}</span>
+            {data.length === 0 ? (
+              <li className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
+                <div className="text-white/40 mb-2">
+                  <svg
+                    className="w-16 h-16 sm:w-20 sm:h-20"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
                 </div>
-                <div className="text-white/90 text-xs sm:text-sm truncate">
-                  {o.vehicle}
-                </div>
-                <div className="text-white/90 text-xs sm:text-sm truncate">
-                  <span className="sm:hidden">{o.location.split(" ")[0]}</span>
-                  <span className="hidden sm:inline">{o.location}</span>
-                </div>
-                <div className="text-white/90 text-xs sm:text-sm truncate">
-                  {o.quantityL}L
-                </div>
-                <div className="text-white/90 text-xs sm:text-sm truncate">
-                  <span className="sm:hidden">
-                    ₦{Math.round(o.costNaira / 1000)}k
-                  </span>
-                  <span className="hidden sm:inline">
-                    {formatMoney(o.costNaira)}
-                  </span>
-                </div>
-                <div className="truncate">
-                  <StatusPill status={o.status} />
-                </div>
-                <div className="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-1 sm:gap-5">
-                  <span className="text-white/80 text-xs sm:text-sm whitespace-nowrap order-2 sm:order-1">
+                <h3 className="text-white text-lg sm:text-xl font-semibold mb-2">
+                  No orders yet
+                </h3>
+                <p className="text-white/60 text-sm sm:text-base text-center max-w-md mb-2">
+                  Start by requesting a new fuel delivery for your vehicles
+                </p>
+              </li>
+            ) : (
+              data.map((o, i) => (
+                <li
+                  key={o.id + i}
+                  className="grid grid-cols-7 items-center px-3 sm:px-6 py-4 sm:py-8 gap-1 sm:gap-2 border-b border-white/5 last:border-b-0"
+                >
+                  <div className="font-medium text-xs sm:text-sm truncate">
+                    <span className="sm:hidden">{o.id.split("-")[2]}</span>
+                    <span className="hidden sm:inline">{o.id}</span>
+                  </div>
+                  <div className="text-white/90 text-xs sm:text-sm truncate">
+                    {o.vehicle}
+                  </div>
+                  <div className="text-white/90 text-xs sm:text-sm truncate">
                     <span className="sm:hidden">
-                      {formatDate(o.dateISO).slice(0, 5)}
+                      {o.location.split(" ")[0]}
+                    </span>
+                    <span className="hidden sm:inline">{o.location}</span>
+                  </div>
+                  <div className="text-white/90 text-xs sm:text-sm truncate">
+                    {o.quantityL}L
+                  </div>
+                  <div className="text-white/90 text-xs sm:text-sm truncate">
+                    <span className="sm:hidden">
+                      ₦{Math.round(o.costNaira / 1000)}k
                     </span>
                     <span className="hidden sm:inline">
-                      {formatDate(o.dateISO)}
+                      {formatMoney(o.costNaira)}
                     </span>
-                  </span>
-                  <Link
-                    href={`/fuel-delivery/${o.id}`}
-                    className="text-[#FF8500] font-semibold hover:underline text-xs sm:text-sm whitespace-nowrap order-1 sm:order-2"
-                  >
-                    View
-                  </Link>
-                </div>
-              </li>
-            ))}
+                  </div>
+                  <div className="truncate">
+                    <StatusPill status={o.status} />
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-1 sm:gap-5">
+                    <span className="text-white/80 text-xs sm:text-sm whitespace-nowrap order-2 sm:order-1">
+                      <span className="sm:hidden">
+                        {formatDate(o.dateISO).slice(0, 5)}
+                      </span>
+                      <span className="hidden sm:inline">
+                        {formatDate(o.dateISO)}
+                      </span>
+                    </span>
+                    <Link
+                      href={`/fuel-delivery/${o.id}`}
+                      className="text-[#FF8500] font-semibold hover:underline text-xs sm:text-sm whitespace-nowrap order-1 sm:order-2"
+                    >
+                      View
+                    </Link>
+                  </div>
+                </li>
+              ))
+            )}
           </ul>
         </div>
       </div>
@@ -277,26 +314,6 @@ export default function OrdersTable({
           New Delivery
         </Button>
       </div>
-
-      {/* <RequestServiceModal
-        open={open}
-        onOpenChange={setOpen}
-        onSubmit={handleSubmit}
-        typeOptions={typeOptions}
-        vehicleOptions={vehicleOptions}
-        locationOptions={locationOptions}
-        slotOptions={slotOptions}
-      /> */}
-
-      {/* <RequestServiceModal
-        open={open}
-        onOpenChange={setOpen}
-        onSubmit={handleSubmit}
-        typeOptions={fuelTypeOptions}
-        vehicleOptions={vehicleOptions}
-        locationOptions={locationOptions}
-        slotOptions={slotOptions}
-      /> */}
       <RequestFuelModal
         open={open}
         onOpenChange={setOpen}
