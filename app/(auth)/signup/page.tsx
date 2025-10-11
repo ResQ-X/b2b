@@ -300,7 +300,7 @@ export default function SignupPage() {
                   onChange={onChange}
                   required
                   className="text-white placeholder:text-white/70"
-                  maxLength={11}
+                  maxLength={14}
                 />
               </div>
 

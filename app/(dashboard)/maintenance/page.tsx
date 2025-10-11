@@ -351,7 +351,7 @@ export default function MaintenancePage() {
           onClick={() => setOpen(true)}
           leftIcon={<Plus className="h-4 w-4" />}
         >
-          New Maintenance
+          Schedule Service
         </Button>
       </div>
 

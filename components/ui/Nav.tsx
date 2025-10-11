@@ -22,11 +22,9 @@ type UserProfile = {
   company_email: string;
   phone: string;
   company_phone: string;
-  // Add other fields if needed
 };
 
 export function DashboardNav({ onMenuClick }: DashboardNavProps) {
-  // const { user } = useAuth();
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);

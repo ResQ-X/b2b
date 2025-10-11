@@ -21,12 +21,12 @@ export function SplashScreen() {
   return (
     <div className="bg-primaryBg flex min-h-screen flex-col items-center justify-between p-8">
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-80 h-40 relative">
+        <div className="w-96 h-48 relative md:w-[500px] md:h-72">
           <Image
             src="/ressqx.png"
             alt="RESQ-X Logo"
             fill
-            className="object-cover"
+            // className="object-contain"
             priority
           />
         </div>

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   Select,
   SelectTrigger,
@@ -475,13 +476,13 @@ export function RequestEmergencyServiceCard({
   };
 
   /* ---------- cleanup ---------- */
-  useEffect(() => {
-    return () => {
-      if (pickupTimer.current) window.clearTimeout(pickupTimer.current);
-      if (dropoffTimer.current) window.clearTimeout(dropoffTimer.current);
-      if (locationTimer.current) window.clearTimeout(locationTimer.current);
-    };
-  }, []);
+  // useEffect(() => {
+  //   return () => {
+  //     if (pickupTimer.current) window.clearTimeout(pickupTimer.current);
+  //     if (dropoffTimer.current) window.clearTimeout(dropoffTimer.current);
+  //     if (locationTimer.current) window.clearTimeout(locationTimer.current);
+  //   };
+  // }, []);
 
   /* ---------- UI ---------- */
   return (
@@ -493,8 +494,15 @@ export function RequestEmergencyServiceCard({
           <Select
             value={form.vehicle}
             onValueChange={(v) => setForm((p) => ({ ...p, vehicle: v }))}
+            disabled={vehicleOptions.length === 0}
           >
-            <Trigger />
+            <Trigger
+              placeholder={
+                vehicleOptions.length > 0
+                  ? "Select vehicle"
+                  : "No vehicles available"
+              }
+            />
             <SelectContent className="bg-[#2D2A27] text-white border-white/10">
               {vehicleOptions.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
@@ -504,6 +512,16 @@ export function RequestEmergencyServiceCard({
             </SelectContent>
           </Select>
         </Field>
+        {vehicleOptions.length === 0 && (
+          <div className="mt-2 text-sm text-white/70">
+            No vehicles found. Go to the{" "}
+            <Link href="/fleet" className="underline hover:text-white">
+              Fleet
+            </Link>{" "}
+            page and click <span className="font-semibold">Add New Fleet</span>{" "}
+            to add an asset.
+          </div>
+        )}
 
         <Field label="Service Needed">
           <Select
@@ -774,10 +792,10 @@ function Field({
   );
 }
 
-function Trigger() {
+function Trigger({ placeholder = "Select" }: { placeholder?: string }) {
   return (
     <SelectTrigger className="h-12 rounded-xl border-white/10 bg-[#2D2A27] text-white">
-      <SelectValue placeholder="Select" />
+      <SelectValue placeholder={placeholder} />
     </SelectTrigger>
   );
 }

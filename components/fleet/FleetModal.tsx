@@ -289,6 +289,11 @@ export default function AssetModal({
       // If asset type is GENERATOR, force subtype to OTHER (backend expects a valid value)
       if (String(payload.asset_type).toUpperCase() === "GENERATOR") {
         payload.asset_subtype = "OTHER";
+        delete payload.plate_number;
+      }
+
+      if (payload.location_id === MANUAL_LOCATION_VALUE) {
+        delete payload.location_id;
       }
 
       // Log payload for debugging
