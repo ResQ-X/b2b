@@ -72,7 +72,7 @@ export default function FleetTable({
         {rows.map((r, i) => (
           <li
             key={(r.id ?? r.vehicleId) + i}
-            className="px-6 py-6 border-b border-white/6"
+            className="px-6 py-6 border-b border-white/5"
           >
             <div className="grid grid-cols-6 items-center gap-x-4">
               {/* Name / ID */}

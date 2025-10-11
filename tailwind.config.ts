@@ -65,8 +65,11 @@ export default {
       backgroundImage: {
         "gradient-orange": "linear-gradient(to right, #FF8500, #CC6102)",
       },
+      // fontFamily: {
+      //   raleway: ["var(--font-raleway)"],
+      // },
       fontFamily: {
-        raleway: ["var(--font-raleway)"],
+        sans: ["var(--font-general-sans)", "system-ui", "sans-serif"],
       },
       keyframes: {
         shake: {
