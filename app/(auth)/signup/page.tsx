@@ -128,11 +128,16 @@ export default function SignupPage() {
     } catch (error: any) {
       console.log("Error:", error?.response?.data?.message[0]);
       setAuthState({ isLoading: false, error: null });
+      // toast.error(
+      //   error?.response?.data?.message || "An error occurred during signup"
+      // );
+      // toast.error(
+      //   error?.response?.data?.message[0] || "An error occurred during signup"
+      // );
+      const errorMessage = error?.response?.data?.message;
       toast.error(
-        error?.response?.data?.message || "An error occurred during signup"
-      );
-      toast.error(
-        error?.response?.data?.message[0] || "An error occurred during signup"
+        (Array.isArray(errorMessage) ? errorMessage[0] : errorMessage) ||
+          "An error occurred during signup"
       );
     }
   };
