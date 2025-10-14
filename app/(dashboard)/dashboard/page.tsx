@@ -300,6 +300,7 @@ export default function DashboardPage() {
       value: stats?.pendingMaintenanceServices || 0,
       sub: "View Schedule →",
       icon: Bolt,
+      link: "/schedule",
     },
     {
       title: "Total Upcoming Orders",

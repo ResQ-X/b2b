@@ -451,7 +451,7 @@ export default function AssetModal({
           </Field>
 
           {/* Plate Number (only for vehicles) */}
-          {isVehicle && (
+          {/* {isVehicle && (
             <Field label="Plate Number">
               <CustomInput
                 id="plate_number"
@@ -461,6 +461,86 @@ export default function AssetModal({
                   setForm((prev) => ({ ...prev, plate_number: e.target.value }))
                 }
                 className="max-w-none h-14 rounded-xl bg-[#2D2B29] placeholder:text-white/60"
+              />
+            </Field>
+          )} */}
+          {/* Plate Number (only for vehicles) */}
+          {/* {isVehicle && (
+            <Field label="Plate Number">
+              <CustomInput
+                id="plate_number"
+                placeholder="Enter plate number (e.g., ABC-1234)"
+                value={form.plate_number}
+                onChange={(e) => {
+                  const value = e.target.value.toUpperCase();
+                  // Allow only letters, numbers, and hyphen
+                  const filtered = value.replace(/[^A-Z0-9-]/g, "");
+
+                  // Format: ABC-1234 (3 letters, hyphen, 4 numbers)
+                  if (filtered.length <= 8) {
+                    let formatted = filtered;
+
+                    // Auto-add hyphen after 3 characters only if user has typed 4+ chars without hyphen
+                    if (filtered.length >= 4 && !filtered.includes("-")) {
+                      formatted =
+                        filtered.slice(0, 3) + "-" + filtered.slice(3);
+                    }
+
+                    setForm((prev) => ({ ...prev, plate_number: formatted }));
+                  }
+                }}
+                onBlur={(e) => {
+                  // Validate format on blur only if there's a value
+                  const regex = /^[A-Z]{3}-\d{4}$/;
+                  if (e.target.value && !regex.test(e.target.value)) {
+                    toast.warning(
+                      "Plate number must be in format ABC-1234 (3 letters, hyphen, 4 numbers)"
+                    );
+                  }
+                }}
+                className="max-w-none h-14 rounded-xl bg-[#2D2B29] placeholder:text-white/60 uppercase"
+                maxLength={8}
+                pattern="[A-Z]{3}-[0-9]{4}"
+                title="Format: ABC-1234 (3 letters, hyphen, 4 numbers)"
+              />
+            </Field>
+          )} */}
+
+          {/* Plate Number (only for vehicles) */}
+          {isVehicle && (
+            <Field label="Plate Number">
+              <CustomInput
+                id="plate_number"
+                placeholder="Enter plate number (e.g., ABC-1234)"
+                value={form.plate_number}
+                onChange={(e) => {
+                  const value = e.target.value.toUpperCase();
+                  // Allow only letters, numbers, and hyphen
+                  const filtered = value.replace(/[^A-Z0-9-]/g, "");
+
+                  // Format: ABC-#### (3 letters, hyphen, any number of digits)
+                  let formatted = filtered;
+
+                  // Auto-add hyphen after 3 characters only if user has typed 4+ chars without hyphen
+                  if (filtered.length >= 4 && !filtered.includes("-")) {
+                    formatted = filtered.slice(0, 3) + "-" + filtered.slice(3);
+                  }
+
+                  setForm((prev) => ({ ...prev, plate_number: formatted }));
+                }}
+                onBlur={(e) => {
+                  // Validate format on blur only if there's a value
+                  // Adjusted regex to allow 4 or more digits
+                  const regex = /^[A-Z]{3}-\d{4,}$/;
+                  if (e.target.value && !regex.test(e.target.value)) {
+                    toast.warning(
+                      "Plate number must be in format ABC-#### (3 letters, hyphen, at least 4 numbers)"
+                    );
+                  }
+                }}
+                className="max-w-none h-14 rounded-xl bg-[#2D2B29] placeholder:text-white/60 uppercase"
+                pattern="[A-Z]{3}-[0-9]{4,}"
+                title="Format: ABC-#### (3 letters, hyphen, at least 4 numbers)"
               />
             </Field>
           )}

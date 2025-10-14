@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { LucideIcon } from "lucide-react";
 
 export function StatTile({
@@ -7,12 +8,14 @@ export function StatTile({
   sub,
   icon: Icon,
   borderColor = "#FF8500",
+  link,
 }: {
   title: string;
   value: number | string;
   sub?: string;
   icon: LucideIcon;
   borderColor?: string;
+  link?: string;
 }) {
   return (
     <div
@@ -33,7 +36,16 @@ export function StatTile({
         <div className="text-3xl md:text-4xl font-extrabold tracking-tight">
           {value}
         </div>
-        {sub && <div className="text-sm md:text-base text-white/90">{sub}</div>}
+
+        {link ? (
+          <Link href={link}>
+            {sub && (
+              <div className="text-sm md:text-base text-white/90">{sub}</div>
+            )}
+          </Link>
+        ) : (
+          sub && <div className="text-sm md:text-base text-white/90">{sub}</div>
+        )}
       </div>
     </div>
   );
