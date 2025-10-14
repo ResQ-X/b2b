@@ -1,5 +1,6 @@
 "use client";
 import { toast } from "react-toastify";
+import { useAuth } from "@/contexts/auth.context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axiosInstance from "@/lib/axios";
@@ -18,6 +19,8 @@ import { ServiceBundle } from "@/components/dashboard/ServiceBundle";
 import RequestFuelModal, {
   type RequestFuelForm,
 } from "@/components/fuel-delivery/RequestFuelModal";
+import TopUpModal from "@/components/billing/TopUpModal";
+import { startPaystackInline } from "@/lib/startPaystackInline";
 import {
   Asset,
   Location,
@@ -29,6 +32,7 @@ import {
 } from "@/types/dashboard";
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const router = useRouter();
   const [topUpOpen, setTopUpOpen] = useState(false);
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -440,6 +444,63 @@ export default function DashboardPage() {
     }
   };
 
+  // const handleTopUpInitiate = async () => {
+  //   try {
+  //     setIsProcessing(true);
+
+  //     // OPTION A (simplest): let Paystack generate the reference.
+  //     // If you prefer to generate your own ref in the backend, see OPTION B below.
+
+  //     await startPaystackInline({
+  //       amountNaira: parseFloat(topUpAmount),
+  //       email: user?.email || "no-reply@resqx.fake", // ideally a real user email
+  //       metadata: {
+  //         product: "fleet_wallet_topup",
+  //         userId: user?.id,
+  //       },
+  //       onSuccess: async (psRef) => {
+  //         toast.info("Verifying payment…");
+  //         try {
+  //           const resp = await axiosInstance.post(
+  //             "/fleet-wallet/verify-payment",
+  //             {
+  //               ref: psRef,
+  //               action: "TOP_UP",
+  //             }
+  //           );
+
+  //           if (resp.data.status === "OK") {
+  //             toast.success(resp.data.message || "Wallet topped up!");
+  //             // refresh balance
+  //             const balanceResponse = await axiosInstance.get(
+  //               "/fleet-wallet/get-wallet-balance"
+  //             );
+  //             setWalletBalance(balanceResponse?.data?.data);
+  //             setTopUpOpen(false);
+  //             setTopUpAmount("");
+  //           } else {
+  //             toast.error("Payment verification failed.");
+  //           }
+  //         } catch (err) {
+  //           console.error(err);
+  //           toast.error("Payment verification failed. Please contact support.");
+  //         } finally {
+  //           setIsProcessing(false);
+  //         }
+  //       },
+  //       onClose: () => {
+  //         // user closed the inline widget
+  //         setIsProcessing(false);
+  //         toast.info("Payment window closed.");
+  //       },
+  //     });
+  //   } catch (e: any) {
+  //     console.error(e);
+  //     toast.error(e?.message || "Failed to start payment.");
+  //     setIsProcessing(false);
+  //   }
+  // };
+
   const verifyPayment = async (ref: string) => {
     try {
       toast.info("Verifying payment...");
@@ -595,53 +656,17 @@ export default function DashboardPage() {
         slotOptions={slotOptions}
       />
 
-      {topUpOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 w-[90%] max-w-md">
-            <h2 className="text-xl font-semibold mb-4">Top Up Wallet</h2>
-            <p className="text-gray-600 mb-4">
-              Enter the amount you want to add to your wallet
-            </p>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Amount (₦)
-              </label>
-              <input
-                type="number"
-                value={topUpAmount}
-                onChange={(e) => setTopUpAmount(e.target.value)}
-                placeholder="Enter amount"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                min="1"
-                disabled={isProcessing}
-              />
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <button
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
-                onClick={() => {
-                  setTopUpOpen(false);
-                  setTopUpAmount("");
-                }}
-                disabled={isProcessing}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-                onClick={handleTopUpInitiate}
-                disabled={
-                  !topUpAmount || parseFloat(topUpAmount) <= 0 || isProcessing
-                }
-              >
-                {isProcessing ? "Processing..." : "Continue"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <TopUpModal
+        open={topUpOpen}
+        onOpenChange={(v) => {
+          setTopUpOpen(v);
+          if (!v) setTopUpAmount("");
+        }}
+        amount={topUpAmount} // keep as raw digits string
+        onAmountChange={setTopUpAmount}
+        isProcessing={isProcessing}
+        onSubmit={handleTopUpInitiate}
+      />
     </div>
   );
 }
