@@ -1,6 +1,6 @@
 "use client";
 import { toast } from "react-toastify";
-import { useAuth } from "@/contexts/auth.context";
+// import { useAuth } from "@/contexts/auth.context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axiosInstance from "@/lib/axios";
@@ -20,7 +20,7 @@ import RequestFuelModal, {
   type RequestFuelForm,
 } from "@/components/fuel-delivery/RequestFuelModal";
 import TopUpModal from "@/components/billing/TopUpModal";
-import { startPaystackInline } from "@/lib/startPaystackInline";
+// import { startPaystackInline } from "@/lib/startPaystackInline";
 import {
   Asset,
   Location,
@@ -32,7 +32,7 @@ import {
 } from "@/types/dashboard";
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const router = useRouter();
   const [topUpOpen, setTopUpOpen] = useState(false);
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -662,7 +662,7 @@ export default function DashboardPage() {
           setTopUpOpen(v);
           if (!v) setTopUpAmount("");
         }}
-        amount={topUpAmount} // keep as raw digits string
+        amount={topUpAmount}
         onAmountChange={setTopUpAmount}
         isProcessing={isProcessing}
         onSubmit={handleTopUpInitiate}
