@@ -47,7 +47,7 @@ export default function AssetModal({
     asset_type: initialValues?.asset_type || "",
     asset_subtype: initialValues?.asset_subtype || "",
     fuel_type: initialValues?.fuel_type || "",
-    capacity: initialValues?.capacity || "",
+    capacity: initialValues?.capacity || 0,
     plate_number: initialValues?.plate_number || "",
     location_id: initialValues?.location_id || "",
     location: initialValues?.location || "",
@@ -95,7 +95,7 @@ export default function AssetModal({
         asset_type: initialValues?.asset_type || "",
         asset_subtype: initialValues?.asset_subtype || "",
         fuel_type: initialValues?.fuel_type || "",
-        capacity: initialValues?.capacity || "",
+        capacity: initialValues?.capacity || 0,
         plate_number: initialValues?.plate_number || "",
         location_id: initialValues?.location_id || "",
         location: initialValues?.location || "",
@@ -235,7 +235,13 @@ export default function AssetModal({
   /* ---------- events ---------- */
   const handleLocationChange = (locationId: string) => {
     if (locationId === MANUAL_LOCATION_VALUE) {
-      setForm((prev) => ({ ...prev, location_id: MANUAL_LOCATION_VALUE }));
+      setForm((prev) => ({
+        ...prev,
+        location_id: MANUAL_LOCATION_VALUE,
+        location: "",
+        longitude: "",
+        latitude: "",
+      }));
       return;
     }
 
@@ -251,16 +257,14 @@ export default function AssetModal({
     }
   };
 
-  /* ---------- NEW: asset type change handler that clears subtype for generators ---------- */
+  /* ---------- asset type change handler that clears subtype for generators ---------- */
   const handleAssetTypeChange = (v: string) => {
-    // v is the lowercased value coming from the Select trigger
     const upper = v.toUpperCase();
-    // if generator, clear subtype
     if (upper === "GENERATOR") {
       setForm((prev) => ({
         ...prev,
         asset_type: upper,
-        asset_subtype: "", // clear subtype when generator is selected
+        asset_subtype: "",
       }));
     } else {
       setForm((prev) => ({ ...prev, asset_type: upper }));
@@ -280,13 +284,13 @@ export default function AssetModal({
         return;
       }
 
-      // Build payload to send to backend (don't mutate state directly)
+      // Build payload to send to backend
       const payload: any = {
         ...form,
         capacity: capacityNum,
       };
 
-      // If asset type is GENERATOR, force subtype to OTHER (backend expects a valid value)
+      // If asset type is GENERATOR, force subtype to OTHER
       if (String(payload.asset_type).toUpperCase() === "GENERATOR") {
         payload.asset_subtype = "OTHER";
         delete payload.plate_number;
@@ -296,7 +300,6 @@ export default function AssetModal({
         delete payload.location_id;
       }
 
-      // Log payload for debugging
       console.log("Saving asset — payload:", payload);
 
       // POST to create-asset endpoint
@@ -337,8 +340,6 @@ export default function AssetModal({
 
   const isVehicle = form.asset_type === "VEHICLE";
   const manualMode = form.location_id === MANUAL_LOCATION_VALUE;
-
-  // SHOW subtype only when asset_type is NOT GENERATOR
   const showSubtype = form.asset_type !== "GENERATOR";
 
   return (
@@ -438,9 +439,13 @@ export default function AssetModal({
               id="capacity"
               type="number"
               placeholder="Enter capacity"
-              value={form.capacity}
-              onChange={(e) => setForm({ ...form, capacity: e.target.value })}
-              className="max-w-none h-14 rounded-xl bg-[#2D2B29] placeholder:text-white/60"
+              value={form.capacity === 0 ? "" : form.capacity}
+              onChange={(e) => {
+                const val = e.target.value;
+                const num = val === "" ? 0 : Math.max(0, parseInt(val) || 0);
+                setForm({ ...form, capacity: num });
+              }}
+              className="max-w-none h-14 rounded-xl bg-[#2D2B29] placeholder:text-white/60 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               required
             />
           </Field>
@@ -460,55 +465,54 @@ export default function AssetModal({
             </Field>
           )}
 
-          {/* Location select */}
-          <Field label="Location">
-            <Select
-              value={form.location_id || ""}
-              onValueChange={handleLocationChange}
-              disabled={loadingLocations}
-            >
-              <SelectTrigger className="h-14 rounded-xl border border-white/20 bg-[#2D2B29] text-white">
-                <SelectValue
-                  placeholder={
-                    loadingLocations
-                      ? "Loading locations..."
-                      : "Select location"
-                  }
-                />
-              </SelectTrigger>
+          {/* Location select - Only show if not in manual mode */}
+          {!manualMode && (
+            <Field label="Location">
+              <Select
+                value={form.location_id || ""}
+                onValueChange={handleLocationChange}
+                disabled={loadingLocations}
+              >
+                <SelectTrigger className="h-14 rounded-xl border border-white/20 bg-[#2D2B29] text-white">
+                  <SelectValue
+                    placeholder={
+                      loadingLocations
+                        ? "Loading locations..."
+                        : "Select location"
+                    }
+                  />
+                </SelectTrigger>
 
-              <SelectContent className="bg-[#2D2B29] text-white border-white/10">
-                {locations.map((loc) => (
-                  <SelectItem key={loc.id} value={loc.id}>
-                    {loc.location_name}
+                <SelectContent className="bg-[#2D2B29] text-white border-white/10">
+                  {locations.map((loc) => (
+                    <SelectItem key={loc.id} value={loc.id}>
+                      {loc.location_name}
+                    </SelectItem>
+                  ))}
+                  <SelectItem key="manual" value={MANUAL_LOCATION_VALUE}>
+                    Add location manually
                   </SelectItem>
-                ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          )}
 
-                <SelectItem key="manual" value={MANUAL_LOCATION_VALUE}>
-                  Add location manually
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
-
-          {/* Manual name + suggestions (coords hidden) */}
+          {/* Manual name + suggestions */}
           {manualMode && (
             <Field label="Location Name (Manual)">
               <div className="relative">
-                <div className="flex gap-2 items-center">
-                  <CustomInput
-                    id="location"
-                    type="text"
-                    placeholder="Enter location name"
-                    value={form.location}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setForm((prev) => ({ ...prev, location: val }));
-                      getPredictions(val);
-                    }}
-                    className="max-w-none h-14 rounded-xl bg-[#2D2B29] placeholder:text-white/60"
-                  />
-                </div>
+                <CustomInput
+                  id="location"
+                  type="text"
+                  placeholder="Enter location name"
+                  value={form.location}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setForm((prev) => ({ ...prev, location: val }));
+                    getPredictions(val);
+                  }}
+                  className="max-w-none h-14 rounded-xl bg-[#2D2B29] placeholder:text-white/60"
+                />
 
                 {/* suggestions dropdown */}
                 {predictions.length > 0 && (
@@ -531,21 +535,6 @@ export default function AssetModal({
               {lookupError && (
                 <p className="text-sm text-rose-400 mt-2">{lookupError}</p>
               )}
-            </Field>
-          )}
-
-          {/* If user didn't choose manual but no location id set, allow entering a location name */}
-          {!form.location_id && !manualMode && (
-            <Field label="Location Name (Manual)">
-              <CustomInput
-                id="location"
-                placeholder="Enter location name"
-                value={form.location}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, location: e.target.value }))
-                }
-                className="max-w-none h-14 rounded-xl bg-[#2D2B29] placeholder:text-white/60"
-              />
             </Field>
           )}
 

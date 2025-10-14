@@ -3,7 +3,7 @@ export type AssetForm = {
   asset_type: string;
   asset_subtype: string;
   fuel_type: string;
-  capacity: string;
+  capacity: number;
   plate_number: string;
   location_id: string;
   location: string;

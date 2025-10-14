@@ -104,14 +104,14 @@ export default function DashboardPage() {
       const pieData: PieDataResponse = response.data.data.data;
 
       // Format currency helper
-      const formatCurrency = (amount: number) => {
-        if (amount >= 1000000) {
-          return `₦${(amount / 1000000).toFixed(1)}M`;
-        } else if (amount >= 1000) {
-          return `₦${(amount / 1000).toFixed(0)}k`;
-        }
-        return `₦${amount}`;
-      };
+      // const formatCurrency = (amount: number) => {
+      //   if (amount >= 1000000) {
+      //     return `₦${(amount / 1000000).toFixed(1)}M`;
+      //   } else if (amount >= 1000) {
+      //     return `₦${(amount / 1000).toFixed(0)}k`;
+      //   }
+      //   return `₦${amount}`;
+      // };
 
       // Define colors for each category
       const colors = ["#FF8500", "#F59E0B", "#FDBA74", "#FFE6C7"];
@@ -121,30 +121,34 @@ export default function DashboardPage() {
         legend: [
           {
             label: "Fuel Cost",
-            value: `${pieData.percentages.fuel}% (${formatCurrency(
-              pieData.fuelCost
-            )})`,
+            value: `${pieData.percentages.fuel}%`,
+            // value: `${pieData.percentages.fuel}% (${formatCurrency(
+            //   pieData.fuelCost
+            // )})`,
             color: colors[0],
           },
           {
             label: "Maintenance Cost",
-            value: `${pieData.percentages.maintenance}% (${formatCurrency(
-              pieData.maintenanceCost
-            )})`,
+            value: `${pieData.percentages.maintenance}%`,
+            // value: `${pieData.percentages.maintenance}% (${formatCurrency(
+            //   pieData.maintenanceCost
+            // )})`,
             color: colors[1],
           },
           {
             label: "Emergency Deliveries",
-            value: `${pieData.percentages.emergency}% (${formatCurrency(
-              pieData.emergencyDeliveries
-            )})`,
+            // value: `${pieData.percentages.emergency}% (${formatCurrency(
+            //   pieData.emergencyDeliveries
+            // )})`,
+            value: `${pieData.percentages.emergency}%`,
             color: colors[2],
           },
           {
             label: "Service Charges",
-            value: `${pieData.percentages.service}% (${formatCurrency(
-              pieData.serviceCharges
-            )})`,
+            // value: `${pieData.percentages.service}% (${formatCurrency(
+            //   pieData.serviceCharges
+            // )})`,
+            value: `${pieData.percentages.service}%`,
             color: colors[3],
           },
         ],

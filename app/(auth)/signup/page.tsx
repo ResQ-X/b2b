@@ -37,36 +37,6 @@ export default function SignupPage() {
     error: null,
   });
 
-  // const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const { name, value } = e.target;
-
-  //   if (name === "phone") {
-  //     // Remove all non-digits
-  //     const digitsOnly = value.replace(/\D/g, "");
-
-  //     let formattedPhone = "";
-
-  //     if (digitsOnly.length > 0) {
-  //       // If starts with 0, remove it and add +234
-  //       if (digitsOnly.startsWith("0")) {
-  //         formattedPhone = "+234" + digitsOnly.substring(1);
-  //       }
-  //       // If starts with 234, add + prefix
-  //       else if (digitsOnly.startsWith("234")) {
-  //         formattedPhone = "+" + digitsOnly;
-  //       }
-  //       // If doesn't start with 0 or 234, assume it's a local number and add +234
-  //       else {
-  //         formattedPhone = "+234" + digitsOnly;
-  //       }
-  //     }
-
-  //     setFormData((p) => ({ ...p, phone: formattedPhone }));
-  //     return;
-  //   }
-
-  //   setFormData((p) => ({ ...p, [name]: value }));
-  // };
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -104,63 +74,6 @@ export default function SignupPage() {
     // min 8 chars, at least: 1 lower, 1 upper, 1 digit, 1 special
     return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(pwd);
   };
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setAuthState({ isLoading: true, error: null });
-
-  //   if (!formData.password || formData.password.length < 8) {
-  //     setAuthState({ isLoading: false, error: null });
-  //     toast.error("Password must be at least 8 characters.");
-  //     return;
-  //   }
-
-  //   if (!passwordsMatch) {
-  //     setAuthState({ isLoading: false, error: null });
-  //     toast.error("Passwords do not match.");
-  //     return;
-  //   }
-
-  //   if (!agreeToTerms) {
-  //     setAuthState({ isLoading: false, error: null });
-  //     toast.error(
-  //       "Please agree to the Terms of Service and Privacy Policy to continue."
-  //     );
-  //     return;
-  //   }
-
-  //   const backendData = {
-  //     name: formData.name,
-  //     email: formData.email,
-  //     company_name: formData.name,
-  //     company_email: formData.email,
-  //     phone: formData.phone,
-  //     company_phone: formData.phone,
-  //     country: formData.country,
-  //     password: formData.password,
-  //   };
-
-  //   console.log("formData:", formData);
-  //   try {
-  //     const res = await AuthService.signup(backendData);
-
-  //     if (res.success) {
-  //       toast.success(
-  //         res.message || "Account created! Please verify your email."
-  //       );
-  //       setAuthState({ isLoading: false, error: null });
-  //       router.push("/subscription");
-  //     } else {
-  //       setAuthState({ isLoading: false, error: null });
-  //       toast.error(res?.message || "An error occurred during signup");
-  //     }
-  //   } catch (error: any) {
-  //     setAuthState({ isLoading: false, error: null });
-  //     toast.error(
-  //       error?.response?.data?.message || "An error occurred during signup"
-  //     );
-  //   }
-  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -210,14 +123,20 @@ export default function SignupPage() {
       } else {
         setAuthState({ isLoading: false, error: null });
         toast.error(res?.message || "An error occurred during signup");
+        console.log(res);
       }
     } catch (error: any) {
+      console.log("Error:", error?.response?.data?.message[0]);
       setAuthState({ isLoading: false, error: null });
       toast.error(
         error?.response?.data?.message || "An error occurred during signup"
       );
+      toast.error(
+        error?.response?.data?.message[0] || "An error occurred during signup"
+      );
     }
   };
+
   return (
     <div
       className="relative flex min-h-screen w-full items-center justify-center"

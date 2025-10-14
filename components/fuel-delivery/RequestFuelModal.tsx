@@ -502,7 +502,7 @@ export default function RequestFuelModal({
               onChange={(e) =>
                 setForm((p) => ({
                   ...p,
-                  quantity: parseInt(e.target.value) || 0,
+                  quantity: Math.max(0, parseInt(e.target.value) || 0),
                 }))
               }
               placeholder="Enter quantity in liters"

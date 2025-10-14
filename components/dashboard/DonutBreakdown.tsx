@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 
 export function DonutBreakdown({
   title,
@@ -11,11 +11,12 @@ export function DonutBreakdown({
   title: string;
   slices: number[];
   colors: string[];
-  legend: { label: string; color: string }[];
+  legend: { label: string; value: string; color: string }[];
 }) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const total = slices.reduce((a, b) => a + b, 0);
 
-  // Build conic-gradient only when there's data
+  // Build segments for the conic gradient
   let acc = 0;
   const segments =
     total > 0
@@ -30,7 +31,7 @@ export function DonutBreakdown({
           .join(", ")
       : "";
 
-  // Calculate positions for percentage labels (safe when total === 0)
+  // Calculate positions for percentage labels
   const getSegmentPosition = (sliceIndex: number) => {
     if (total === 0) return { x: 0, y: 0 };
 
@@ -41,13 +42,51 @@ export function DonutBreakdown({
     const segmentAngle = (slices[sliceIndex] / total) * 360;
     const midAngle = accAngle + segmentAngle / 2;
 
-    // Convert to radians and calculate position
-    const rad = (midAngle - 90) * (Math.PI / 180); // -90 to start from top
-    const radius = 100; // Distance from center (in px)
+    const rad = (midAngle - 90) * (Math.PI / 180);
+    const radius = 100;
     const x = Math.cos(rad) * radius;
     const y = Math.sin(rad) * radius;
 
     return { x, y };
+  };
+
+  // Create interactive segments for hover detection
+  const createSegmentPath = (sliceIndex: number) => {
+    if (total === 0) return "";
+
+    let accAngle = 0;
+    for (let i = 0; i < sliceIndex; i++) {
+      accAngle += (slices[i] / total) * 360;
+    }
+    const segmentAngle = (slices[sliceIndex] / total) * 360;
+
+    const startAngle = (accAngle - 90) * (Math.PI / 180);
+    const endAngle = (accAngle + segmentAngle - 90) * (Math.PI / 180);
+
+    const outerRadius = 128; // Half of 256px (chart size)
+    const innerRadius = 56; // Size of inner circle (inset-14 = 56px)
+
+    // Calculate outer arc points
+    const x1 = 128 + outerRadius * Math.cos(startAngle);
+    const y1 = 128 + outerRadius * Math.sin(startAngle);
+    const x2 = 128 + outerRadius * Math.cos(endAngle);
+    const y2 = 128 + outerRadius * Math.sin(endAngle);
+
+    // Calculate inner arc points
+    const x3 = 128 + innerRadius * Math.cos(endAngle);
+    const y3 = 128 + innerRadius * Math.sin(endAngle);
+    const x4 = 128 + innerRadius * Math.cos(startAngle);
+    const y4 = 128 + innerRadius * Math.sin(startAngle);
+
+    const largeArc = segmentAngle > 180 ? 1 : 0;
+
+    return `
+      M ${x1} ${y1}
+      A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${x2} ${y2}
+      L ${x3} ${y3}
+      A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${x4} ${y4}
+      Z
+    `;
   };
 
   return (
@@ -60,41 +99,52 @@ export function DonutBreakdown({
           <div
             className="relative h-64 w-64 rounded-full"
             style={{
-              // if there's no data, show a subtle empty-ring background
               background:
                 total > 0
                   ? `conic-gradient(${segments})`
                   : `radial-gradient(circle at center, #2C2926 60%, transparent 61%), conic-gradient(#444 0deg 360deg)`,
             }}
           >
-            {/* Inner circle to create donut effect - smaller inset for thicker ring */}
+            {/* Inner circle to create donut effect */}
             <div className="absolute inset-14 rounded-full bg-[#2C2926]" />
 
-            {/* Percentage labels positioned around the donut */}
-            {slices.map((slice, index) => {
-              const percentage =
-                total === 0 ? 0 : Math.round((slice / total) * 100);
-              // Optionally hide labels for 0% slices
-              if (percentage === 0) return null;
+            {/* SVG overlay for hover detection */}
+            <svg
+              className="absolute inset-0 w-full h-full"
+              viewBox="0 0 256 256"
+            >
+              {slices.map((slice, index) => {
+                const percentage =
+                  total === 0 ? 0 : Math.round((slice / total) * 100);
+                if (percentage === 0) return null;
 
-              const position = getSegmentPosition(index);
+                return (
+                  <path
+                    key={index}
+                    d={createSegmentPath(index)}
+                    fill="transparent"
+                    className="cursor-pointer"
+                    onMouseEnter={() => setHoveredIndex(index)}
+                    onMouseLeave={() => setHoveredIndex(null)}
+                  />
+                );
+              })}
+            </svg>
 
-              return (
-                <div
-                  key={index}
-                  className="absolute text-white text-lg font-semibold"
-                  style={{
-                    left: `calc(50% + ${position.x}px)`,
-                    top: `calc(50% + ${position.y}px)`,
-                    transform: "translate(-50%, -50%)",
-                    // small pointer to keep labels readable
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {percentage}%
-                </div>
-              );
-            })}
+            {/* Percentage labels - only show on hover */}
+            {hoveredIndex !== null && slices[hoveredIndex] > 0 && (
+              <div
+                className="absolute text-white text-lg font-semibold pointer-events-none"
+                style={{
+                  left: `calc(50% + ${getSegmentPosition(hoveredIndex).x}px)`,
+                  top: `calc(50% + ${getSegmentPosition(hoveredIndex).y}px)`,
+                  transform: "translate(-50%, -50%)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {Math.round((slices[hoveredIndex] / total) * 100)}%
+              </div>
+            )}
 
             {/* Center text for empty state */}
             {total === 0 && (
@@ -105,16 +155,24 @@ export function DonutBreakdown({
           </div>
         </div>
 
-        {/* Legend */}
+        {/* Legend with percentages */}
         <div className="w-full mt-20">
           <ul className="space-y-3">
-            {legend.map((item) => (
-              <li key={item.label} className="flex items-center gap-3">
+            {legend.map((item, index) => (
+              <li
+                key={item.label}
+                className="flex items-center gap-3 cursor-pointer"
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
                 <span
                   className="inline-block h-4 w-4 rounded-full flex-shrink-0"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="text-white text-base">{item.label}</span>
+                <span className="text-white text-base flex-1">
+                  {item.label}
+                </span>
+                <span className="text-white/80 text-sm">{item.value}</span>
               </li>
             ))}
           </ul>
