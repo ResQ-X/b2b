@@ -49,6 +49,26 @@ export default function BillingPage() {
           {/* Right column (shows at the right, not below) */}
           {showRightPane && (
             <div className="w-full lg:w-[38%] bg-[#3B3835] rounded-2xl h-auto lg:h-[810px] shrink-0 lg:mt-[-21rem] py-5 lg:py-16">
+              <div className="flex justify-end px-4 lg:px-6 -mt-2 lg:-mt-8">
+                <button
+                  onClick={() => setShowPicker(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
               <Sub />
             </div>
           )}
