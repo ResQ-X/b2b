@@ -64,6 +64,79 @@ export default function MaintenancePage() {
     [orders]
   );
 
+  const slotOptions = useMemo(() => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentDate = now.toDateString();
+
+    const slots = [
+      { label: "Now", value: "NOW" },
+      {
+        label: "05:00–07:00",
+        value: new Date(new Date().setHours(5, 0, 0, 0)).toISOString(),
+        hour: 5,
+      },
+      {
+        label: "07:00–09:00",
+        value: new Date(new Date().setHours(7, 0, 0, 0)).toISOString(),
+        hour: 7,
+      },
+      {
+        label: "09:00–11:00",
+        value: new Date(new Date().setHours(9, 0, 0, 0)).toISOString(),
+        hour: 9,
+      },
+      {
+        label: "11:00–13:00",
+        value: new Date(new Date().setHours(11, 0, 0, 0)).toISOString(),
+        hour: 11,
+      },
+      {
+        label: "13:00–15:00",
+        value: new Date(new Date().setHours(13, 0, 0, 0)).toISOString(),
+        hour: 13,
+      },
+      {
+        label: "15:00–17:00",
+        value: new Date(new Date().setHours(15, 0, 0, 0)).toISOString(),
+        hour: 15,
+      },
+      {
+        label: "17:00–19:00",
+        value: new Date(new Date().setHours(17, 0, 0, 0)).toISOString(),
+        hour: 17,
+      },
+      {
+        label: "19:00–21:00",
+        value: new Date(new Date().setHours(19, 0, 0, 0)).toISOString(),
+        hour: 19,
+      },
+      {
+        label: "21:00–22:00",
+        value: new Date(new Date().setHours(21, 0, 0, 0)).toISOString(),
+        hour: 21,
+      },
+    ];
+
+    // Filter out past time slots for today
+    return slots
+      .filter((slot) => {
+        if (slot.value === "NOW") return true;
+
+        const slotDate = new Date(slot.value);
+        const slotDateString = slotDate.toDateString();
+
+        // If slot is for today, check if the time has passed
+        if (slotDateString === currentDate) {
+          return slot.hour && slot.hour > currentHour;
+        }
+
+        // Keep all future date slots
+        return true;
+      })
+      .map(({ ...rest }) => rest);
+  }, []);
+
   const tabsWithCounts = TABS.map((t) => ({
     ...t,
     count: counts[t.key as keyof typeof counts] ?? 0,
@@ -235,7 +308,10 @@ export default function MaintenancePage() {
       // Build the payload
       const payload: any = {
         maintenance_type: data.maintenance_type,
-        asset_id: data.asset_id,
+        // asset_id: data.asset_id,
+        ...(data.asset_ids && data.asset_ids.length > 1
+          ? { asset_id: data.asset_ids }
+          : { asset_id: data.asset_id }),
         // Convert "NOW" to current ISO string, otherwise use the selected slot
         time_slot:
           data.time_slot === "NOW" ? new Date().toISOString() : data.time_slot,
@@ -278,9 +354,10 @@ export default function MaintenancePage() {
     } catch (error) {
       console.error("Failed to request maintenance service:", error);
       toast.error("Failed to request maintenance service. Please try again.");
-      throw error; // Re-throw to let modal handle error state
+      // throw error; // Re-throw to let modal handle error state
     }
   };
+
   // const history: ServiceHistoryItem[] = [
   //   {
   //     title: "LND-234-CC - Full Service",
@@ -315,7 +392,7 @@ export default function MaintenancePage() {
       "Mileage (km)": o.mileageKm,
       Status: o.status,
       "Due Date": fmt(o.dueDateISO),
-      "Cost (NGN)": o.costNaira, // keep numeric; Excel can sum
+      "Cost (NGN)": o.costNaira,
     }));
 
     const csv = toCSV(rows);
@@ -402,27 +479,3 @@ const vehicleOptionsFrom = (assets: Asset[]) =>
 
 const locationOptionsFrom = (locations: Location[]) =>
   locations.map((l) => ({ label: l.location_name, value: l.id }));
-
-const slotOptions = [
-  { label: "Now", value: "NOW" },
-  {
-    label: "08:00–10:00",
-    value: new Date(new Date().setHours(8, 0, 0, 0)).toISOString(),
-  },
-  {
-    label: "10:00–12:00",
-    value: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
-  },
-  {
-    label: "12:00–14:00",
-    value: new Date(new Date().setHours(12, 0, 0, 0)).toISOString(),
-  },
-  {
-    label: "14:00–16:00",
-    value: new Date(new Date().setHours(14, 0, 0, 0)).toISOString(),
-  },
-  {
-    label: "16:00–18:00",
-    value: new Date(new Date().setHours(16, 0, 0, 0)).toISOString(),
-  },
-];

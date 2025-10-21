@@ -1,5 +1,5 @@
 "use client";
-
+import { Fragment } from "react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +15,7 @@ import {
   SelectContent,
   SelectItem,
   SelectValue,
+  SelectSeparator,
 } from "@/components/ui/select";
 import CustomInput from "@/components/ui/CustomInput";
 import axiosInstance from "@/lib/axios";
@@ -363,7 +364,7 @@ export default function AssetModal({
           </Field>
 
           {/* Asset Type */}
-          <Field label="Asset Type">
+          {/* <Field label="Asset Type">
             <Select
               value={form.asset_type ? form.asset_type.toLowerCase() : ""}
               onValueChange={handleAssetTypeChange}
@@ -380,10 +381,45 @@ export default function AssetModal({
                 ))}
               </SelectContent>
             </Select>
+          </Field> */}
+          <Field label="Asset Type">
+            <Select
+              value={form.asset_type ? form.asset_type.toLowerCase() : ""}
+              onValueChange={handleAssetTypeChange}
+              required
+            >
+              <SelectTrigger className="h-14 rounded-xl border border-white/20 bg-[#2D2B29] text-white">
+                <SelectValue placeholder="Select asset type" />
+              </SelectTrigger>
+
+              <SelectContent className="bg-[#2D2B29] text-white border-white/10">
+                {assetTypes.map((opt, idx) => (
+                  <Fragment key={opt.value}>
+                    <SelectItem
+                      value={opt.value.toLowerCase()}
+                      className="
+              cursor-pointer
+              transition-colors
+              hover:bg-[#FF8500]/20
+              focus:bg-[#FF8500]/25
+              hover:text-white
+              focus:text-white
+            "
+                    >
+                      {opt.label}
+                    </SelectItem>
+
+                    {idx < assetTypes.length - 1 && (
+                      <SelectSeparator className="my-1 -mx-1 h-px bg-white/10" />
+                    )}
+                  </Fragment>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
 
           {/* Asset Subtype — only show when not a generator */}
-          {showSubtype && (
+          {/* {showSubtype && (
             <Field label="Asset Subtype">
               <Select
                 value={
@@ -409,10 +445,54 @@ export default function AssetModal({
                 </SelectContent>
               </Select>
             </Field>
+          )} */}
+          {showSubtype && (
+            <Field label="Asset Subtype">
+              <Select
+                value={
+                  form.asset_subtype ? form.asset_subtype.toLowerCase() : ""
+                }
+                onValueChange={(v) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    asset_subtype: v.toUpperCase(),
+                  }))
+                }
+                required={showSubtype}
+              >
+                <SelectTrigger className="h-14 rounded-xl border border-white/20 bg-[#2D2B29] text-white">
+                  <SelectValue placeholder="Select asset subtype" />
+                </SelectTrigger>
+
+                <SelectContent className="bg-[#2D2B29] text-white border-white/10">
+                  {assetSubtypes.map((opt, idx) => (
+                    <Fragment key={opt.value}>
+                      <SelectItem
+                        value={opt.value.toLowerCase()}
+                        className="
+                cursor-pointer
+                transition-colors
+                hover:bg-[#FF8500]/20
+                focus:bg-[#FF8500]/25
+                hover:text-white
+                focus:text-white
+              "
+                      >
+                        {opt.label}
+                      </SelectItem>
+
+                      {idx < assetSubtypes.length - 1 && (
+                        <SelectSeparator className="my-1 -mx-1 h-px bg-white/10" />
+                      )}
+                    </Fragment>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
           )}
 
           {/* Fuel Type */}
-          <Field label="Fuel Type">
+          {/* <Field label="Fuel Type">
             <Select
               value={form.fuel_type ? form.fuel_type.toLowerCase() : ""}
               onValueChange={(v) =>
@@ -428,6 +508,45 @@ export default function AssetModal({
                   <SelectItem key={opt.value} value={opt.value.toLowerCase()}>
                     {opt.label}
                   </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field> */}
+
+          <Field label="Fuel Type">
+            <Select
+              value={form.fuel_type ? form.fuel_type.toLowerCase() : ""}
+              onValueChange={(v) =>
+                setForm((prev) => ({ ...prev, fuel_type: v.toUpperCase() }))
+              }
+              required
+            >
+              <SelectTrigger className="h-14 rounded-xl border border-white/20 bg-[#2D2B29] text-white">
+                <SelectValue placeholder="Select fuel type" />
+              </SelectTrigger>
+
+              <SelectContent className="bg-[#2D2B29] text-white border-white/10">
+                {fuelTypes.map((opt, idx) => (
+                  <Fragment key={opt.value}>
+                    <SelectItem
+                      value={opt.value.toLowerCase()}
+                      className="
+              cursor-pointer
+              transition-colors
+              hover:bg-[#FF8500]/20
+              focus:bg-[#FF8500]/25
+              hover:text-white
+              focus:text-white
+              font-medium
+            "
+                    >
+                      {opt.label}
+                    </SelectItem>
+
+                    {idx < fuelTypes.length - 1 && (
+                      <SelectSeparator className="my-1 -mx-1 h-px bg-white/10" />
+                    )}
+                  </Fragment>
                 ))}
               </SelectContent>
             </Select>
@@ -546,7 +665,7 @@ export default function AssetModal({
           )}
 
           {/* Location select - Only show if not in manual mode */}
-          {!manualMode && (
+          {/* {!manualMode && (
             <Field label="Location">
               <Select
                 value={form.location_id || ""}
@@ -570,6 +689,68 @@ export default function AssetModal({
                     </SelectItem>
                   ))}
                   <SelectItem key="manual" value={MANUAL_LOCATION_VALUE}>
+                    Add location manually
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+          )} */}
+          {!manualMode && (
+            <Field label="Location">
+              <Select
+                value={form.location_id || ""}
+                onValueChange={handleLocationChange}
+                disabled={loadingLocations}
+              >
+                <SelectTrigger className="h-14 rounded-xl border border-white/20 bg-[#2D2B29] text-white">
+                  <SelectValue
+                    placeholder={
+                      loadingLocations
+                        ? "Loading locations..."
+                        : "Select location"
+                    }
+                  />
+                </SelectTrigger>
+
+                <SelectContent className="bg-[#2D2B29] text-white border-white/10">
+                  {locations.map((loc, idx) => (
+                    <Fragment key={loc.id}>
+                      <SelectItem
+                        value={loc.id}
+                        className="
+                cursor-pointer
+                transition-colors
+                hover:bg-[#FF8500]/20
+                focus:bg-[#FF8500]/25
+                hover:text-white
+                focus:text-white
+              "
+                      >
+                        {loc.location_name}
+                      </SelectItem>
+
+                      {idx < locations.length - 1 && (
+                        <SelectSeparator className="my-1 -mx-1 h-px bg-white/10" />
+                      )}
+                    </Fragment>
+                  ))}
+
+                  {/* stronger divider before manual option */}
+                  <SelectSeparator className="my-2 -mx-1 h-px bg-white/15" />
+
+                  <SelectItem
+                    key="manual"
+                    value={MANUAL_LOCATION_VALUE}
+                    className="
+            cursor-pointer
+            transition-colors
+            hover:bg-[#FF8500]/20
+            focus:bg-[#FF8500]/25
+            hover:text-white
+            focus:text-white
+            font-medium
+          "
+                  >
                     Add location manually
                   </SelectItem>
                 </SelectContent>

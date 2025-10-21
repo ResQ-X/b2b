@@ -1,10 +1,10 @@
 "use client";
-import { useState } from "react";
+// import { useState, useMemo } from "react";
 // import { Button } from "@/components/ui/button";
 // import { Plus } from "lucide-react";
-import RequestServiceModal, {
-  type RequestServiceForm,
-} from "@/components/maintenance/RequestServiceModal";
+// import RequestServiceModal, {
+//   type RequestServiceForm,
+// } from "@/components/maintenance/RequestServiceModal";
 import Search from "@/components/ui/Search";
 import Image from "next/image";
 import ExportIcon from "@/public/export.svg";
@@ -31,33 +31,100 @@ export default function MaintenanceTabs({
   onSearchChange: (q: string) => void;
   onExport: () => void;
 }) {
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
 
-  const typeOptions = [
-    { label: "Oil Change", value: "oil-change" },
-    { label: "Brake Inspection", value: "brake-inspection" },
-    { label: "Tire Rotation", value: "tire-rotation" },
-    { label: "Full Service", value: "full-service" },
-  ];
-  const vehicleOptions = [
-    { label: "LND-451-AA", value: "LND-451-AA" },
-    { label: "KJA-220-KD", value: "KJA-220-KD" },
-    { label: "ABC-123-XY", value: "ABC-123-XY" },
-  ];
-  const locationOptions = [
-    { label: "Lekki Office", value: "lekki-office" },
-    { label: "VI Branch", value: "vi-branch" },
-    { label: "Ikeja Depot", value: "ikeja-depot" },
-  ];
-  const slotOptions = [
-    { label: "08:00–10:00", value: "08:00-10:00" },
-    { label: "10:00–12:00", value: "10:00-12:00" },
-    { label: "12:00–14:00", value: "12:00-14:00" },
-  ];
+  // const typeOptions = [
+  //   { label: "Oil Change", value: "oil-change" },
+  //   { label: "Brake Inspection", value: "brake-inspection" },
+  //   { label: "Tire Rotation", value: "tire-rotation" },
+  //   { label: "Full Service", value: "full-service" },
+  // ];
+  // const vehicleOptions = [
+  //   { label: "LND-451-AA", value: "LND-451-AA" },
+  //   { label: "KJA-220-KD", value: "KJA-220-KD" },
+  //   { label: "ABC-123-XY", value: "ABC-123-XY" },
+  // ];
+  // const locationOptions = [
+  //   { label: "Lekki Office", value: "lekki-office" },
+  //   { label: "VI Branch", value: "vi-branch" },
+  //   { label: "Ikeja Depot", value: "ikeja-depot" },
+  // ];
+  // const slotOptions = useMemo(() => {
+  //   const now = new Date();
+  //   const currentHour = now.getHours();
+  //   const currentDate = now.toDateString();
 
-  const handleSubmit = async (data: RequestServiceForm) => {
-    console.log("submit", data);
-  };
+  //   const slots = [
+  //     { label: "Now", value: "NOW" },
+  //     {
+  //       label: "05:00–07:00",
+  //       value: new Date(new Date().setHours(5, 0, 0, 0)).toISOString(),
+  //       hour: 5,
+  //     },
+  //     {
+  //       label: "07:00–09:00",
+  //       value: new Date(new Date().setHours(7, 0, 0, 0)).toISOString(),
+  //       hour: 7,
+  //     },
+  //     {
+  //       label: "09:00–11:00",
+  //       value: new Date(new Date().setHours(9, 0, 0, 0)).toISOString(),
+  //       hour: 9,
+  //     },
+  //     {
+  //       label: "11:00–13:00",
+  //       value: new Date(new Date().setHours(11, 0, 0, 0)).toISOString(),
+  //       hour: 11,
+  //     },
+  //     {
+  //       label: "13:00–15:00",
+  //       value: new Date(new Date().setHours(13, 0, 0, 0)).toISOString(),
+  //       hour: 13,
+  //     },
+  //     {
+  //       label: "15:00–17:00",
+  //       value: new Date(new Date().setHours(15, 0, 0, 0)).toISOString(),
+  //       hour: 15,
+  //     },
+  //     {
+  //       label: "17:00–19:00",
+  //       value: new Date(new Date().setHours(17, 0, 0, 0)).toISOString(),
+  //       hour: 17,
+  //     },
+  //     {
+  //       label: "19:00–21:00",
+  //       value: new Date(new Date().setHours(19, 0, 0, 0)).toISOString(),
+  //       hour: 19,
+  //     },
+  //     {
+  //       label: "21:00–22:00",
+  //       value: new Date(new Date().setHours(21, 0, 0, 0)).toISOString(),
+  //       hour: 21,
+  //     },
+  //   ];
+
+  //   // Filter out past time slots for today
+  //   return slots
+  //     .filter((slot) => {
+  //       if (slot.value === "NOW") return true;
+
+  //       const slotDate = new Date(slot.value);
+  //       const slotDateString = slotDate.toDateString();
+
+  //       // If slot is for today, check if the time has passed
+  //       if (slotDateString === currentDate) {
+  //         return slot.hour && slot.hour > currentHour;
+  //       }
+
+  //       // Keep all future date slots
+  //       return true;
+  //     })
+  //     .map(({ ...rest }) => rest);
+  // }, []);
+
+  // const handleSubmit = async (data: RequestServiceForm) => {
+  //   console.log("submit", data);
+  // };
 
   return (
     <>
@@ -132,7 +199,7 @@ export default function MaintenanceTabs({
         </div>
       </div>
 
-      <RequestServiceModal
+      {/* <RequestServiceModal
         open={open}
         onOpenChange={setOpen}
         onSubmit={handleSubmit}
@@ -140,7 +207,7 @@ export default function MaintenanceTabs({
         vehicleOptions={vehicleOptions}
         locationOptions={locationOptions}
         slotOptions={slotOptions}
-      />
+      /> */}
     </>
   );
 }

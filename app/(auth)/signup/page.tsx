@@ -101,13 +101,38 @@ export default function SignupPage() {
       return;
     }
 
+    // const backendData = {
+    //   name: formData.name,
+    //   email: formData.email,
+    //   company_name: formData.name,
+    //   company_email: formData.email,
+    //   phone: formData.phone,
+    //   company_phone: formData.phone,
+    //   country: formData.country,
+    //   password: formData.password,
+    // };
+    // ✅ Normalize phone number before sending
+    let normalizedPhone = formData.phone.trim();
+
+    // If it starts with "0" (e.g. 08141352896), convert to +234...
+    if (/^0\d{10}$/.test(normalizedPhone)) {
+      normalizedPhone = `+234${normalizedPhone.slice(1)}`;
+    }
+
+    // If it starts with "234" but without "+", add "+"
+    else if (/^234\d{10}$/.test(normalizedPhone)) {
+      normalizedPhone = `+${normalizedPhone}`;
+    }
+
+    // Otherwise, assume user already entered valid format (+234....)
+
     const backendData = {
       name: formData.name,
       email: formData.email,
       company_name: formData.name,
       company_email: formData.email,
-      phone: formData.phone,
-      company_phone: formData.phone,
+      phone: normalizedPhone,
+      company_phone: normalizedPhone,
       country: formData.country,
       password: formData.password,
     };

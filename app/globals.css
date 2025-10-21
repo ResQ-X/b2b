@@ -127,6 +127,30 @@ body {
   outline: 2px solid #f97316;
   outline-offset: 2px;
 }
+/* ===== Disable all visible scrollbars across the app ===== */
+
+/* Works for Chrome, Edge, Safari */
+*::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+/* Optional: hide scrollbar thumb completely */
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+/* Works for Firefox */
+* {
+  scrollbar-width: none; /* hides scrollbar but keeps scroll functionality */
+  -ms-overflow-style: none; /* for IE/Edge */
+}
+
+/* Prevent unwanted horizontal scrolling */
+html,
+body {
+  overflow-x: hidden;
+}
 
 /* hide scrollbar for elements with .no-scrollbar */
 .no-scrollbar::-webkit-scrollbar {
@@ -147,4 +171,9 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   appearance: textfield;
   -moz-appearance: textfield;
+}
+
+.radix-themes,
+[data-radix-popper-content-wrapper] {
+  overscroll-behavior: contain;
 }

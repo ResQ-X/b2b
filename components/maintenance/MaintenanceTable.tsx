@@ -16,7 +16,7 @@ export type Order = {
   costNaira: number; // 22500
 };
 
-const PER_PAGE = 5;
+const PER_PAGE = 3;
 
 const formatMoney = (n: number) =>
   new Intl.NumberFormat("en-NG", {

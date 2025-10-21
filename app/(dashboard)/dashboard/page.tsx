@@ -2,7 +2,7 @@
 import { toast } from "react-toastify";
 // import { useAuth } from "@/contexts/auth.context";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import axiosInstance from "@/lib/axios";
 import { CarFront, Bolt, Wallet, Fuel, AlertTriangle } from "lucide-react";
 import FuelIcon from "@/public/gas-station.svg";
@@ -290,6 +290,80 @@ export default function DashboardPage() {
     });
   };
 
+  // Time slot options
+  const slotOptions = useMemo(() => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentDate = now.toDateString();
+
+    const slots = [
+      { label: "Now", value: "NOW" },
+      {
+        label: "05:00–07:00",
+        value: new Date(new Date().setHours(5, 0, 0, 0)).toISOString(),
+        hour: 5,
+      },
+      {
+        label: "07:00–09:00",
+        value: new Date(new Date().setHours(7, 0, 0, 0)).toISOString(),
+        hour: 7,
+      },
+      {
+        label: "09:00–11:00",
+        value: new Date(new Date().setHours(9, 0, 0, 0)).toISOString(),
+        hour: 9,
+      },
+      {
+        label: "11:00–13:00",
+        value: new Date(new Date().setHours(11, 0, 0, 0)).toISOString(),
+        hour: 11,
+      },
+      {
+        label: "13:00–15:00",
+        value: new Date(new Date().setHours(13, 0, 0, 0)).toISOString(),
+        hour: 13,
+      },
+      {
+        label: "15:00–17:00",
+        value: new Date(new Date().setHours(15, 0, 0, 0)).toISOString(),
+        hour: 15,
+      },
+      {
+        label: "17:00–19:00",
+        value: new Date(new Date().setHours(17, 0, 0, 0)).toISOString(),
+        hour: 17,
+      },
+      {
+        label: "19:00–21:00",
+        value: new Date(new Date().setHours(19, 0, 0, 0)).toISOString(),
+        hour: 19,
+      },
+      {
+        label: "21:00–22:00",
+        value: new Date(new Date().setHours(21, 0, 0, 0)).toISOString(),
+        hour: 21,
+      },
+    ];
+
+    // Filter out past time slots for today
+    return slots
+      .filter((slot) => {
+        if (slot.value === "NOW") return true;
+
+        const slotDate = new Date(slot.value);
+        const slotDateString = slotDate.toDateString();
+
+        // If slot is for today, check if the time has passed
+        if (slotDateString === currentDate) {
+          return slot.hour && slot.hour > currentHour;
+        }
+
+        // Keep all future date slots
+        return true;
+      })
+      .map(({ ...rest }) => rest);
+  }, []);
+
   if (loading) return <Loader content="Loading dashbaord data..." />;
 
   const tiles = [
@@ -334,42 +408,18 @@ export default function DashboardPage() {
     value: location.id,
   }));
 
-  // Time slot options (generate for today and tomorrow)
-  const slotOptions = [
-    { label: "Now", value: "NOW" },
-    {
-      label: "08:00–10:00",
-      value: new Date(new Date().setHours(8, 0, 0, 0)).toISOString(),
-    },
-    {
-      label: "10:00–12:00",
-      value: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
-    },
-    {
-      label: "12:00–14:00",
-      value: new Date(new Date().setHours(12, 0, 0, 0)).toISOString(),
-    },
-    {
-      label: "14:00–16:00",
-      value: new Date(new Date().setHours(14, 0, 0, 0)).toISOString(),
-    },
-    {
-      label: "16:00–18:00",
-      value: new Date(new Date().setHours(16, 0, 0, 0)).toISOString(),
-    },
-  ];
-
   const handleSubmit = async (data: RequestFuelForm) => {
     try {
-      // Check if it's a manual location (location_id will be MANUAL_LOCATION_VALUE)
       const isManualLocation = data.location_id === "__manual__";
 
-      const requestBody = {
-        fuel_type: data.fuel_type, // "PETROL" or "DIESEL"
-        asset_id: data.asset_id,
-        // Only send location_id if it's NOT a manual location
+      const requestBody: any = {
+        fuel_type: data.fuel_type,
+        // >>> Use asset_ids if multiple selected, else single asset_id
+        ...(data.asset_ids && data.asset_ids.length > 1
+          ? { asset_id: data.asset_ids }
+          : { asset_id: data.asset_id }),
+
         ...(isManualLocation ? {} : { location_id: data.location_id }),
-        // Send manual location details if applicable
         ...(isManualLocation
           ? {
               location_address: data.location_address || "",
@@ -383,6 +433,7 @@ export default function DashboardPage() {
         note: data.note,
         is_scheduled: data.time_slot !== "NOW",
       };
+
       await axiosInstance.post(
         "/fleet-service/place-fuel-service",
         requestBody
