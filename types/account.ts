@@ -43,6 +43,7 @@ export interface UpdateProfileResponse {
   success: boolean;
   message: string;
   user?: User;
+  data?: any;
 }
 
 export interface ChangePasswordResponse {

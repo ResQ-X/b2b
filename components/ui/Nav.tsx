@@ -80,7 +80,9 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
           {getPageTitle(pathname)}
         </span> */}
         <h1 className="text-[#F1F1F1] text-2xl font-semibold">
-          Welcome {loading ? "..." : userProfile?.name || "User"},
+          {/* Welcome {loading ? "..." : userProfile?.name || "User"}, */}
+          Welcome {loading ? "..." : userProfile?.name?.split(" ")[0] || "User"}
+          ,
         </h1>
         <p className="text-[#E2E2E2] text-base font-medium">
           Today&apos;s snapshot of your operations.

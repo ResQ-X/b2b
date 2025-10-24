@@ -17,6 +17,7 @@ export function FuelBarChart({
   availableYears?: number[];
   onYearChange?: (year: number) => void;
 }) {
+  console.log("data", data);
   const [selectedYear, setSelectedYear] = useState(2025);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 

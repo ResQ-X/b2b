@@ -581,9 +581,10 @@ export default function EmergencyPage() {
               emergency_type: data.type, // "TOWING" or others
               // asset_id: data.vehicle,
               // asset_id: data.asset_id || data.vehicle,
-              ...(data.asset_ids && data.asset_ids.length > 1
-                ? { asset_id: data.asset_ids }
-                : { asset_id: data.asset_id }),
+              // ...(data.asset_ids && data.asset_ids.length > 1
+              //   ? { asset_id: data.asset_ids }
+              //   : { asset_id: data.asset_id }),
+              asset_ids: data.asset_ids,
               time_slot:
                 data.slot === "NOW" ? new Date().toISOString() : data.slot,
               is_scheduled: isScheduled,

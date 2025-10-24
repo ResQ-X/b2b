@@ -725,10 +725,10 @@ export default function OrdersTable({
       const requestBody: any = {
         fuel_type: data.fuel_type,
         // >>> Use asset_ids if multiple selected, else single asset_id
-        ...(data.asset_ids && data.asset_ids.length > 1
-          ? { asset_id: data.asset_ids }
-          : { asset_id: data.asset_id }),
-
+        // ...(data.asset_ids && data.asset_ids.length > 1
+        //   ? { asset_ids: data.asset_ids }
+        //   : { asset_ids: data.asset_id }),
+        asset_ids: data.asset_ids,
         ...(isManualLocation ? {} : { location_id: data.location_id }),
         ...(isManualLocation
           ? {

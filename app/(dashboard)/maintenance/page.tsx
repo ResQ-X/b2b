@@ -309,9 +309,10 @@ export default function MaintenancePage() {
       const payload: any = {
         maintenance_type: data.maintenance_type,
         // asset_id: data.asset_id,
-        ...(data.asset_ids && data.asset_ids.length > 1
-          ? { asset_id: data.asset_ids }
-          : { asset_id: data.asset_id }),
+        asset_ids: data.asset_ids,
+        // ...(data.asset_ids && data.asset_ids.length > 1
+        //   ? { asset_id: data.asset_ids }
+        //   : { asset_id: data.asset_id }),
         // Convert "NOW" to current ISO string, otherwise use the selected slot
         time_slot:
           data.time_slot === "NOW" ? new Date().toISOString() : data.time_slot,

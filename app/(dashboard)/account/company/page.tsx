@@ -157,6 +157,20 @@ export default function CompanyInformationPage() {
             />
 
             <FieldRow
+              label="Company Email"
+              value={companyEmail}
+              onChange={setCompanyEmail}
+              disabled={updating}
+            />
+
+            <FieldRow
+              label="Company Phone"
+              value={companyPhone}
+              onChange={setCompanyPhone}
+              disabled={updating}
+            />
+
+            <FieldRow
               label="Company's Address"
               value={companyAddress}
               onChange={setCompanyAddress}
@@ -207,20 +221,6 @@ export default function CompanyInformationPage() {
               label="Phone Number"
               value={phone}
               onChange={setPhone}
-              disabled={updating}
-            />
-
-            <FieldRow
-              label="Company Email"
-              value={companyEmail}
-              onChange={setCompanyEmail}
-              disabled={updating}
-            />
-
-            <FieldRow
-              label="Company Phone"
-              value={companyPhone}
-              onChange={setCompanyPhone}
               disabled={updating}
             />
           </div>
