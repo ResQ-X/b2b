@@ -6,7 +6,7 @@ export function PlanCard({
   onChoose,
 }: {
   card: CardSpec;
-  onChoose: () => void;
+  onChoose: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
   return (
     <div className="bg-[#3B3835] relative w-full max-w-[392px] h-[423px] mx-auto rounded-3xl text-white border border-[#FF8500] px-[30px] py-10">

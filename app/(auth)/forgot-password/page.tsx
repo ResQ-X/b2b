@@ -28,13 +28,27 @@ export default function ForgotPasswordPage() {
 
     try {
       const response = await AuthService.requestPasswordReset(formData);
+
       if (
         response?.success === true &&
         response?.message === "Verification code sent successfully"
       ) {
+        // 1) Set a short-lived HttpOnly cookie via our API route (not visible in URL or JS)
+        const setCookieRes = await fetch("/api/auth/set-reset-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: formData.email }),
+          cache: "no-store",
+        });
+
+        if (!setCookieRes.ok) {
+          throw new Error("Unable to store email securely. Please retry.");
+        }
+
         setAuthState({ isLoading: false, error: null });
-        toast.success(response.message);
-        router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
+
+        // 2) Navigate WITHOUT exposing the email in the URL
+        router.push("/create-password");
       } else {
         setAuthState({ isLoading: false, error: null });
         toast.error(
@@ -45,6 +59,7 @@ export default function ForgotPasswordPage() {
       setAuthState({ isLoading: false, error: null });
       toast.error(
         error?.response?.data?.message ||
+          error?.message ||
           "Unable to send reset link. Please try again."
       );
     }

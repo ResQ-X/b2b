@@ -144,7 +144,9 @@ export default function SignupPage() {
           res.message || "Account created! Please verify your email."
         );
         setAuthState({ isLoading: false, error: null });
-        router.push("/subscription");
+        router.push(
+          `/verify-signup?email=${encodeURIComponent(formData.email)}`
+        );
       } else {
         setAuthState({ isLoading: false, error: null });
         toast.error(res?.message || "An error occurred during signup");

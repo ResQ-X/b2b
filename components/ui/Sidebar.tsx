@@ -61,7 +61,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                   href={item.href}
                   onClick={onClose}
                   className={cn(
-                    "flex w-full max-w-[193px] h-[50px] items-center gap-3 text-[16px] font-semibold px-3 py-2 rounded-lg mb-1 relative group",
+                    "flex w-full max-w-[193px] h-[50px] items-center gap-3 text-[16px] font-semibold px-3 py-2 rounded-[10px] mb-1 relative group",
                     isActive
                       ? "bg-[#FFFFFF] text-orange"
                       : "text-[#C6C6C6] hover:bg-orange/10"
@@ -86,7 +86,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       <div className="p-4">
         <button
           onClick={() => setShowLogoutModal(true)}
-          className="flex items-center gap-3 px-3 py-2 w-full text-[#C6C6C6] hover:bg-orange/10 rounded-lg"
+          className="flex items-center gap-3 px-3 py-2 w-full text-[#C6C6C6] hover:bg-orange/10 rounded-[10px]"
         >
           <LogOut className="h-5 w-5" />
           <span>Log Out</span>

@@ -32,6 +32,7 @@ export default function SubscriptionPage() {
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
   };
+
   const onTouchEnd = (e: React.TouchEvent) => {
     if (touchStartX.current == null) return;
     const dx = e.changedTouches[0].clientX - touchStartX.current;
@@ -46,26 +47,29 @@ export default function SubscriptionPage() {
     setBilling(b);
     setIndex(0);
   };
+
   const selectCategory = (c: CategoryKey) => {
     setCategory(c);
     setIndex(0);
   };
 
   function handleChoosePlan(
-    event: any,
+    event: React.MouseEvent,
     billing: Billing,
     category: CategoryKey,
     card: CardSpec,
     index: number
   ) {
     event.preventDefault();
-    console.log({
+    console.log("Full Selection:", {
       billing,
       category,
       index,
       ...card,
     });
-    router.push("/dashboard");
+
+    router.push("/login");
+    // router.push("/dashboard");
   }
 
   return (
@@ -204,8 +208,8 @@ export default function SubscriptionPage() {
                   <div key={i} className="w-full shrink-0 px-2 sm:px-4">
                     <PlanCard
                       card={card}
-                      onChoose={() =>
-                        handleChoosePlan(event, billing, category, card, i)
+                      onChoose={(e: any) =>
+                        handleChoosePlan(e, billing, category, card, i)
                       }
                     />
                   </div>

@@ -21,7 +21,7 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses =
-    "h-5 md:h-12 px-4 font-medium hover:bg-opacity-80 hover:scale-105 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded-lg flex items-center justify-center gap-2";
+    "h-5 md:h-12 px-4 font-medium hover:bg-opacity-80 hover:scale-105 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded-[10px] flex items-center justify-center gap-2";
 
   const variants = {
     orange:
