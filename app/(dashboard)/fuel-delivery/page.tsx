@@ -109,31 +109,50 @@ export default function FuelDeliveryPage() {
           location_longitude?: string;
           location_latitude?: string;
           business_id?: string;
-          asset_id?: string;
           created_at?: string;
           updated_at?: string;
-          asset?: {
+          assets?: Array<{
             id: string;
             asset_name: string;
             plate_number: string | null;
-          };
+            asset_type?: string;
+            asset_subtype?: string;
+            fuel_type?: string;
+            capacity?: number;
+          }>;
         };
 
         const apiOrders = (ordersRes.data.data || []) as ApiOrder[];
-        const mapped: Order[] = apiOrders.map((o) => ({
-          id: o.id,
-          vehicle: o.asset?.plate_number || o.asset?.asset_name || "N/A",
-          location: o.location,
-          quantityL: o.quantity ?? 0,
-          costNaira: 0,
-          status:
-            o.status === "COMPLETED"
-              ? "Completed"
-              : o.status === "IN_PROGRESS"
-              ? "In Progress"
-              : "Scheduled",
-          dateISO: o.date_time,
-        }));
+        console.log("apiOrders", apiOrders);
+
+        const mapped: Order[] = apiOrders.map((o) => {
+          let vehicleDisplay = "N/A";
+
+          if (o.assets && o.assets.length > 0) {
+            const assetNames = o.assets.map(
+              (asset) => asset.plate_number || asset.asset_name
+            );
+            vehicleDisplay = assetNames.join(", ");
+          }
+
+          return {
+            id: o.id,
+            vehicle: vehicleDisplay,
+            location: o.location,
+            quantityL: o.quantity ?? 0,
+            costNaira: 0,
+            status:
+              o.status === "COMPLETED"
+                ? "Completed"
+                : o.status === "IN_PROGRESS"
+                ? "In Progress"
+                : o.status === "PENDING"
+                ? "Scheduled"
+                : "Scheduled",
+            dateISO: o.date_time,
+          };
+        });
+
         setOrders(mapped);
       } catch (e) {
         console.error("Failed to fetch fuel delivery data", e);

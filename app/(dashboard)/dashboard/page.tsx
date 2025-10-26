@@ -1,6 +1,5 @@
 "use client";
 import { toast } from "react-toastify";
-// import { useAuth } from "@/contexts/auth.context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import axiosInstance from "@/lib/axios";
@@ -20,7 +19,6 @@ import RequestFuelModal, {
   type RequestFuelForm,
 } from "@/components/fuel-delivery/RequestFuelModal";
 import TopUpModal from "@/components/billing/TopUpModal";
-// import { startPaystackInline } from "@/lib/startPaystackInline";
 import {
   Asset,
   Location,
@@ -32,7 +30,6 @@ import {
 } from "@/types/dashboard";
 
 export default function DashboardPage() {
-  // const { user } = useAuth();
   const router = useRouter();
   const [topUpOpen, setTopUpOpen] = useState(false);
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -74,10 +71,8 @@ export default function DashboardPage() {
 
   console.log("Wallet Balance:", walletBalance);
 
-  // Get available years - only 2025 since project just started
   const availableYears = [2025];
 
-  // Fetch bar chart data
   const fetchBarChartData = async (year: number) => {
     try {
       const response = await axiosInstance.get("/fleets/dashboard-bar-data", {
@@ -86,7 +81,6 @@ export default function DashboardPage() {
 
       const barData: FuelBarData[] = response.data.data.data || [];
 
-      // Transform API data to chart format
       const transformedData: FuelChartData = {
         data: barData.map((item) => item.quantity),
         labels: barData.map((item) => item.month),
@@ -95,63 +89,37 @@ export default function DashboardPage() {
       setFuelBarData(transformedData);
     } catch (error) {
       console.error("Failed to fetch bar chart data:", error);
-      // Set empty data on error
       setFuelBarData({ data: [], labels: [] });
     }
   };
 
-  // Fetch pie chart data
   const fetchPieChartData = async () => {
     try {
       const response = await axiosInstance.get("/fleets/dashboard-pie-data");
 
       const pieData: PieDataResponse = response.data.data.data;
 
-      // Format currency helper
-      // const formatCurrency = (amount: number) => {
-      //   if (amount >= 1000000) {
-      //     return `₦${(amount / 1000000).toFixed(1)}M`;
-      //   } else if (amount >= 1000) {
-      //     return `₦${(amount / 1000).toFixed(0)}k`;
-      //   }
-      //   return `₦${amount}`;
-      // };
-
-      // Define colors for each category
       const colors = ["#FF8500", "#F59E0B", "#FDBA74", "#FFE6C7"];
 
-      // Transform API data to chart format
       const transformedPieData: PieChartData = {
         legend: [
           {
             label: "Fuel Cost",
             value: `${pieData.percentages.fuel}%`,
-            // value: `${pieData.percentages.fuel}% (${formatCurrency(
-            //   pieData.fuelCost
-            // )})`,
             color: colors[0],
           },
           {
             label: "Maintenance Cost",
             value: `${pieData.percentages.maintenance}%`,
-            // value: `${pieData.percentages.maintenance}% (${formatCurrency(
-            //   pieData.maintenanceCost
-            // )})`,
             color: colors[1],
           },
           {
             label: "Emergency Deliveries",
-            // value: `${pieData.percentages.emergency}% (${formatCurrency(
-            //   pieData.emergencyDeliveries
-            // )})`,
             value: `${pieData.percentages.emergency}%`,
             color: colors[2],
           },
           {
             label: "Service Charges",
-            // value: `${pieData.percentages.service}% (${formatCurrency(
-            //   pieData.serviceCharges
-            // )})`,
             value: `${pieData.percentages.service}%`,
             color: colors[3],
           },
@@ -168,7 +136,6 @@ export default function DashboardPage() {
       setPieChartData(transformedPieData);
     } catch (error) {
       console.error("Failed to fetch pie chart data:", error);
-      // Keep default empty data on error
     }
   };
 
@@ -177,7 +144,6 @@ export default function DashboardPage() {
       try {
         setLoading(true);
 
-        // Fetch all data in parallel
         const [statsResponse, assetsResponse, locationsResponse] =
           await Promise.all([
             axiosInstance.get("/fleets/dashboard-stats"),
@@ -189,7 +155,6 @@ export default function DashboardPage() {
         setAssets(assetsResponse.data.assets || []);
         setLocations(locationsResponse.data.data || []);
 
-        // Fetch bar chart data for current year and pie chart data
         await Promise.all([
           fetchBarChartData(selectedYear),
           fetchPieChartData(),
@@ -204,19 +169,16 @@ export default function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handler for year change
   const handleYearChange = async (year: number) => {
     setSelectedYear(year);
     await fetchBarChartData(year);
     console.log(`Year changed to: ${year}`);
   };
 
-  // Transform upcoming orders for the table
   const getUpcomingSchedulesData = () => {
     if (!stats?.upcomingOrders || stats.upcomingOrders.length === 0) return [];
 
     return stats.upcomingOrders.map((order) => {
-      // Determine service type and volume info
       let serviceType = "Unknown";
       let volumeInfo = "";
 
@@ -246,8 +208,14 @@ export default function DashboardPage() {
         hour12: true,
       });
 
-      const vehicleLabel =
-        order?.asset?.plate_number || order?.asset?.asset_name;
+      // Handle multiple assets
+      let vehicleLabel = "N/A";
+      if (order.assets && order.assets.length > 0) {
+        const assetNames = order.assets.map(
+          (asset) => asset.plate_number || asset.asset_name
+        );
+        vehicleLabel = assetNames.join(", ");
+      }
 
       return {
         title: `${serviceType} - ${vehicleLabel}`,
@@ -258,7 +226,6 @@ export default function DashboardPage() {
     });
   };
 
-  // Transform recent deliveries for the table
   const getRecentDeliveriesData = () => {
     if (!stats?.recentDeliveries || stats.recentDeliveries.length === 0)
       return [];
@@ -275,9 +242,17 @@ export default function DashboardPage() {
         hour12: true,
       });
 
+      // Handle multiple assets
+      let plateDisplay = "N/A";
+      if (delivery.assets && delivery.assets.length > 0) {
+        const assetNames = delivery.assets.map(
+          (asset) => asset.plate_number || asset.asset_name
+        );
+        plateDisplay = assetNames.join(", ");
+      }
+
       return {
-        plate:
-          delivery.asset?.plate_number || delivery.asset?.asset_name || "N/A",
+        plate: plateDisplay,
         where: delivery.location,
         when: `${dateStr}, ${timeStr}`,
         volume: delivery.quantity ? `${delivery.quantity}L` : "N/A",
@@ -291,7 +266,6 @@ export default function DashboardPage() {
     });
   };
 
-  // Time slot options
   const slotOptions = useMemo(() => {
     const now = new Date();
     const currentHour = now.getHours();
@@ -346,7 +320,6 @@ export default function DashboardPage() {
       },
     ];
 
-    // Filter out past time slots for today
     return slots
       .filter((slot) => {
         if (slot.value === "NOW") return true;
@@ -354,18 +327,16 @@ export default function DashboardPage() {
         const slotDate = new Date(slot.value);
         const slotDateString = slotDate.toDateString();
 
-        // If slot is for today, check if the time has passed
         if (slotDateString === currentDate) {
           return slot.hour && slot.hour > currentHour;
         }
 
-        // Keep all future date slots
         return true;
       })
       .map(({ ...rest }) => rest);
   }, []);
 
-  if (loading) return <Loader content="Loading dashbaord data..." />;
+  if (loading) return <Loader content="Loading dashboard data..." />;
 
   const tiles = [
     {
@@ -389,13 +360,11 @@ export default function DashboardPage() {
     },
   ];
 
-  // Fuel type options
   const fuelTypeOptions = [
     { label: "Petrol", value: "PETROL" },
     { label: "Diesel", value: "DIESEL" },
   ];
 
-  // Generate vehicle options from assets
   const vehicleOptions = assets.map((asset) => ({
     label: asset.plate_number
       ? `${asset.asset_name} (${asset.plate_number})`
@@ -403,7 +372,6 @@ export default function DashboardPage() {
     value: asset.id,
   }));
 
-  // Generate location options from locations
   const locationOptions = locations.map((location) => ({
     label: location.location_name,
     value: location.id,
@@ -415,12 +383,7 @@ export default function DashboardPage() {
 
       const requestBody: any = {
         fuel_type: data.fuel_type,
-        // >>> Use asset_ids if multiple selected, else single asset_id
-        // ...(data.asset_ids && data.asset_ids.length > 1
-        //   ? { asset_id: data.asset_ids }
-        //   : { asset_id: data.asset_id }),
         asset_ids: data.asset_ids,
-
         ...(isManualLocation ? {} : { location_id: data.location_id }),
         ...(isManualLocation
           ? {
@@ -460,33 +423,27 @@ export default function DashboardPage() {
 
       const { authorization_url, reference } = response.data.data;
 
-      // Store reference to verify later
       sessionStorage.setItem("paystack_reference", reference);
 
-      // Open Paystack in a popup window
       const popup = window.open(
         authorization_url,
         "PaystackPayment",
         "width=600,height=700,left=200,top=100"
       );
 
-      // Check if popup was blocked
       if (!popup) {
         toast.error("Please allow popups for this site to complete payment");
         setIsProcessing(false);
         return;
       }
 
-      // Close the top-up modal
       setTopUpOpen(false);
       setTopUpAmount("");
       setIsProcessing(false);
 
-      // Monitor popup window
       const checkPopup = setInterval(() => {
         if (popup.closed) {
           clearInterval(checkPopup);
-          // When popup closes, verify payment
           verifyPayment(reference);
         }
       }, 500);
@@ -496,63 +453,6 @@ export default function DashboardPage() {
       setIsProcessing(false);
     }
   };
-
-  // const handleTopUpInitiate = async () => {
-  //   try {
-  //     setIsProcessing(true);
-
-  //     // OPTION A (simplest): let Paystack generate the reference.
-  //     // If you prefer to generate your own ref in the backend, see OPTION B below.
-
-  //     await startPaystackInline({
-  //       amountNaira: parseFloat(topUpAmount),
-  //       email: user?.email || "no-reply@resqx.fake", // ideally a real user email
-  //       metadata: {
-  //         product: "fleet_wallet_topup",
-  //         userId: user?.id,
-  //       },
-  //       onSuccess: async (psRef) => {
-  //         toast.info("Verifying payment…");
-  //         try {
-  //           const resp = await axiosInstance.post(
-  //             "/fleet-wallet/verify-payment",
-  //             {
-  //               ref: psRef,
-  //               action: "TOP_UP",
-  //             }
-  //           );
-
-  //           if (resp.data.status === "OK") {
-  //             toast.success(resp.data.message || "Wallet topped up!");
-  //             // refresh balance
-  //             const balanceResponse = await axiosInstance.get(
-  //               "/fleet-wallet/get-wallet-balance"
-  //             );
-  //             setWalletBalance(balanceResponse?.data?.data);
-  //             setTopUpOpen(false);
-  //             setTopUpAmount("");
-  //           } else {
-  //             toast.error("Payment verification failed.");
-  //           }
-  //         } catch (err) {
-  //           console.error(err);
-  //           toast.error("Payment verification failed. Please contact support.");
-  //         } finally {
-  //           setIsProcessing(false);
-  //         }
-  //       },
-  //       onClose: () => {
-  //         // user closed the inline widget
-  //         setIsProcessing(false);
-  //         toast.info("Payment window closed.");
-  //       },
-  //     });
-  //   } catch (e: any) {
-  //     console.error(e);
-  //     toast.error(e?.message || "Failed to start payment.");
-  //     setIsProcessing(false);
-  //   }
-  // };
 
   const verifyPayment = async (ref: string) => {
     try {
@@ -569,13 +469,11 @@ export default function DashboardPage() {
       if (response.data.status === "OK") {
         toast.success(response.data.message);
 
-        // Refresh wallet balance
         const balanceResponse = await axiosInstance.get(
           "/fleet-wallet/get-wallet-balance"
         );
         setWalletBalance(balanceResponse?.data?.data);
 
-        // Remove stored reference
         sessionStorage.removeItem("paystack_reference");
       } else {
         toast.error("Payment verification failed.");
@@ -590,7 +488,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top tiles */}
       <div className="flex flex-col md:flex-row md:gap-[52px]">
         {tiles.map((t, idx) => (
           <div key={t.title} className="relative flex-1">
@@ -603,7 +500,6 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Mid row: CTA + Wallet */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="bg-[#3B3835] lg:col-span-2 border border-[#777777] rounded-2xl">
           <CTABanner
@@ -621,7 +517,6 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 border border-[#777777] rounded-2xl">
           <FuelBarChart
@@ -641,13 +536,8 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Lists row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {/* <RecentDeliveries items={getRecentDeliveriesData().slice(0, 2)} />
-
-          <UpcomingSchedules items={getUpcomingSchedulesData().slice(0, 3)} /> */}
-
           <RecentDeliveries
             items={[...getRecentDeliveriesData()].reverse().slice(0, 2)}
           />

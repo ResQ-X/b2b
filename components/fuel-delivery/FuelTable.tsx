@@ -89,6 +89,9 @@ export default function OrdersTable({
   const endIdx = startIdx + PER_PAGE;
   const paginatedOrders = filteredOrders.slice(startIdx, endIdx);
 
+  console.log("paginatedOrders:", paginatedOrders);
+  console.log("filteredOrders:", filteredOrders);
+
   // Reset to page 1 when search changes
   useEffect(() => {
     setPage(1);

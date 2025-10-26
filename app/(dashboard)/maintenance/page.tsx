@@ -6,14 +6,10 @@ import { Wallet, Plus } from "lucide-react";
 import { StatTile } from "@/components/dashboard/StatTile";
 import { Button } from "@/components/ui/button";
 import MaintenanceTable, {
-  // maintenanceData,
   type Order,
 } from "@/components/maintenance/MaintenanceTable";
 import MaintenanceTabs from "@/components/maintenance/MaintenanceTabs";
 import RequestServiceModal from "@/components/maintenance/RequestServiceModal";
-// import ServiceHistoryCard, {
-//   type ServiceHistoryItem,
-// } from "@/components/maintenance/ServiceHistoryCard";
 import { toCSV, downloadText } from "@/lib/export";
 import type { RequestServiceForm } from "@/components/maintenance/RequestServiceModal";
 
@@ -118,7 +114,6 @@ export default function MaintenancePage() {
       },
     ];
 
-    // Filter out past time slots for today
     return slots
       .filter((slot) => {
         if (slot.value === "NOW") return true;
@@ -126,12 +121,10 @@ export default function MaintenancePage() {
         const slotDate = new Date(slot.value);
         const slotDateString = slotDate.toDateString();
 
-        // If slot is for today, check if the time has passed
         if (slotDateString === currentDate) {
           return slot.hour && slot.hour > currentHour;
         }
 
-        // Keep all future date slots
         return true;
       })
       .map(({ ...rest }) => rest);
@@ -142,7 +135,6 @@ export default function MaintenancePage() {
     count: counts[t.key as keyof typeof counts] ?? 0,
   }));
 
-  // Step 1: filter by tab
   const filteredByTab: Order[] = useMemo(() => {
     switch (tab) {
       case "completed":
@@ -160,7 +152,6 @@ export default function MaintenancePage() {
 
   console.log("Filtered by tab:", menTMetrics);
 
-  // Step 2: filter by search (supports id, vehicle, serviceType, status, mileage, cost, and date)
   const filtered: Order[] = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return filteredByTab;
@@ -172,8 +163,8 @@ export default function MaintenancePage() {
         o.vehicle,
         o.serviceType,
         o.status,
-        full, // dd-mm-yyyy
-        `${yyyy}-${mm}-${dd}`, // ISO-like
+        full,
+        `${yyyy}-${mm}-${dd}`,
         dd,
         mm,
         String(yyyy),
@@ -181,7 +172,7 @@ export default function MaintenancePage() {
         .join(" ")
         .toLowerCase();
 
-      const numbers = `${o.mileageKm} ${o.costNaira}`; // allow numeric text matches
+      const numbers = `${o.mileageKm} ${o.costNaira}`;
 
       return hay.includes(q) || numbers.includes(q);
     });
@@ -201,31 +192,50 @@ export default function MaintenancePage() {
 
     type ApiItem = {
       id: string;
-      status: string; // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+      status: string;
       date_time: string;
-      maintenance_type: string; // BRAKE_INSPECTION, FULL_SERVICE, OIL_CHANGE, TIRE_ROTATION, OTHER
+      maintenance_type: string;
       note?: string;
       location: string;
-      asset?: { id: string; asset_name: string; plate_number: string | null };
+      assets?: Array<{
+        id: string;
+        asset_name: string;
+        plate_number: string | null;
+        asset_type?: string;
+        asset_subtype?: string;
+      }>;
     };
 
     const apiOrders = (listRes.data.data || []) as ApiItem[];
-    const mapped: Order[] = apiOrders.map((o) => ({
-      id: o.id,
-      vehicle: o.asset?.plate_number || o.asset?.asset_name || "N/A",
-      serviceType: formatMaintenanceType(o.maintenance_type),
-      mileageKm: 0,
-      status:
-        o.status === "COMPLETED"
-          ? "Completed"
-          : o.status === "IN_PROGRESS"
-          ? "In Progress"
-          : o.status === "PENDING"
-          ? "Scheduled"
-          : "Completed",
-      dueDateISO: o.date_time,
-      costNaira: 0,
-    }));
+    const mapped: Order[] = apiOrders.map((o) => {
+      // Handle multiple assets
+      let vehicleDisplay = "N/A";
+
+      if (o.assets && o.assets.length > 0) {
+        const assetNames = o.assets.map(
+          (asset) => asset.plate_number || asset.asset_name
+        );
+        vehicleDisplay = assetNames.join(", ");
+      }
+
+      return {
+        id: o.id,
+        vehicle: vehicleDisplay,
+        serviceType: formatMaintenanceType(o.maintenance_type),
+        mileageKm: 0,
+        status:
+          o.status === "COMPLETED"
+            ? "Completed"
+            : o.status === "IN_PROGRESS"
+            ? "In Progress"
+            : o.status === "PENDING"
+            ? "Scheduled"
+            : "Completed",
+        dueDateISO: o.date_time,
+        costNaira: 0,
+      };
+    });
+
     setOrders(mapped);
     setMenTMetrics(listRes.data.metrics);
   };
@@ -267,62 +277,27 @@ export default function MaintenancePage() {
     },
   ];
 
-  // Build select options for the modal
   const vehicleOptions = useMemo(() => vehicleOptionsFrom(assets), [assets]);
   const locationOptions = useMemo(
     () => locationOptionsFrom(locations),
     [locations]
   );
 
-  // const handleSubmit = async (data: {
-  //   type: string;
-  //   vehicle: string;
-  //   location: string;
-  //   slot: string;
-  //   notes: string;
-  // }) => {
-  //   const payload = {
-  //     maintenance_type: data.type,
-  //     asset_id: data.vehicle,
-  //     location_id: data.location,
-  //     time_slot: data.slot,
-  //     note: data.notes,
-  //   };
-  //   await axiosInstance.post(
-  //     "/fleet-service/place-maintenance-service",
-  //     payload
-  //   );
-  //   await fetchAll();
-  // };
-
-  // Fixed handleSubmit in MaintenancePage component
-
   const handleSubmit = async (data: RequestServiceForm) => {
     try {
-      // Check if user selected manual location
       const isManual = data.location_id === "__manual__";
-
-      // Determine if service is scheduled (not "NOW")
       const isScheduled = data.time_slot !== "NOW";
 
-      // Build the payload
       const payload: any = {
         maintenance_type: data.maintenance_type,
-        // asset_id: data.asset_id,
         asset_ids: data.asset_ids,
-        // ...(data.asset_ids && data.asset_ids.length > 1
-        //   ? { asset_id: data.asset_ids }
-        //   : { asset_id: data.asset_id }),
-        // Convert "NOW" to current ISO string, otherwise use the selected slot
         time_slot:
           data.time_slot === "NOW" ? new Date().toISOString() : data.time_slot,
         is_scheduled: isScheduled,
-        note: data.note || "", // Ensure note is always a string
+        note: data.note || "",
       };
 
-      // Add location data based on selection type
       if (isManual) {
-        // Manual location: send address and coordinates
         if (data.location_address) {
           payload.location_address = data.location_address;
         }
@@ -333,13 +308,11 @@ export default function MaintenancePage() {
           payload.location_latitude = data.location_latitude;
         }
       } else {
-        // Preset location: send location_id
         payload.location_id = data.location_id;
       }
 
       console.log("Submitting maintenance request:", payload);
 
-      // Send request to backend
       const response = await axiosInstance.post(
         "/fleet-service/place-maintenance-service",
         payload
@@ -347,35 +320,14 @@ export default function MaintenancePage() {
 
       console.log("Maintenance request successful:", response.data);
 
-      // Refresh the data
       await fetchAll();
 
-      // Show success message
       toast.success("Maintenance service requested successfully!");
     } catch (error) {
       console.error("Failed to request maintenance service:", error);
       toast.error("Failed to request maintenance service. Please try again.");
-      // throw error; // Re-throw to let modal handle error state
     }
   };
-
-  // const history: ServiceHistoryItem[] = [
-  //   {
-  //     title: "LND-234-CC - Full Service",
-  //     subtitle: "ResQ-X Service Center • 5 days ago",
-  //     amount: 22500,
-  //   },
-  //   {
-  //     title: "LND-789-DD - Brake Replacement",
-  //     subtitle: "Ajose, Lekki",
-  //     amount: 30900,
-  //   },
-  //   {
-  //     title: "LND-451-AA - Oil Change",
-  //     subtitle: "Ogba, Ikeja",
-  //     amount: 50000,
-  //   },
-  // ];
 
   const exportMaintenance = () => {
     const fmt = (iso: string) => {
@@ -433,9 +385,6 @@ export default function MaintenancePage() {
         </Button>
       </div>
 
-      {/* <ServiceHistoryCard items={history} /> */}
-
-      {/* Request Maintenance Modal */}
       <RequestServiceModal
         open={open}
         onOpenChange={setOpen}
@@ -461,7 +410,6 @@ function formatMaintenanceType(t: string) {
   return map[t] || t;
 }
 
-// Select options
 const maintenanceTypeOptions = [
   { label: "Brake Inspection", value: "BRAKE_INSPECTION" },
   { label: "Full Service", value: "FULL_SERVICE" },

@@ -1350,7 +1350,7 @@ export default function RequestServiceModal({
                       font-medium
                     "
                   >
-                    ➕ Add location manually
+                    Add location manually
                   </SelectItem>
                 </SelectContent>
               </Select>

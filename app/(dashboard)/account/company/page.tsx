@@ -117,7 +117,7 @@ export default function CompanyInformationPage() {
 
   return (
     <div className="min-h-screen text-[#FFFFFF]">
-      <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+      <div className="mx-auto w-full py-6 md:py-10">
         {/* Header (32px arrow col + 1fr content col) */}
         <div className="grid grid-cols-[32px_1fr] items-center gap-2">
           <Link
