@@ -39,7 +39,26 @@ export default function LoginPage() {
       }
     } catch (error: any) {
       setAuthState({ isLoading: false, error: null });
-      toast.error(error.response?.data?.message || "Invalid credentials");
+
+      // Check if the error is due to unverified email
+      const errorMessage = error.response?.data?.message || "";
+
+      if (errorMessage === "Email not verified") {
+        try {
+          await AuthService.resendVerificationEmail({ email: formData.email });
+          toast.info("Verification email sent. Please check your inbox.");
+          router.push(
+            `/verify-otp?email=${encodeURIComponent(formData.email)}`
+          );
+        } catch (resendError: any) {
+          toast.error(
+            resendError.response?.data?.message ||
+              "Failed to resend verification email"
+          );
+        }
+      } else {
+        toast.error(errorMessage || "Invalid credentials");
+      }
     }
   };
 

@@ -72,6 +72,21 @@ export const AuthService = {
     return response.data;
   },
 
+  async resendVerificationEmail(data: {
+    email: string;
+  }): Promise<{ success: boolean; message: string }> {
+    const response = await axiosInstance.post(
+      "/auth/resend-verification-fleet",
+      data
+    );
+    return response.data;
+  },
+
+  //  async resendVerificationEmail(data: { email: string }) {
+  //   const response = await axiosInstance.post('/auth/resend-verification-fleet', data);
+  //   return response.data;
+  // };
+
   async createService(
     data: CreateServiceData
   ): Promise<{ success: boolean; message: string }> {

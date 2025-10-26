@@ -264,15 +264,15 @@ function VerifyEmailContent() {
                 {authState.isLoading ? "Verifying..." : "Verify Email"}
               </Button>
 
-              <div className="flex items-center justify-between text-center text-sm text-white/90">
-                <Button
+              <div className="flex items-center justify-end text-center text-sm text-white/90">
+                {/* <Button
                   type="button"
                   variant="link"
                   className="text-orange hover:text-orange/80 p-0"
                   onClick={() => router.push("/forgot-password")}
                 >
                   Back to Forgot Password
-                </Button>
+                </Button> */}
 
                 <Button
                   type="button"
