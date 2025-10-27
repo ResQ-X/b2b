@@ -340,7 +340,7 @@ export default function DashboardPage() {
 
   const tiles = [
     {
-      title: "Active Vehicles",
+      title: "Total Asset",
       value: stats?.assetCount || 0,
       sub: "Total assets",
       icon: CarFront,
