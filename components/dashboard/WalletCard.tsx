@@ -13,7 +13,7 @@ export function WalletCard({
       <div className="p-6">
         <div className="text-sm font-medium opacity-80">Wallet Balance</div>
         <div className="mt-2 text-3xl font-extrabold tracking-tight">
-          ₦{balance.toLocaleString()}
+          ₦ {balance.toLocaleString()}
         </div>
       </div>
       <hr className="mt-[27px] border-[#5E5E5E]" />

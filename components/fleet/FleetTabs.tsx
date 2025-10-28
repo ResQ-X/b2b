@@ -126,7 +126,7 @@ export default function FuelTabs({
                 key={t.key}
                 onClick={() => onChange(t.key)}
                 className={[
-                  "h-full px-4 py-2 rounded-lg text-base font-semibold transition",
+                  "h-full px-4 py-2 rounded-[10px] text-base font-semibold transition",
                   active
                     ? "bg-[#FFFFFF] text-[#FF8500] font-bold"
                     : "text-[#E2E2E2] hover:bg-white/10 font-medium",

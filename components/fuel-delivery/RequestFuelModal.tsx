@@ -1046,7 +1046,7 @@ function VehiclesMultiSelect({
               onClick={toggleAll}
               onKeyDown={handleKeyActivate}
               className="
-                w-full flex items-center gap-3 rounded-lg px-3 py-2
+                w-full flex items-center gap-3 rounded-[10px] px-3 py-2
                 hover:bg-[#FF8500]/20 focus:bg-[#FF8500]/25 transition-colors
                 outline-none
               "
@@ -1082,7 +1082,7 @@ function VehiclesMultiSelect({
                     value={opt.label}
                     onSelect={() => toggleOne(opt.value)}
                     className="
-                      ml-2 cursor-pointer rounded-lg px-3 py-2
+                      ml-2 cursor-pointer rounded-[10px] px-3 py-2
                       transition-colors text-white
                       hover:bg-[#FF8500]/20 hover:text-white
                       focus:bg-[#FF8500]/25 focus:text-white

@@ -381,7 +381,7 @@ export default function OrdersTable({
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="rounded-lg bg-white/10 p-2 disabled:opacity-40 hover:bg-white/20 transition-colors"
+              className="rounded-[10px] bg-white/10 p-2 disabled:opacity-40 hover:bg-white/20 transition-colors"
             >
               <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
@@ -391,7 +391,7 @@ export default function OrdersTable({
             <button
               onClick={() => setPage((p) => (p < totalPages ? p + 1 : p))}
               disabled={page >= totalPages}
-              className="rounded-lg bg-white/10 p-2 disabled:opacity-40 hover:bg-white/20 transition-colors"
+              className="rounded-[10px] bg-white/10 p-2 disabled:opacity-40 hover:bg-white/20 transition-colors"
             >
               <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>

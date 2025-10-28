@@ -60,7 +60,7 @@ export function FuelBarChart({
               />
 
               {/* Dropdown Menu */}
-              <div className="absolute right-0 top-full mt-1 bg-[#3C3933] rounded-lg shadow-lg border border-white/10 z-20 min-w-[120px]">
+              <div className="absolute right-0 top-full mt-1 bg-[#3C3933] rounded-[10px] shadow-lg border border-white/10 z-20 min-w-[120px]">
                 {availableYears.map((year) => (
                   <button
                     key={year}

@@ -87,7 +87,7 @@ export function FieldRow({
         onChange={(e) => setDraft(e.target.value)}
         disabled={!editing || disabled}
         className={[
-          "block w-full rounded-lg border px-4 py-6 text-sm",
+          "block w-full rounded-[10px] border px-4 py-6 text-sm",
           "bg-[#3B3835] text-white placeholder-white/60",
           "border-[#E2E2E2] focus:outline-none focus:ring-2 focus:ring-white/20",
           "disabled:opacity-90 disabled:cursor-not-allowed",

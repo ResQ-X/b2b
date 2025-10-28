@@ -180,7 +180,7 @@ export default function MaintenanceTable({ orders }: { orders?: Order[] }) {
             <button
               onClick={() => canPrev && setPage((p) => p - 1)}
               disabled={!canPrev}
-              className="rounded-lg bg-white/10 p-2 disabled:opacity-40 hover:bg-white/20 transition-colors"
+              className="rounded-[10px] bg-white/10 p-2 disabled:opacity-40 hover:bg-white/20 transition-colors"
             >
               <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
@@ -190,7 +190,7 @@ export default function MaintenanceTable({ orders }: { orders?: Order[] }) {
             <button
               onClick={() => canNext && setPage((p) => p + 1)}
               disabled={!canNext}
-              className="rounded-lg bg-white/10 p-2 disabled:opacity-40 hover:bg-white/20 transition-colors"
+              className="rounded-[10px] bg-white/10 p-2 disabled:opacity-40 hover:bg-white/20 transition-colors"
             >
               <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>

@@ -68,13 +68,30 @@ export interface UpcomingOrder {
   asset_id: string;
   created_at: string;
   updated_at: string;
-  asset: Asset;
+  // Changed from singular 'asset' to plural 'assets' array
+  assets: Asset[];
+}
+
+export interface RecentDelivery {
+  id: string;
+  status: string;
+  date_time: string;
+  fuel_type?: string;
+  quantity?: number;
+  location: string;
+  location_longitude: string;
+  location_latitude: string;
+  business_id: string;
+  created_at: string;
+  updated_at: string;
+  // Added assets array for recent deliveries
+  assets: Asset[];
 }
 
 export interface DashboardStats {
   assetCount: number;
   pendingMaintenanceServices: number;
-  recentDeliveries: any[];
+  recentDeliveries: RecentDelivery[];
   upcomingOrdersCount: number;
   upcomingOrders: UpcomingOrder[];
 }

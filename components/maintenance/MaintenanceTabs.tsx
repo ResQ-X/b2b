@@ -139,7 +139,7 @@ export default function MaintenanceTabs({
                   key={t.key}
                   onClick={() => onChange(t.key)}
                   className={[
-                    "whitespace-nowrap rounded-lg px-1 lg:px-4 py-2 text-xs lg:text-base transition",
+                    "whitespace-nowrap rounded-[10px] px-1 lg:px-4 py-2 text-xs lg:text-base transition",
                     active
                       ? "bg-white text-[#FF8500] font-medium lg:font-bold"
                       : "text-[#E2E2E2] hover:bg-white/10 font-normal lg:font-medium",

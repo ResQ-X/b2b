@@ -19,7 +19,7 @@ export function ServiceBundle({
       <ul className="space-y-[14px]">
         {services.map(({ icon: Icon, title, desc }) => (
           <li key={title} className="h-[65px] flex items-center gap-3">
-            {/* <div className="rounded-lg bg-black/20 p-2"> */}
+            {/* <div className="rounded-[10px] bg-black/20 p-2"> */}
             <Icon className="h-[36px] w-[36px] mr-[13px]" />
             {/* </div> */}
             <div>
