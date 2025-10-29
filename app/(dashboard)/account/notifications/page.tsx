@@ -1,9 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-export default function NotificationsPage() {
+// Separate content component
+function NotificationsContent() {
   const [email, setEmail] = useState(false);
   const [sms, setSms] = useState(true);
   const [push, setPush] = useState(true);
@@ -83,5 +84,20 @@ export default function NotificationsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main component with Suspense boundary
+export default function NotificationsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen text-[#FFFFFF] flex items-center justify-center">
+          <div className="text-white/60">Loading...</div>
+        </div>
+      }
+    >
+      <NotificationsContent />
+    </Suspense>
   );
 }
