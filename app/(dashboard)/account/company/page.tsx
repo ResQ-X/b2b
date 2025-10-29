@@ -1,6 +1,6 @@
 "use client";
 import { toast } from "react-toastify";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import Loader from "@/components/ui/Loader";
 import Link from "next/link";
@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { AccountService } from "@/services/account.service";
 import type { User } from "@/types/account";
 
-export default function CompanyInformationPage() {
+// Wrap the main component content in a separate component
+function CompanyInformationContent() {
   // User data state
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -240,5 +241,14 @@ export default function CompanyInformationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main component with Suspense boundary
+export default function CompanyInformationPage() {
+  return (
+    <Suspense fallback={<Loader content="Loading the Account details....." />}>
+      <CompanyInformationContent />
+    </Suspense>
   );
 }
