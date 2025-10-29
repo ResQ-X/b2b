@@ -107,7 +107,7 @@
 // }
 
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Cookies } from "react-cookie";
 import Head from "next/head";
@@ -137,7 +137,7 @@ interface MeResponse {
   };
 }
 
-/** ——————— Simple “no plan” modal ——————— */
+/** ——————— Simple "no plan" modal ——————— */
 function PlanNudgeModal({
   onClose,
   onGoToPlans,
@@ -158,7 +158,7 @@ function PlanNudgeModal({
               No Active Plan
             </h2>
             <p className="mt-1 text-sm text-gray-600">
-              You don’t have an active subscription yet. Choose a plan to unlock
+              You don't have an active subscription yet. Choose a plan to unlock
               refuel, fleet care, and rescue features.
             </p>
           </div>
@@ -198,12 +198,8 @@ function hasActivePlan(payload: MeResponse["data"] | null): boolean {
   return Number.isFinite(exp) ? exp > now : true;
 }
 
-/** ——————— Layout ——————— */
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+/** ——————— Layout Content (uses useSearchParams) ——————— */
+function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -301,5 +297,24 @@ export default function DashboardLayout({
         />
       )}
     </>
+  );
+}
+
+/** ——————— Main Layout with Suspense Boundary ——————— */
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center bg-[#242220]">
+          <div className="text-white text-lg">Loading...</div>
+        </div>
+      }
+    >
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </Suspense>
   );
 }
