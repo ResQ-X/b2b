@@ -3,6 +3,9 @@ import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+// Force dynamic rendering - disable static generation
+export const dynamic = "force-dynamic";
+
 // Separate content component
 function NotificationsContent() {
   const [email, setEmail] = useState(false);

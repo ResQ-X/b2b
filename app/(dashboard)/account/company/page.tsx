@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { AccountService } from "@/services/account.service";
 import type { User } from "@/types/account";
 
+// Force dynamic rendering - disable static generation
+export const dynamic = "force-dynamic";
+
 // Wrap the main component content in a separate component
 function CompanyInformationContent() {
   // User data state
