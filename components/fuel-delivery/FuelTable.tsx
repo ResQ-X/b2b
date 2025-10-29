@@ -262,7 +262,8 @@ export default function OrdersTable({
       );
       toast.success("Fuel service requested successfully!");
     } catch (error) {
-      toast.error(`Failed to request fuel service. Please try again. ${error}`);
+      // toast.error(`Failed to request fuel service. Please try again. ${error}`);
+      toast.error(error.response.data.message);
       throw error;
     }
   };
