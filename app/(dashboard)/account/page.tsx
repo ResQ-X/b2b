@@ -1,6 +1,9 @@
 "use client";
-import React from "react";
+import React, { Suspense } from "react";
 import { SettingRow } from "@/components/account/SettingRow";
+
+// Force dynamic rendering
+export const dynamic = "force-dynamic";
 
 type Row = { label: string; href: string };
 
@@ -10,7 +13,7 @@ const rows: Row[] = [
   { label: "Notification", href: "/account/notifications" },
 ];
 
-export default function AccountPage() {
+function AccountContent() {
   return (
     <div className="">
       <div className="mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 md:py-10">
@@ -21,5 +24,19 @@ export default function AccountPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AccountPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-white/60">Loading...</div>
+        </div>
+      }
+    >
+      <AccountContent />
+    </Suspense>
   );
 }

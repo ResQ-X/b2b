@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AccountService } from "@/services/account.service";
 
-export default function SecurityPage() {
+// Force dynamic rendering
+export const dynamic = "force-dynamic";
+
+function SecurityContent() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,22 +93,22 @@ export default function SecurityPage() {
               </Button>
             </div>
           </div>
-          {/* Example for 2FA row if you bring it back later */}
-          {/* <div>
-            <Link
-              href="/account/security/two-factor"
-              className="block rounded-xl bg-[#3B3835] px-5 py-4 md:px-6 md:py-6 hover:bg-[#2b2927] transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold">
-                  Two-Factor Authentication
-                </span>
-                <ChevronRight className="h-5 w-5 text-white/80" />
-              </div>
-            </Link>
-          </div> */}
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SecurityPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen text-[#FFFFFF] flex items-center justify-center">
+          <div className="text-white/60">Loading...</div>
+        </div>
+      }
+    >
+      <SecurityContent />
+    </Suspense>
   );
 }
