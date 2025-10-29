@@ -170,7 +170,8 @@ function VerifyEmailContent() {
       if (response?.success === true) {
         toast.success("Email verified successfully!");
         setAuthState({ isLoading: false, error: null });
-        router.push("/subscription");
+        // router.push("/subscription");
+        router.push("/login");
 
         // router.push(
         //   `/create-password?email=${encodeURIComponent(

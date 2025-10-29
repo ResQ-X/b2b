@@ -44,6 +44,7 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
 
     fetchUserProfile();
   }, []);
+
   // console.log(user);
   // const pathname = usePathname();
 

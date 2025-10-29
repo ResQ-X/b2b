@@ -1,13 +1,7 @@
-import { CardSpec } from "@/lib/constants";
+// import { CardSpec } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 
-export function Card({
-  card,
-  onChoose,
-}: {
-  card: CardSpec;
-  onChoose: () => void;
-}) {
+export function Card({ card, onChoose }: { card: any; onChoose: () => void }) {
   return (
     <div className="bg-[#272727] relative w-11/12 lg:w-full lg:max-w-[392px] h-auto lg:h-[500px] mx-auto rounded-2xl lg:rounded-3xl text-[#fff] px-4 lg:px-[30px] py-10">
       {/* <p className="text-[#FF8500] text-center text-sm lg:text-xl font-medium lg:font-semibold mb-5">
@@ -20,7 +14,8 @@ export function Card({
         <p className="text-xl lg:text-5xl font-medium lg:font-semibold tracking-tight">
           {card.price}{" "}
           <span className="lg:ml-2 text-xs lg:text-xl font-light lg:font-medium">
-            {card.cadence}
+            {/* {card.cadence} */}
+            /asset
           </span>
         </p>
       </div>

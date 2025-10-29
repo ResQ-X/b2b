@@ -12,6 +12,7 @@ import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";
 import type { AuthState, LoginFormData } from "@/types/auth";
 import CustomInput from "@/components/ui/CustomInput";
+import { PlanService } from "@/services/plan.service";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,21 +27,73 @@ export default function LoginPage() {
     error: null,
   });
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setAuthState({ isLoading: true, error: null });
+  //   try {
+  //     const response = await AuthService.login(formData);
+  //     if (response.user) {
+  //       setUser(response.user);
+  //       console.log("User Details:", user);
+  //       toast.success("Login successful! Redirecting...");
+  //       router.push("/dashboard");
+  //     }
+  //   } catch (error: any) {
+  //     setAuthState({ isLoading: false, error: null });
+
+  //     // Check if the error is due to unverified email
+  //     const errorMessage = error.response?.data?.message || "";
+
+  //     if (errorMessage === "Email not verified") {
+  //       try {
+  //         await AuthService.resendVerificationEmail({ email: formData.email });
+  //         toast.info("Verification email sent. Please check your inbox.");
+  //         router.push(
+  //           `/verify-otp?email=${encodeURIComponent(formData.email)}`
+  //         );
+  //       } catch (resendError: any) {
+  //         toast.error(
+  //           resendError.response?.data?.message ||
+  //             "Failed to resend verification email"
+  //         );
+  //       }
+  //     } else {
+  //       toast.error(errorMessage || "Invalid credentials");
+  //     }
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthState({ isLoading: true, error: null });
+
     try {
       const response = await AuthService.login(formData);
       if (response.user) {
         setUser(response.user);
-        console.log("User Details:", user);
+
+        // 1) Check if user has an active plan
+        let hasActivePlan = false;
+        try {
+          const me = await PlanService.getMySubscription();
+          hasActivePlan = !!me?.subscription && !!me?.plan;
+        } catch {
+          // If it fails, treat as no plan (or ignore and let dashboard handle it)
+          hasActivePlan = false;
+        }
+
+        // 2) Store a one-time nudge flag (optional)
+        if (!hasActivePlan) {
+          // You can use either localStorage flag OR redirect with a query param
+          localStorage.setItem("SHOW_PLAN_NUDGE", "1");
+          // Or: router.push("/dashboard?subscribe=1");
+        }
+
         toast.success("Login successful! Redirecting...");
         router.push("/dashboard");
       }
     } catch (error: any) {
       setAuthState({ isLoading: false, error: null });
-
-      // Check if the error is due to unverified email
       const errorMessage = error.response?.data?.message || "";
 
       if (errorMessage === "Email not verified") {

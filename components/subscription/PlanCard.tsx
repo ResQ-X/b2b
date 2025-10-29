@@ -1,22 +1,24 @@
 import { Button } from "@/components/ui/button";
-import { CardSpec } from "@/lib/constants";
+// import { CardSpec } from "@/lib/constants";
+// import { CardSpec } from "@/app/(auth)/subscription/page";
 
 export function PlanCard({
   card,
   onChoose,
 }: {
-  card: CardSpec;
+  card: any;
   onChoose: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
   return (
-    <div className="bg-[#3B3835] relative w-full max-w-[392px] h-[423px] mx-auto rounded-3xl text-white border border-[#FF8500] px-[30px] py-10">
+    <div className="bg-[#3B3835] relative w-full max-w-[392px] h-auto mx-auto rounded-3xl text-white border border-[#FF8500] px-[30px] py-10">
       <p className="text-center text-xl font-semibold mb-5">{card.title}</p>
       <div className="flex items-end justify-center text-center mb-6">
         <span className="text-5xl font-semibold tracking-tight">
           {card.price}
         </span>
         <span className="ml-2 text-xl font-medium opacity-90">
-          {card.cadence}
+          {/* {card.cadence} */}
+          /asset
         </span>
       </div>
 
