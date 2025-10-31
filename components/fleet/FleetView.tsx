@@ -78,13 +78,13 @@ export function FleetView({ vehicle }: FleetViewProps) {
         </div>
 
         {/* Optional note */}
-        <p className="text-sm text-amber-300 mt-1">
+        {/* <p className="text-sm text-amber-300 mt-1">
           ⚠️ Refuel recommended within the next 2 days.
-        </p>
+        </p> */}
       </div>
 
       {/* ACTIVITY LOG */}
-      <div className="bg-[#3B3835] space-y-4 p-6 rounded-[14px] mt-8">
+      {/* <div className="bg-[#3B3835] space-y-4 p-6 rounded-[14px] mt-8">
         <h2 className="text-lg font-semibold">Activity Log</h2>
         <div className="rounded-2xl overflow-hidden">
           <table className="w-full">
@@ -119,7 +119,7 @@ export function FleetView({ vehicle }: FleetViewProps) {
             </tbody>
           </table>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -139,7 +139,7 @@ export default function FleetTable({
           { label: "Other", value: "other" },
         ]}
         fuelTypes={[
-          { label: "Diesel", value: "diesel" },
+          // { label: "Diesel", value: "diesel" },
           { label: "Petrol", value: "petrol" },
         ]}
       />

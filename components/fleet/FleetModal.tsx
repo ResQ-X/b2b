@@ -626,7 +626,7 @@ export default function AssetModal({
           )} */}
 
           {/* Plate Number (only for vehicles) */}
-          {isVehicle && (
+          {/* {isVehicle && (
             <Field label="Plate Number">
               <CustomInput
                 id="plate_number"
@@ -660,6 +660,23 @@ export default function AssetModal({
                 className="max-w-none h-14 rounded-xl bg-[#2D2B29] placeholder:text-white/60 uppercase"
                 pattern="[A-Z]{3}-[0-9]{4,}"
                 title="Format: ABC-#### (3 letters, hyphen, at least 4 numbers)"
+              />
+            </Field>
+          )} */}
+
+          {isVehicle && (
+            <Field label="Plate Number">
+              <CustomInput
+                id="plate_number"
+                placeholder="Enter plate number"
+                value={form.plate_number}
+                onChange={(e) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    plate_number: e.target.value,
+                  }));
+                }}
+                className="max-w-none h-14 rounded-xl bg-[#2D2B29] placeholder:text-white/60"
               />
             </Field>
           )}
