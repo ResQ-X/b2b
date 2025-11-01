@@ -1262,6 +1262,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DateTimePicker } from "@/components/ui/DateTimePicker";
 
 type Option = {
   label: string;
@@ -2189,29 +2190,13 @@ export function RequestEmergencyServiceCard({
           </Field>
         )}
 
-        {/* Slot */}
-        <Field label="Preferred Time Slot">
-          <Select
+        {/* Date & Time Slot */}
+        <Field label="Preferred Date & Time">
+          <DateTimePicker
             value={form.slot}
-            onValueChange={(v) => setForm((p) => ({ ...p, slot: v }))}
-          >
-            <Trigger placeholder="Select preferred time slot" />
-            <SelectContent className="bg-[#2D2A27] text-white border-white/10">
-              {slotOptions.map((opt, idx) => (
-                <Fragment key={opt.value}>
-                  <SelectItem
-                    value={opt.value}
-                    className="cursor-pointer transition-colors hover:bg-[#FF8500]/20 focus:bg-[#FF8500]/25"
-                  >
-                    {opt.label}
-                  </SelectItem>
-                  {idx < slotOptions.length - 1 && (
-                    <SelectSeparator className="my-1 -mx-1 h-px bg-white/10" />
-                  )}
-                </Fragment>
-              ))}
-            </SelectContent>
-          </Select>
+            onChange={(v) => setForm((p) => ({ ...p, slot: v }))}
+            placeholder="Select preferred date and time"
+          />
         </Field>
 
         {/* Notes */}
