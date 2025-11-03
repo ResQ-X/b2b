@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axiosInstance from "@/lib/axios";
 import Image from "next/image";
 import { Menu } from "lucide-react";
@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 // import { Input } from "@/components/ui/input";
 // import Search from "@/components/ui/Search";
 // import { useAuth } from "@/contexts/auth.context";
+import Link from "next/link";
 
 interface DashboardNavProps {
   onMenuClick?: () => void;
@@ -28,6 +29,15 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+
+  const subAdmins = [
+  { name: "Jiver", href: "/jiver" },
+  { name: "Emtech", href: "/emtech" },
+  { name: "KarlTech", href: "/karltech" },
+  { name: "Resq", href: "/resq" }
+ ];
+
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -65,8 +75,24 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
   //   return last.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   // };
 
+  const [isDropdownopen, setIsDropdownopen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null); // Add HTMLDivElement type
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) { // Add MouseEvent type
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownopen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="h-20 bg-[#3B3835] px-4 sm:px-6 md:px-8 flex items-center justify-between border-b border-[#474747]">
+    <div className="h-20 bg-[#3B3835] px-4 sm:px-6 md:px-8 flex items-center justify-between border-b border-[#474747] relative">
       {/* Hamburger (Mobile only) */}
       <div className="md:hidden">
         <button onClick={onMenuClick} className="p-2 rounded-md">
@@ -133,7 +159,36 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
               className="rounded-full"
             />
           </div>
+
+          {/*drop down*/}
+          <div onClick={() => setIsDropdownopen(!isDropdownopen)} className="absolute right-1">
+            <Image
+              src="/input-field.svg"
+              alt="User Avatar"
+              width={24}
+              height={24}
+              className="rounded-full"
+            />
+          </div>
         </div>
+
+        {isDropdownopen && (  
+          <div className="modal-content absolute top-24 z-50 bg-[#3B3835]  right-3 pl-6 pr-8 pt-8 pb-10 text-[14px] rounded-2xl shadow-lg "
+            ref={dropdownRef} >
+            <ul className="flex flex-col gap-4 font-medium">
+              {subAdmins.map((admin, index) => (
+                <Link 
+                  key={index}
+                  href={admin.href}
+                  className="hover:bg-[#FFA947] pr-5 pl-1 py-2 rounded-lg transition-all duration-300"
+                  onClick={() => setIsDropdownopen(false)}
+                >
+                  Sub Admin - {admin.name}
+                </Link>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

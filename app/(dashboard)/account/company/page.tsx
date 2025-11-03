@@ -8,7 +8,7 @@ import { FieldRow } from "@/components/account/FieldRow";
 import { Button } from "@/components/ui/button";
 import { AccountService } from "@/services/account.service";
 import type { User } from "@/types/account";
-
+import AddUserModal from "@/components/AddUserModal"
 // Force dynamic rendering - disable static generation
 export const dynamic = "force-dynamic";
 
@@ -32,6 +32,8 @@ function CompanyInformationContent() {
   const [phone, setPhone] = useState("");
   const [companyEmail, setCompanyEmail] = useState("");
   const [companyPhone, setCompanyPhone] = useState("");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch user data on component mount
   useEffect(() => {
@@ -118,6 +120,9 @@ function CompanyInformationContent() {
   if (loading) {
     return <Loader content="Loading the Account details....." />;
   }
+
+
+
 
   return (
     <div className="min-h-screen text-[#FFFFFF]">
@@ -230,7 +235,18 @@ function CompanyInformationContent() {
           </div>
           <div /> {/* spacer */}
           {/* CTA */}
-          <div className="mt-2">
+          <div className="mt-2 flex gap-3 ">
+            <Button
+              type="button"
+              variant="light"
+              className="w-auto h-[48px] lg:h-[52px] px-8 "
+              onClick={() => setIsModalOpen(!isModalOpen)}
+              disabled={updating}
+            >
+              {updating ? "Updating..." : "Add User"}
+            </Button>
+
+
             <Button
               type="button"
               variant="orange"
@@ -243,6 +259,16 @@ function CompanyInformationContent() {
           </div>
         </div>
       </div>
+
+      <AddUserModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSubmit={(data) => {
+          // Handle form submission
+          console.log(data);
+        }}
+  // ... other props it needs
+/>
     </div>
   );
 }
