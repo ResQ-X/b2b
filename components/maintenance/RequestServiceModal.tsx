@@ -695,6 +695,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import CustomInput from "@/components/ui/CustomInput";
+import { DateTimePicker } from "@/components/ui/DateTimePicker";
 
 /* ===================== Types ===================== */
 
@@ -1400,32 +1401,16 @@ export default function RequestServiceModal({
             </Field>
           )}
 
-          {/* Time Slot */}
-          <Field label="Time Slot" error={errors.time_slot}>
-            <Select
+          {/* Date & Time Slot */}
+          <Field label="Date & Time" error={errors.time_slot}>
+            <DateTimePicker
               value={form.time_slot}
-              onValueChange={(v) => {
+              onChange={(v) => {
                 setForm((p) => ({ ...p, time_slot: v }));
                 clearError("time_slot");
               }}
-            >
-              <Trigger placeholder="Select time slot" />
-              <SelectContent className="bg-[#2D2A27] text-white border-white/10">
-                {slotOptions.map((opt, idx) => (
-                  <Fragment key={opt.value}>
-                    <SelectItem
-                      value={opt.value}
-                      className="cursor-pointer transition-colors hover:bg-[#FF8500]/20 focus:bg-[#FF8500]/25 hover:text-white focus:text-white"
-                    >
-                      {opt.label}
-                    </SelectItem>
-                    {idx < slotOptions.length - 1 && (
-                      <SelectSeparator className="my-1 -mx-1 h-px bg-white/10" />
-                    )}
-                  </Fragment>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="Select date and time"
+            />
           </Field>
 
           {/* Notes */}
