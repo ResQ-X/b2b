@@ -122,19 +122,6 @@ function CompanyInformationContent() {
   }
 
 
-  // <CustomInput
-  //                   type="text"
-  //                   placeholder="Enter location name"
-  //                   value={form.location_address}
-  //                   onChange={(e) => {
-  //                     const val = e.target.value;
-  //                     setForm((prev) => ({ ...prev, location_address: val }));
-  //                     clearError("location_address");
-  //                     getPredictions(val);
-  //                   }}
-  //                   className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
-  //                 />
-
 
 
   return (
