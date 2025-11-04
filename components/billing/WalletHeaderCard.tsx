@@ -6,6 +6,9 @@ import Image from "next/image";
 import CardImage from "@/public/resq-x-card.svg";
 import TopUpModal from "@/components/billing/TopUpModal";
 import { Button } from "../ui/button";
+import DisburseMoneyModal from "@/components/billing/DisburseMoneyModal";
+import RequestMoneyModal from "@/components/billing/RequestMoneyModal";
+
 
 export function WalletHeaderCard() {
   type WalletBalance = { balance: number };
@@ -16,6 +19,19 @@ export function WalletHeaderCard() {
   const [topUpOpen, setTopUpOpen] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [showDisburse, setShowDisburse] = useState(false);
+  const [showRequest, setShowRequest] = useState(false);
+
+  const handleDisburseSubmit = (data: any) => {
+    console.log('Disburse data:', data);
+    // Add your API call here
+  };
+
+  const handleRequestSubmit = (data: any) => {
+    console.log('Request data:', data);
+    // Add your API call here
+  };
 
   const handleTopUpInitiate = async () => {
     try {
@@ -133,17 +149,34 @@ export function WalletHeaderCard() {
                 maximumFractionDigits: 2,
               })}`}
         </h2>
+        <div className="flex gap-4">
+          <Button
+            variant="orange"
+            className="w-full lg:w-[159px] h-[48px] lg:h-[52px]"
+            onClick={() => setTopUpOpen(true)}
+          >
+            Top Up Wallet
+          </Button>
 
-        <Button
-          variant="orange"
-          className="w-full lg:w-[159px] h-[48px] lg:h-[52px]"
-          onClick={() => setTopUpOpen(true)}
-        >
-          Top Up Wallet
-        </Button>
+          {/**<Button
+            variant="light"
+            className="w-full lg:w-[159px] h-[48px] lg:h-[52px]"
+            onClick={() => setShowDisburse(true)}
+          >
+            Disburse Money
+          </Button>   **/     } 
+
+          <Button
+            variant="light"
+            className="w-full lg:w-[159px] h-[48px] lg:h-[52px]"
+            onClick={() => setShowRequest(true)}
+          >
+            Request Money
+          </Button>  
+        </div>
       </div>
 
-      <div className="hidden absolute inset-0 lg:flex justify-end items-end">
+      <div className="hidden absolute inset-10 lg:flex justify-end items-end">
         <Image
           src={CardImage}
           alt="ResQ-X Card"
@@ -162,6 +195,18 @@ export function WalletHeaderCard() {
         onAmountChange={setTopUpAmount}
         isProcessing={isProcessing}
         onSubmit={handleTopUpInitiate}
+      />
+
+      <DisburseMoneyModal
+        open={showDisburse}
+        onOpenChange={setShowDisburse}
+        onSubmit={(data) => console.log('Disburse:', data)}
+      />
+
+      <RequestMoneyModal
+        open={showRequest}
+        onOpenChange={setShowRequest}
+        onSubmit={(data) => console.log('Request:', data)}
       />
     </div>
   );
