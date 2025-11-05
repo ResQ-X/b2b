@@ -12,8 +12,15 @@ export interface SignupFormData {
   company_email: string;
   phone: string;
   company_phone: string;
+  fleetRole: string;
   country: string;
   password: string;
+}
+export interface SubAdminSignupFormData {
+  name: string;
+  phone: string;
+  password: string;
+  token: string;
 }
 export interface VerifyEmailData {
   email: string;
@@ -60,6 +67,7 @@ export interface User {
   refreshToken: string | null;
   created_at: string;
   updated_at: string;
+  role?: "";
 }
 export interface CreateServiceData {
   service_name: string;

@@ -17,7 +17,6 @@ export function FuelBarChart({
   availableYears?: number[];
   onYearChange?: (year: number) => void;
 }) {
-  console.log("data", data);
   const [selectedYear, setSelectedYear] = useState(2025);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -29,8 +28,6 @@ export function FuelBarChart({
     setIsDropdownOpen(false);
     onYearChange?.(year);
   };
-
-  console.log(data.length);
 
   return (
     <div className="rounded-2xl bg-[#3B3835] p-6 text-white">

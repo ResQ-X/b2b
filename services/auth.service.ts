@@ -9,6 +9,7 @@ import type {
   resetPasswordData,
   AuthResponse,
   CreateServiceData,
+  SubAdminSignupFormData,
 } from "@/types/auth";
 
 const cookies = new Cookies();
@@ -17,6 +18,14 @@ export const AuthService = {
   async signup(data: SignupFormData): Promise<AuthResponse> {
     const response = await axiosInstance.post<AuthResponse>(
       "/auth/fleet-signup",
+      data
+    );
+    return response.data;
+  },
+
+  async subadminsignup(data: SubAdminSignupFormData): Promise<AuthResponse> {
+    const response = await axiosInstance.post<AuthResponse>(
+      "/auth/accept-invite",
       data
     );
     return response.data;

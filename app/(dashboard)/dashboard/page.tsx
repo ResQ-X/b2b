@@ -69,8 +69,6 @@ export default function DashboardPage() {
     fetchBalance();
   }, []);
 
-  console.log("Wallet Balance:", walletBalance);
-
   const availableYears = [2025];
 
   const fetchBarChartData = async (year: number) => {
@@ -399,10 +397,7 @@ export default function DashboardPage() {
         is_scheduled: data.time_slot !== "NOW",
       };
 
-      await axiosInstance.post(
-        "/fleet-service/place-fuel-service",
-        requestBody
-      );
+      await axiosInstance.post("/fleet-service/init-fuel-service", requestBody);
       toast.success("Fuel service requested successfully!");
     } catch (error) {
       // toast.error(`Failed to request fuel service. Please try again. ${error}`);
