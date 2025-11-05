@@ -1,111 +1,3 @@
-// "use client";
-// import { useEffect, useState } from "react";
-// import { useRouter } from "next/navigation";
-// import { Cookies } from "react-cookie";
-// import Head from "next/head";
-// import { DashboardNav } from "@/components/ui/Nav";
-// import { Sidebar } from "@/components/ui/Sidebar";
-
-// export default function DashboardLayout({
-//   children,
-// }: {
-//   children: React.ReactNode;
-// }) {
-//   const router = useRouter();
-//   const [isAuthorized, setIsAuthorized] = useState(false);
-//   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-//   useEffect(() => {
-//     const cookies = new Cookies();
-//     const accessToken = cookies.get("access_token");
-
-//     if (!accessToken) {
-//       router.replace("/login");
-//     } else {
-//       setIsAuthorized(true);
-//     }
-//   }, [router]);
-
-//   // useEffect(() => {
-//   //   if (!isAuthorized) return;
-
-//   //   let timeout: NodeJS.Timeout;
-
-//   //   const resetTimer = () => {
-//   //     clearTimeout(timeout);
-//   //     timeout = setTimeout(() => {
-//   //       const cookies = new Cookies();
-//   //       cookies.remove("accessToken");
-//   //       cookies.remove("refreshToken");
-//   //       cookies.remove("user");
-//   //       router.push("/login");
-//   //     }, 5 * 60 * 1000);
-//   //   };
-
-//   //   window.addEventListener("mousemove", resetTimer);
-//   //   window.addEventListener("keydown", resetTimer);
-//   //   resetTimer();
-
-//   //   return () => {
-//   //     window.removeEventListener("mousemove", resetTimer);
-//   //     window.removeEventListener("keydown", resetTimer);
-//   //     clearTimeout(timeout);
-//   //   };
-//   // }, [isAuthorized, router]);
-
-//   if (!isAuthorized) return null;
-
-//   return (
-//     <>
-//       <Head>
-//         <title>Dashboard - ResqX Admin</title>
-//         <meta
-//           name="description"
-//           content="ResqX Admin Dashboard - Emergency Response Management System"
-//         />
-//         <meta name="robots" content="noindex, nofollow" />
-//         <link rel="icon" href="/favicon.ico" />
-//         <meta name="theme-color" content="#3B3835" />
-//         <meta name="viewport" content="width=device-width, initial-scale=1" />
-//         {/* Prevent caching for security */}
-//         <meta
-//           httpEquiv="Cache-Control"
-//           content="no-cache, no-store, must-revalidate"
-//         />
-//         <meta httpEquiv="Pragma" content="no-cache" />
-//         <meta httpEquiv="Expires" content="0" />
-//       </Head>
-
-//       <div className="flex h-screen bg-[#242220]">
-//         {/* Sidebar for desktop */}
-//         <div className="hidden md:flex">
-//           <Sidebar />
-//         </div>
-
-//         {/* Sidebar for mobile */}
-//         {sidebarOpen && (
-//           <div className="fixed inset-0 z-50 flex md:hidden">
-//             <div
-//               className="fixed inset-0 bg-black/50"
-//               onClick={() => setSidebarOpen(false)}
-//             />
-//             <div className="relative bg-[#3B3835] w-64 z-50">
-//               <Sidebar onClose={() => setSidebarOpen(false)} />
-//             </div>
-//           </div>
-//         )}
-
-//         <div className="flex-1 flex flex-col">
-//           <DashboardNav onMenuClick={() => setSidebarOpen(true)} />
-//           <main className="flex-1 overflow-y-auto bg-[#242220] p-4 sm:p-8">
-//             {children}
-//           </main>
-//         </div>
-//       </div>
-//     </>
-//   );
-// }
-
 "use client";
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -138,7 +30,7 @@ interface MeResponse {
 }
 
 /** ——————— Simple "no plan" modal ——————— */
-function PlanNudgeModal({
+export function PlanNudgeModal({
   onClose,
   onGoToPlans,
 }: {
@@ -146,41 +38,37 @@ function PlanNudgeModal({
   onGoToPlans: () => void;
 }) {
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-    >
-      <div className="w-[92vw] max-w-md rounded-2xl bg-white p-5 shadow-2xl">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">
-              No Active Plan
-            </h2>
-            <p className="mt-1 text-sm text-gray-600">
-              You don't have an active subscription yet. Choose a plan to unlock
-              refuel, fleet care, and rescue features.
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-gray-100"
-            aria-label="Close"
-          >
-            <X className="h-5 w-5 text-gray-700" />
-          </button>
-        </div>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60">
+      <div className="relative w-11/12 lg:w-[547px] rounded-2xl bg-[#3B3835] p-6 text-center text-white shadow-lg">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-6 right-6 inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+          aria-label="Close"
+        >
+          <X className="h-5 w-5 text-white/80" />
+        </button>
 
-        <div className="mt-5 flex items-center justify-end gap-2">
-          <Button variant="ghost" onClick={onClose}>
-            Not now
+        {/* Modal content */}
+        <h2 className="text-2xl font-semibold">No Active Plan</h2>
+        <p className="my-9 text-lg font-medium text-white/80">
+          You don’t have an active subscription yet. Choose a plan to unlock
+          refuel, fleet care, and rescue features.
+        </p>
+
+        {/* Buttons */}
+        <div className="my-8 flex flex-col lg:flex-row justify-between gap-4">
+          <Button
+            variant="grey"
+            onClick={onClose}
+            className="w-full lg:w-[224px] h-[48px] lg:h-[52px]"
+          >
+            Not Now
           </Button>
           <Button
             variant="orange"
-            onClick={() => {
-              onGoToPlans(); // navigate
-              onClose(); // close modal right after navigation
-            }}
+            onClick={onGoToPlans}
+            className="w-full lg:w-[224px] h-[48px] lg:h-[52px]"
           >
             Browse Plans
           </Button>
@@ -293,7 +181,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {showPlanModal && (
         <PlanNudgeModal
           onClose={() => setShowPlanModal(false)}
-          onGoToPlans={() => router.push("/billing")}
+          onGoToPlans={async () => {
+            await router.push("/billing");
+            setShowPlanModal(false);
+          }}
         />
       )}
     </>

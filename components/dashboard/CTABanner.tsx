@@ -2,7 +2,9 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import CheckoutModal, { OrderDetails } from "../checkoutModal";
+// import FuelCheckoutModal, {
+//   OrderDetails,
+// } from "../fuel-delivery/FuelCheckoutModal";
 
 export function CTABanner({
   title,
@@ -17,16 +19,7 @@ export function CTABanner({
   illustration: string;
   onAction?: () => void;
 }) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   // Mock order details - replace with your actual data
-  const orderDetails: OrderDetails = {
-    serviceType: "delivery",
-    fuelType: "petrol",
-    quantity: 50,
-    location: "123 Main St, City, State",
-    additionalNotes: "Please call before delivery",
-  };
 
   const formatDesc = (text: string) =>
     text.split("|").map((part, idx) => (
@@ -35,12 +28,6 @@ export function CTABanner({
         {idx < text.split("|").length - 1 && <br />}
       </span>
     ));
-
-  const handleCheckout = async (orderDetails: OrderDetails) => {
-    // Handle the actual payment processing here
-    console.log("Processing payment for:", orderDetails);
-    // Integrate with your payment gateway (Stripe, PayPal, etc.)
-  };
 
   return (
     <div className="rounded-2xl bg-[#3B3835] text-white p-6 flex items-center justify-between gap-6">
@@ -55,17 +42,17 @@ export function CTABanner({
           >
             {buttonText}
           </Button>
-
+          {/* 
           <Button
             variant="orange"
             onClick={() => setIsModalOpen(true)}
             className="w-[180px] lg:w-[262px] h-[58px] lg:h-[60px]"
           >
             Checkout
-          </Button>
+          </Button> */}
         </div>
       </div>
-      
+
       <Image
         src={illustration}
         width={350}
@@ -74,12 +61,12 @@ export function CTABanner({
         className="hidden sm:block"
       />
 
-      <CheckoutModal
+      {/* <FuelCheckoutModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         onCheckout={handleCheckout}
         orderDetails={orderDetails}
-      />
+      /> */}
     </div>
   );
 }

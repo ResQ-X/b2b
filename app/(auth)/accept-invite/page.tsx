@@ -9,23 +9,18 @@ import { AuthService } from "@/services/auth.service";
 import { useState } from "react";
 import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";
-import type { AuthState, SignupFormData } from "@/types/auth";
+import type { AuthState, SubAdminSignupFormData } from "@/types/auth";
 import { Eye, EyeOff } from "lucide-react";
 import CustomInput from "@/components/ui/CustomInput";
 
-export default function SignupPage() {
+export default function SubAdminSignupPage() {
   const router = useRouter();
 
-  const [formData, setFormData] = useState<SignupFormData>({
+  const [formData, setFormData] = useState<SubAdminSignupFormData>({
     name: "",
-    email: "",
-    company_name: "",
-    company_email: "",
     phone: "",
-    company_phone: "",
-    country: "NG",
     password: "",
-    fleetRole: "USERS", // ✅ Default role
+    token: "",
   });
 
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -108,26 +103,17 @@ export default function SignupPage() {
 
     const backendData = {
       name: formData.name,
-      email: formData.email,
-      company_name: formData.name,
-      company_email: formData.email,
       phone: normalizedPhone,
-      company_phone: normalizedPhone,
-      country: formData.country,
       password: formData.password,
-      fleetRole: formData.fleetRole, // ✅ include in payload
+      token: formData.token,
     };
 
     try {
-      const res = await AuthService.signup(backendData);
+      const res = await AuthService.subadminsignup(backendData);
       if (res.success) {
-        toast.success(
-          res.message || "Account created! Please verify your email."
-        );
+        toast.success(res.message || "Account created successfully.");
         setAuthState({ isLoading: false, error: null });
-        router.push(
-          `/verify-signup?email=${encodeURIComponent(formData.email)}`
-        );
+        router.push("login");
       } else {
         setAuthState({ isLoading: false, error: null });
         toast.error(res?.message || "An error occurred during signup");
@@ -175,54 +161,23 @@ export default function SignupPage() {
                 Welcome!
               </h1>
               <p className="mt-6 text-sm text-white/90 font-medium text-center">
-                Let&#39;s get started, create an account
+                Sign up to access your dashboard
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 text-white">
-              {/* Company Name */}
+              {/* Name */}
               <CustomInput
-                label="Company's Name"
+                label="Name"
                 id="name"
                 name="name"
                 type="text"
-                placeholder="Enter Company's Name"
+                placeholder="Enter First Name"
                 value={formData.name}
                 onChange={onChange}
                 required
                 className="text-white placeholder:text-white/70"
               />
-
-              {/* Company Email */}
-              <CustomInput
-                label="Company Email Address"
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Enter Email Address"
-                value={formData.email}
-                onChange={onChange}
-                required
-                className="text-white placeholder:text-white/70"
-              />
-
-              {/* ✅ Role Select */}
-              <div className="w-full">
-                <label className="block text-sm font-medium mb-2 text-white/80">
-                  Role
-                </label>
-                <select
-                  id="fleetRole"
-                  name="fleetRole"
-                  value={formData.fleetRole}
-                  onChange={onChange}
-                  className="w-full h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white px-4 focus:outline-none"
-                  required
-                >
-                  <option value="USERS">USERS</option>
-                  <option value="SUPER">SUPER</option>
-                </select>
-              </div>
 
               {/* Phone */}
               <CustomInput

@@ -30,14 +30,12 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-
   const subAdmins = [
-  { name: "Jiver", href: "/jiver" },
-  { name: "Emtech", href: "/emtech" },
-  { name: "KarlTech", href: "/karltech" },
-  { name: "Resq", href: "/resq" }
- ];
-
+    { name: "Jiver", href: "/jiver" },
+    { name: "Emtech", href: "/emtech" },
+    { name: "KarlTech", href: "/karltech" },
+    { name: "Resq", href: "/resq" },
+  ];
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -76,18 +74,22 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
   // };
 
   const [isDropdownopen, setIsDropdownopen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null); // Add HTMLDivElement type
+  const dropdownRef = useRef<HTMLDivElement>(null); // Add HTMLDivElement type
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) { // Add MouseEvent type
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    function handleClickOutside(event: MouseEvent) {
+      // Add MouseEvent type
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownopen(false);
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -101,7 +103,7 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
       </div>
 
       {/* Logo or Search Placeholder */}
-      <div className="flex-1 flex flex-col justify-center md:justify-start">
+      <div className="hidden flex-1 md:flex flex-col justify-center md:justify-start">
         {/* Show only on md+ screens */}
         {/* <span className="text-lg md:text-2xl font-bold text-[#fff]">
           {getPageTitle(pathname)}
@@ -161,7 +163,10 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
           </div>
 
           {/*drop down*/}
-          <div onClick={() => setIsDropdownopen(!isDropdownopen)} className="absolute right-1">
+          <div
+            onClick={() => setIsDropdownopen(!isDropdownopen)}
+            className="absolute right-1"
+          >
             <Image
               src="/input-field.svg"
               alt="User Avatar"
@@ -172,12 +177,14 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
           </div>
         </div>
 
-        {isDropdownopen && (  
-          <div className="modal-content absolute top-24 z-50 bg-[#3B3835]  right-3 pl-6 pr-8 pt-8 pb-10 text-[14px] rounded-2xl shadow-lg "
-            ref={dropdownRef} >
+        {isDropdownopen && (
+          <div
+            className="modal-content absolute top-24 z-50 bg-[#3B3835]  right-3 pl-6 pr-8 pt-8 pb-10 text-[14px] rounded-2xl shadow-lg "
+            ref={dropdownRef}
+          >
             <ul className="flex flex-col gap-4 font-medium">
               {subAdmins.map((admin, index) => (
-                <Link 
+                <Link
                   key={index}
                   href={admin.href}
                   className="hover:bg-[#FFA947] pr-5 pl-1 py-2 rounded-lg transition-all duration-300"
