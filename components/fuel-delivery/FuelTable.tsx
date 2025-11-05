@@ -190,48 +190,6 @@ export default function OrdersTable({
       .map(({ ...rest }) => rest);
   }, []);
 
-  // const handleSubmit = async (data: RequestFuelForm) => {
-  //   try {
-  //     const isManualLocation = data.location_id === "__manual__";
-  //     const requestBody = {
-  //       fuel_type: data.fuel_type,
-  //       asset_id: data.asset_id,
-  //       ...(isManualLocation ? {} : { location_id: data.location_id }),
-  //       ...(isManualLocation
-  //         ? {
-  //             location_address: data.location_address || "",
-  //             location_longitude: data.location_longitude || "",
-  //             location_latitude: data.location_latitude || "",
-  //           }
-  //         : {}),
-  //       time_slot:
-  //         data.time_slot === "NOW" ? new Date().toISOString() : data.time_slot,
-  //       quantity: data.quantity,
-  //       note: data.note,
-  //       is_scheduled: data.time_slot !== "NOW",
-  //     };
-
-  //     const res = await axiosInstance.post(
-  //       "/fleet-service/place-fuel-service",
-  //       requestBody
-  //     );
-  //     console.log("Fuel service request successful:", res.data);
-  //     toast.success("Fuel service requested successfully!");
-  //     setOpen(false);
-
-  //     // Trigger refresh in parent
-  //     setRefreshTrigger((prev) => prev + 1);
-  //   } catch (error: any) {
-  //     console.error("Failed to request fuel service:", error);
-  //     toast.error(
-  //       `Failed to request fuel service. ${
-  //         error?.response?.data?.message || ""
-  //       }`
-  //     );
-  //     throw error;
-  //   }
-  // };
-
   const handleSubmit = async (data: RequestFuelForm) => {
     try {
       const isManualLocation = data.location_id === "__manual__";
