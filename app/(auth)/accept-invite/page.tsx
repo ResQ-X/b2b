@@ -3,10 +3,10 @@ import { toast } from "react-toastify";
 import Image from "next/image";
 import LogoSvg from "@/public/logo.svg";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { AuthService } from "@/services/auth.service";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AuthImage from "@/public/auth-page.png";
 import AuthText from "@/components/auth/auth-text";
 import type { AuthState, SubAdminSignupFormData } from "@/types/auth";
@@ -15,6 +15,7 @@ import CustomInput from "@/components/ui/CustomInput";
 
 export default function SubAdminSignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [formData, setFormData] = useState<SubAdminSignupFormData>({
     name: "",
@@ -32,6 +33,17 @@ export default function SubAdminSignupPage() {
     isLoading: false,
     error: null,
   });
+
+  useEffect(() => {
+    const t = searchParams.get("token");
+    if (t) {
+      setFormData((p) => ({ ...p, token: t }));
+    } else {
+      toast.info(
+        "No invite token found in the link. Paste your token to continue."
+      );
+    }
+  }, [searchParams]);
 
   const onChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -72,6 +84,14 @@ export default function SubAdminSignupPage() {
     e.preventDefault();
     setAuthState({ isLoading: true, error: null });
 
+    if (!formData.token?.trim()) {
+      setAuthState({ isLoading: false, error: null });
+      toast.error(
+        "Invitation token is missing. Use the email link or paste your token."
+      );
+      return;
+    }
+
     if (!isStrongPassword(formData.password)) {
       setAuthState({ isLoading: false, error: null });
       toast.error(
@@ -105,7 +125,7 @@ export default function SubAdminSignupPage() {
       name: formData.name,
       phone: normalizedPhone,
       password: formData.password,
-      token: formData.token,
+      token: formData.token, // ✅ includes token from URL (or pasted)
     };
 
     try {
@@ -240,6 +260,22 @@ export default function SubAdminSignupPage() {
               {!passwordsMatch && confirmPassword.length > 0 && (
                 <p className="text-xs text-red-300">Passwords do not match.</p>
               )}
+
+              {/* Token field (readonly if present via URL; editable if missing) */}
+              {/* <CustomInput
+                label="Invitation Token"
+                id="token"
+                name="token"
+                type="text"
+                placeholder="Auto-filled from email link, or paste token"
+                value={formData.token}
+                onChange={onChange}
+                required
+                readOnly={!!formData.token} // user can still paste if empty
+                className={`text-white placeholder:text-white/70 ${
+                  formData.token ? "opacity-75 cursor-not-allowed" : ""
+                }`}
+              /> */}
 
               {/* Terms */}
               <label className="flex items-start gap-3 text-sm text-white/90 select-none">
