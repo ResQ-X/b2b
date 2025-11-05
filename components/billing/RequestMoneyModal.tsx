@@ -1,32 +1,35 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 interface RequestMoneyModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit?: (data: RequestData) => void;
+  availableBalance?: number | null;
 }
 
 interface RequestData {
-  recipient: string;
-  amount: string;
-  note: string;
+  amount: number;
 }
 
-export default function RequestMoneyModal({ 
-  open, 
+export default function RequestMoneyModal({
+  open,
   onOpenChange,
-  onSubmit 
+  onSubmit,
+  availableBalance,
 }: RequestMoneyModalProps) {
-  const [recipient, setRecipient] = useState('');
-  const [amount, setAmount] = useState('55,500');
-  const [note, setNote] = useState('');
+  const [amount, setAmount] = useState("55,500");
   const [processing, setProcessing] = useState(false);
 
-  const availableBalance = '0.00';
   const quickAmounts = [82000, 100000, 115000, 500000, 802000];
 
   const handleQuickSelect = (value: number) => {
@@ -37,19 +40,19 @@ export default function RequestMoneyModal({
     setProcessing(true);
     try {
       if (onSubmit) {
-        await onSubmit({ recipient, amount, note });
+        await onSubmit({ amount: parseFloat(amount.replace(/,/g, "")) });
       }
-      // Reset form
-      setRecipient('');
-      setAmount('');
-      setNote('');
+      setAmount("");
+
       onOpenChange(false);
     } catch (error) {
-      console.error('Request error:', error);
+      console.error("Request error:", error);
     } finally {
       setProcessing(false);
     }
   };
+
+  console.log("availableBalance", availableBalance);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -74,20 +77,6 @@ export default function RequestMoneyModal({
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Recipient */}
-          <div>
-            <label className="block text-sm text-white/70 mb-2 font-medium">
-              Recipient
-            </label>
-            <input
-              type="text"
-              value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
-              placeholder="Super Admin"
-              className="w-full bg-[#2D2A27] text-white rounded-2xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-white/40 border border-white/10"
-            />
-          </div>
-
           {/* Enter Amount */}
           <div>
             <label className="block text-sm text-white/70 mb-2 font-medium">
@@ -103,15 +92,16 @@ export default function RequestMoneyModal({
               />
             </div>
             <div className="flex justify-between mt-2">
-                <p className="text-xs text-white/60 ">Available Balance</p>
-                <div className="  text-[#FF8500] font-medium text-sm ">
-                    ₦{availableBalance}
-                </div>
-            </div>          </div>
+              <p className="text-xs text-white/60 ">Available Balance</p>
+              <div className="  text-[#FF8500] font-medium text-sm ">
+                ₦ {availableBalance}
+              </div>
+            </div>{" "}
+          </div>
 
           {/* Quick Select */}
           <div>
-            <label className="block text-sm text-white mb-3 font-semibold text-lg">
+            <label className="block text-sm text-white mb-3 font-semibold md:text-lg">
               Quick Select
             </label>
             <div className="grid grid-cols-3 gap-3">
@@ -125,20 +115,6 @@ export default function RequestMoneyModal({
                 </button>
               ))}
             </div>
-          </div>
-
-          {/* Note */}
-          <div>
-            <label className="block text-sm text-white/70 mb-2 font-medium">
-              Note (Optional)
-            </label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Additional note/reference"
-              rows={3}
-              className="w-full bg-[#2D2A27] text-white rounded-2xl px-4 py-4 resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-white/40 border border-white/10"
-            />
           </div>
         </div>
 

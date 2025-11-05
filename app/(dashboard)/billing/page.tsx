@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axiosInstance from "@/lib/axios";
 import { WalletHeaderCard } from "@/components/billing/WalletHeaderCard";
 import { Tabs } from "@/components/billing/Tabs";
 import { FeaturePanel } from "@/components/billing/FeaturePanel";
@@ -14,17 +15,50 @@ export const naira = (n: number) =>
     maximumFractionDigits: 0,
   }).format(n);
 
+type UserProfile = {
+  id: string;
+  name: string;
+  company_name: string;
+  email: string;
+  company_email: string;
+  phone: string;
+  company_phone: string;
+  role?: string;
+};
+
 export default function BillingPage() {
+  const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [tab, setTab] = useState<"subscription" | "billing">("subscription");
   const [showPicker, setShowPicker] = useState(false);
 
+  console.log("loading", loading);
+
   const showRightPane = tab === "subscription" && showPicker;
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get("/fleets/profile");
+        setUserProfile(response.data.data);
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  console.log("userProfile", userProfile);
 
   return (
     <div className="w-full h-auto flex flex-col gap-4">
       {/* WalletHeader stays fixed width (do not change) */}
       <div className="w-full lg:w-3/5">
-        <WalletHeaderCard />
+        <WalletHeaderCard role={userProfile?.role} />
       </div>
 
       {/* Tabs: match original behavior */}

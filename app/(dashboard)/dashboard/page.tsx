@@ -340,21 +340,23 @@ export default function DashboardPage() {
     {
       title: "Total Asset",
       value: stats?.assetCount || 0,
-      sub: "Total assets",
+      sub: "Total assets →",
       icon: CarFront,
+      link: "/fleet",
     },
     {
       title: "Maintenance Pending",
       value: stats?.pendingMaintenanceServices || 0,
-      sub: "View Schedule →",
+      sub: "View maintenance →",
       icon: Bolt,
-      link: "/schedule",
+      link: "/maintenance",
     },
     {
       title: "Total Upcoming Orders",
       value: stats?.upcomingOrdersCount || 0,
-      sub: "Upcoming orders",
+      sub: "Upcoming orders →",
       icon: Wallet,
+      link: "/schedule",
     },
   ];
 

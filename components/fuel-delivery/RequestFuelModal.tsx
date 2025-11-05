@@ -39,7 +39,7 @@ import { toast } from "react-toastify";
 
 /* ===================== Types ===================== */
 
-type RequestFuelForm = {
+export type RequestFuelForm = {
   slot: string;
   location: any;
   vehicle: any;
@@ -443,6 +443,8 @@ function VehiclesMultiSelect({
     </Popover>
   );
 }
+
+//  onSubmit?: (data: RequestFuelForm) => Promise<void>;
 
 /* ===================== Main Component ===================== */
 
