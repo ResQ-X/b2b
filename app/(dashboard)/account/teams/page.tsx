@@ -1,7 +1,10 @@
 "use client";
-
+import { AccountService } from "@/services/account.service";
 import React, { useEffect, useState } from "react";
 import axiosInstance from "@/lib/axios";
+import { Button } from "@/components/ui/button";
+import type { User } from "@/types/account";
+import AddUserModal from "@/components/AddUserModal";
 
 type SubAdmin = {
   id: string;
@@ -17,6 +20,8 @@ export default function Page() {
   const [subs, setSubs] = useState<SubAdmin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchSubs() {
@@ -51,6 +56,30 @@ export default function Page() {
 
     fetchSubs();
   }, []);
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await AccountService.getProfile();
+
+        // Extract user data from the nested response structure
+        const userData = response.data || response;
+        setUser(userData as unknown as User);
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        setError("Failed to load user information. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  console.log(user);
 
   if (loading) {
     return (
@@ -115,6 +144,19 @@ export default function Page() {
           </tbody>
         </table>
       </div>
+
+      {(user as { role?: string } | null)?.role === "SUPER" && (
+        <Button
+          type="button"
+          variant="light"
+          className="w-auto h-[48px] lg:h-[52px] px-8 mt-5"
+          onClick={() => setIsModalOpen(!isModalOpen)}
+        >
+          Add User
+        </Button>
+      )}
+
+      <AddUserModal open={isModalOpen} onOpenChange={setIsModalOpen} />
     </div>
   );
 }
