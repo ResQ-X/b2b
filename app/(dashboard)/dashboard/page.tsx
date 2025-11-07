@@ -1,7 +1,7 @@
 "use client";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import axiosInstance from "@/lib/axios";
 import { CarFront, Bolt, Wallet, Fuel, AlertTriangle } from "lucide-react";
 import FuelIcon from "@/public/gas-station.svg";
@@ -15,9 +15,7 @@ import { RecentDeliveries } from "@/components/dashboard/RecentDeliveries";
 import { UpcomingSchedules } from "@/components/dashboard/UpcomingSchedules";
 import { SideCard } from "@/components/dashboard/SideCard";
 import { ServiceBundle } from "@/components/dashboard/ServiceBundle";
-import RequestFuelModal, {
-  type RequestFuelForm,
-} from "@/components/fuel-delivery/RequestFuelModal";
+import RequestFuelModal from "@/components/fuel-delivery/RequestFuelModal";
 import TopUpModal from "@/components/billing/TopUpModal";
 import {
   Asset,
@@ -25,7 +23,7 @@ import {
   FuelBarData,
   FuelChartData,
   PieChartData,
-  PieDataResponse,
+  // PieDataResponse,
   DashboardStats,
 } from "@/types/dashboard";
 
@@ -95,40 +93,29 @@ export default function DashboardPage() {
     try {
       const response = await axiosInstance.get("/fleets/dashboard-pie-data");
 
-      const pieData: PieDataResponse = response.data.data.data;
+      const resData = response.data.data; // access "data" inside main "data"
 
-      const colors = ["#FF8500", "#F59E0B", "#FDBA74", "#FFE6C7"];
+      // The chart data (for the pie chart itself)
+      // const chartLabels = resData.chart.labels; // e.g. ["Asset 1", "Asset 2"]
+      // const chartSeries = resData.chart.series; // e.g. [5, 4]
 
-      const transformedPieData: PieChartData = {
-        legend: [
-          {
-            label: "Fuel Cost",
-            value: `${pieData.percentages.fuel}%`,
-            color: colors[0],
+      const colors = ["#FF8500", "#F59E0B", "#FDBA74", "#FFE6C7", "#9CA3AF"];
+
+      // Transform chart data into your PieChartData shape
+      const transformedPieData = {
+        legend: resData.data.map((asset: any, index: number) => ({
+          label: asset.label,
+          value: `${asset.total_orders} orders`,
+          color: colors[index % colors.length],
+          details: {
+            total_orders: asset.total_orders,
+            fuel_orders: asset.fuel_orders,
+            maintenance_orders: asset.maintenance_orders,
+            emergency_orders: asset.emergency_orders,
           },
-          {
-            label: "Maintenance Cost",
-            value: `${pieData.percentages.maintenance}%`,
-            color: colors[1],
-          },
-          {
-            label: "Emergency Deliveries",
-            value: `${pieData.percentages.emergency}%`,
-            color: colors[2],
-          },
-          {
-            label: "Service Charges",
-            value: `${pieData.percentages.service}%`,
-            color: colors[3],
-          },
-        ],
-        slices: [
-          parseFloat(pieData.percentages.fuel),
-          parseFloat(pieData.percentages.maintenance),
-          parseFloat(pieData.percentages.emergency),
-          parseFloat(pieData.percentages.service),
-        ],
-        colors: colors,
+        })),
+        slices: resData.chart.series,
+        colors: colors.slice(0, resData.chart.series.length),
       };
 
       setPieChartData(transformedPieData);
@@ -137,6 +124,53 @@ export default function DashboardPage() {
     }
   };
 
+  // const fetchPieChartData = async () => {
+  //   try {
+  //     const response = await axiosInstance.get("/fleets/dashboard-pie-data");
+
+  //     const pieData: PieDataResponse = response.data.data.data;
+
+  //     const colors = ["#FF8500", "#F59E0B", "#FDBA74", "#FFE6C7"];
+
+  //     const transformedPieData: PieChartData = {
+  //       legend: [
+  //         {
+  //           label: "Fuel Cost",
+  //           value: `${pieData.percentages.fuel}%`,
+  //           color: colors[0],
+  //         },
+  //         {
+  //           label: "Maintenance Cost",
+  //           value: `${pieData.percentages.maintenance}%`,
+  //           color: colors[1],
+  //         },
+  //         {
+  //           label: "Emergency Deliveries",
+  //           value: `${pieData.percentages.emergency}%`,
+  //           color: colors[2],
+  //         },
+  //         {
+  //           label: "Service Charges",
+  //           value: `${pieData.percentages.service}%`,
+  //           color: colors[3],
+  //         },
+  //       ],
+  //       slices: [
+  //         parseFloat(pieData.percentages.fuel),
+  //         parseFloat(pieData.percentages.maintenance),
+  //         parseFloat(pieData.percentages.emergency),
+  //         parseFloat(pieData.percentages.service),
+  //       ],
+  //       colors: colors,
+  //     };
+
+  //     setPieChartData(transformedPieData);
+  //   } catch (error) {
+  //     console.error("Failed to fetch pie chart data:", error);
+  //   }
+  // };
+
+  console.log("pieChartData", pieChartData);
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -264,76 +298,6 @@ export default function DashboardPage() {
     });
   };
 
-  const slotOptions = useMemo(() => {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentDate = now.toDateString();
-
-    const slots = [
-      { label: "Now", value: "NOW" },
-      {
-        label: "05:00–07:00",
-        value: new Date(new Date().setHours(5, 0, 0, 0)).toISOString(),
-        hour: 5,
-      },
-      {
-        label: "07:00–09:00",
-        value: new Date(new Date().setHours(7, 0, 0, 0)).toISOString(),
-        hour: 7,
-      },
-      {
-        label: "09:00–11:00",
-        value: new Date(new Date().setHours(9, 0, 0, 0)).toISOString(),
-        hour: 9,
-      },
-      {
-        label: "11:00–13:00",
-        value: new Date(new Date().setHours(11, 0, 0, 0)).toISOString(),
-        hour: 11,
-      },
-      {
-        label: "13:00–15:00",
-        value: new Date(new Date().setHours(13, 0, 0, 0)).toISOString(),
-        hour: 13,
-      },
-      {
-        label: "15:00–17:00",
-        value: new Date(new Date().setHours(15, 0, 0, 0)).toISOString(),
-        hour: 15,
-      },
-      {
-        label: "17:00–19:00",
-        value: new Date(new Date().setHours(17, 0, 0, 0)).toISOString(),
-        hour: 17,
-      },
-      {
-        label: "19:00–21:00",
-        value: new Date(new Date().setHours(19, 0, 0, 0)).toISOString(),
-        hour: 19,
-      },
-      {
-        label: "21:00–22:00",
-        value: new Date(new Date().setHours(21, 0, 0, 0)).toISOString(),
-        hour: 21,
-      },
-    ];
-
-    return slots
-      .filter((slot) => {
-        if (slot.value === "NOW") return true;
-
-        const slotDate = new Date(slot.value);
-        const slotDateString = slotDate.toDateString();
-
-        if (slotDateString === currentDate) {
-          return slot.hour && slot.hour > currentHour;
-        }
-
-        return true;
-      })
-      .map(({ ...rest }) => rest);
-  }, []);
-
   if (loading) return <Loader content="Loading dashboard data..." />;
 
   const tiles = [
@@ -376,37 +340,6 @@ export default function DashboardPage() {
     label: location.location_name,
     value: location.id,
   }));
-
-  const handleSubmit = async (data: RequestFuelForm) => {
-    try {
-      const isManualLocation = data.location_id === "__manual__";
-
-      const requestBody: any = {
-        fuel_type: data.fuel_type,
-        asset_ids: data.asset_ids,
-        ...(isManualLocation ? {} : { location_id: data.location_id }),
-        ...(isManualLocation
-          ? {
-              location_address: data.location_address || "",
-              location_longitude: data.location_longitude || "",
-              location_latitude: data.location_latitude || "",
-            }
-          : {}),
-        time_slot:
-          data.time_slot === "NOW" ? new Date().toISOString() : data.time_slot,
-        quantity: data.quantity,
-        note: data.note,
-        is_scheduled: data.time_slot !== "NOW",
-      };
-
-      await axiosInstance.post("/fleet-service/init-fuel-service", requestBody);
-      toast.success("Fuel service requested successfully!");
-    } catch (error) {
-      // toast.error(`Failed to request fuel service. Please try again. ${error}`);
-      toast.error(error.response.data.message);
-      throw error;
-    }
-  };
 
   const handleTopUpInitiate = async () => {
     try {
@@ -590,11 +523,9 @@ export default function DashboardPage() {
       <RequestFuelModal
         open={open}
         onOpenChange={setOpen}
-        onSubmit={handleSubmit}
         typeOptions={fuelTypeOptions}
         vehicleOptions={vehicleOptions}
         locationOptions={locationOptions}
-        slotOptions={slotOptions}
       />
 
       <TopUpModal

@@ -196,7 +196,7 @@ function FuelCheckoutModal({
               Additional Note
             </h3>
             <p className="text-white/80 mt-5">
-              Come to the Office
+              No additional note
               {/* {orderDetails.additionalNotes} */}
             </p>
           </div>

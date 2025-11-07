@@ -177,6 +177,53 @@ export function DonutBreakdown({
             ))}
           </ul>
         </div>
+
+        {/* <div className="w-full mt-20">
+          <ul className="space-y-5">
+            {legend.map((item, index) => (
+              <li
+                key={item.label}
+                className="border border-white/10 rounded-xl p-4 hover:bg-[#2C2926]/60 transition-all"
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <span
+                    className="inline-block h-4 w-4 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="text-white font-medium text-base flex-1">
+                    {item.label}
+                  </span>
+                  <span className="text-white/80 text-sm">{item.value}</span>
+                </div>
+
+     
+                {item.details && (
+                  <div className="grid grid-cols-2 gap-y-1 text-sm text-white/80 pl-7">
+                    <div>🚗 Fuel Orders:</div>
+                    <div className="text-right">{item.details.fuel_orders}</div>
+
+                    <div>🛠 Maintenance:</div>
+                    <div className="text-right">
+                      {item.details.maintenance_orders}
+                    </div>
+
+                    <div>⚡ Emergency:</div>
+                    <div className="text-right">
+                      {item.details.emergency_orders}
+                    </div>
+
+                    <div className="font-medium text-white mt-1">Total:</div>
+                    <div className="text-right font-semibold text-white mt-1">
+                      {item.details.total_orders}
+                    </div>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div> */}
       </div>
     </div>
   );

@@ -24,7 +24,7 @@ export function WalletHeaderCard({ role }: { role?: string }) {
   const [showDisburse, setShowDisburse] = useState(false);
   const [showRequest, setShowRequest] = useState(false);
 
-  const availableBalance = walletBalance?.balance ?? 0.00;
+  const availableBalance = walletBalance?.balance ?? 0.0;
 
   const handleDisburseSubmit = async (data: any) => {
     console.log("Disburse data:", data);
@@ -188,13 +188,15 @@ export function WalletHeaderCard({ role }: { role?: string }) {
         </h2>
 
         <div className="flex gap-4">
-          <Button
-            variant="orange"
-            className="w-full lg:w-[159px] h-[48px] lg:h-[52px]"
-            onClick={() => setTopUpOpen(true)}
-          >
-            Top Up Wallet
-          </Button>
+          {role !== "SUB" && (
+            <Button
+              variant="orange"
+              className="w-full lg:w-[159px] h-[48px] lg:h-[52px]"
+              onClick={() => setTopUpOpen(true)}
+            >
+              Top Up Wallet
+            </Button>
+          )}
 
           {role === "SUPER" && (
             <Button
