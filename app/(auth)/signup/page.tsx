@@ -25,7 +25,7 @@ export default function SignupPage() {
     company_phone: "",
     country: "NG",
     password: "",
-    fleetRole: "USERS", // ✅ Default role
+    fleetRole: "USERS",
   });
 
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -115,7 +115,7 @@ export default function SignupPage() {
       company_phone: normalizedPhone,
       country: formData.country,
       password: formData.password,
-      fleetRole: formData.fleetRole, // ✅ include in payload
+      fleetRole: formData.fleetRole,
     };
 
     try {

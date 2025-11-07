@@ -56,7 +56,7 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
     fetchUserProfile();
   }, []);
 
-  console.log("userProfile", userProfile);
+  // console.log("userProfile", userProfile);
 
   // Fetch sub-admins (only if SUPER)
   useEffect(() => {
@@ -111,8 +111,12 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
 
   const welcomeName =
     userProfile?.role === "SUB"
-      ? userProfile?.company_name?.split(" ")[0]
+      ? userProfile?.name?.split(" ")[0]
       : userProfile?.name?.split(" ")[0];
+  // const welcomeName =
+  //   userProfile?.role === "SUB"
+  //     ? userProfile?.company_name?.split(" ")[0]
+  //     : userProfile?.name?.split(" ")[0];
 
   return (
     <div className="h-20 bg-[#3B3835] px-4 sm:px-6 md:px-8 flex items-center justify-between border-b border-[#474747] relative">
@@ -158,9 +162,16 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
               {loading
                 ? "..."
                 : userProfile?.role === "SUB"
-                ? userProfile?.company_name || "User"
+                ? userProfile?.name || "User"
                 : userProfile?.name || "User"}
             </p>
+            {/* <p className="text-sm font-semibold truncate">
+              {loading
+                ? "..."
+                : userProfile?.role === "SUB"
+                ? userProfile?.company_name || "User"
+                : userProfile?.name || "User"}
+            </p> */}
             <p className="text-sm font-semibold truncate">
               {userProfile?.role === "SUB" ? "Sub Admin" : "Admin"}
             </p>

@@ -2,12 +2,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
-import axiosInstance from "@/lib/axios";
-import RequestFuelModal, {
-  type RequestFuelForm,
-} from "@/components/fuel-delivery/RequestFuelModal";
+import RequestFuelModal from "@/components/fuel-delivery/RequestFuelModal";
 
 export type OrderStatus = "Completed" | "In Progress" | "Scheduled" | "Pending";
 
@@ -124,109 +120,6 @@ export default function OrdersTable({
       })),
     [locations]
   );
-
-  // slot options
-  const slotOptions = useMemo(() => {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentDate = now.toDateString();
-    const slots = [
-      { label: "Now", value: "NOW" },
-      {
-        label: "05:00–07:00",
-        value: new Date(new Date().setHours(5, 0, 0, 0)).toISOString(),
-        hour: 5,
-      },
-      {
-        label: "07:00–09:00",
-        value: new Date(new Date().setHours(7, 0, 0, 0)).toISOString(),
-        hour: 7,
-      },
-      {
-        label: "09:00–11:00",
-        value: new Date(new Date().setHours(9, 0, 0, 0)).toISOString(),
-        hour: 9,
-      },
-      {
-        label: "11:00–13:00",
-        value: new Date(new Date().setHours(11, 0, 0, 0)).toISOString(),
-        hour: 11,
-      },
-      {
-        label: "13:00–15:00",
-        value: new Date(new Date().setHours(13, 0, 0, 0)).toISOString(),
-        hour: 13,
-      },
-      {
-        label: "15:00–17:00",
-        value: new Date(new Date().setHours(15, 0, 0, 0)).toISOString(),
-        hour: 15,
-      },
-      {
-        label: "17:00–19:00",
-        value: new Date(new Date().setHours(17, 0, 0, 0)).toISOString(),
-        hour: 17,
-      },
-      {
-        label: "19:00–21:00",
-        value: new Date(new Date().setHours(19, 0, 0, 0)).toISOString(),
-        hour: 19,
-      },
-      {
-        label: "21:00–22:00",
-        value: new Date(new Date().setHours(21, 0, 0, 0)).toISOString(),
-        hour: 21,
-      },
-    ];
-    return slots
-      .filter((slot) => {
-        if (slot.value === "NOW") return true;
-        const slotDate = new Date(slot.value);
-        const slotDateString = slotDate.toDateString();
-        if (slotDateString === currentDate)
-          return (slot as any).hour > currentHour;
-        return true;
-      })
-      .map(({ ...rest }) => rest);
-  }, []);
-
-  const handleSubmit = async (data: RequestFuelForm) => {
-    try {
-      const isManualLocation = data.location_id === "__manual__";
-
-      const requestBody: any = {
-        fuel_type: data.fuel_type,
-        // >>> Use asset_ids if multiple selected, else single asset_id
-        // ...(data.asset_ids && data.asset_ids.length > 1
-        //   ? { asset_ids: data.asset_ids }
-        //   : { asset_ids: data.asset_id }),
-        asset_ids: data.asset_ids,
-        ...(isManualLocation ? {} : { location_id: data.location_id }),
-        ...(isManualLocation
-          ? {
-              location_address: data.location_address || "",
-              location_longitude: data.location_longitude || "",
-              location_latitude: data.location_latitude || "",
-            }
-          : {}),
-        time_slot:
-          data.time_slot === "NOW" ? new Date().toISOString() : data.time_slot,
-        quantity: data.quantity,
-        note: data.note,
-        is_scheduled: data.time_slot !== "NOW",
-      };
-
-      await axiosInstance.post(
-        "/fleet-service/place-fuel-service",
-        requestBody
-      );
-      toast.success("Fuel service requested successfully!");
-    } catch (error) {
-      // toast.error(`Failed to request fuel service. Please try again. ${error}`);
-      toast.error(error.response.data.message);
-      throw error;
-    }
-  };
 
   return (
     <div className="bg-[#3B3835] rounded-b-[20px] text-white overflow-hidden w-full">
@@ -373,11 +266,9 @@ export default function OrdersTable({
       <RequestFuelModal
         open={open}
         onOpenChange={setOpen}
-        onSubmit={handleSubmit}
         typeOptions={fuelTypeOptions}
         vehicleOptions={vehicleOptions}
         locationOptions={locationOptions}
-        slotOptions={slotOptions}
       />
     </div>
   );

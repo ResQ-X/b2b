@@ -309,6 +309,8 @@ function EmergencyCheckoutModal({
 
   const isTowing = breakdown.emergency_type?.toUpperCase() === "TOWING";
 
+  console.log("breakdown", breakdown);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-11/12 lg:max-w-[640px] rounded-[28px] border border-white/10 bg-[#1F1E1C] text-white p-7 md:p-9 max-h-[90vh] overflow-y-auto overscroll-contain">
@@ -378,7 +380,10 @@ function EmergencyCheckoutModal({
               Additional Note
             </h3>
             <p className="text-white/80 mt-5">
-              Come to the Office
+              No additional note
+              {/* {orderDetails?.additionalNotes
+                ? `: ${orderDetails.additionalNotes}`
+                : ""} */}
               {/* {orderDetails.additionalNotes} */}
             </p>
           </div>

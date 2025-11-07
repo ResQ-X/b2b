@@ -76,7 +76,9 @@ export default function BillingPage() {
         >
           {/* Left column */}
           <div className={showRightPane ? "w-full lg:w-3/5" : "w-full"}>
-            <CurrentPlanCard onUpgrade={() => setShowPicker(true)} />
+            {userProfile?.role === "USER" && (
+              <CurrentPlanCard onUpgrade={() => setShowPicker(true)} />
+            )}
             <FeaturePanel />
           </div>
 
