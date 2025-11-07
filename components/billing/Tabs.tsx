@@ -24,7 +24,7 @@ export function Tabs({
               value === "billing" ? "text-[#FF8500]" : "text-white"
             }`}
           >
-            Billing
+            Transaction
           </button>
         </div>
       </div>

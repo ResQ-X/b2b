@@ -68,44 +68,64 @@ export default function FleetTable({
       </div>
 
       {/* Rows */}
-      <ul>
-        {rows.map((r, i) => (
-          <li
-            key={(r.id ?? r.vehicleId) + i}
-            className="px-6 py-6 border-b border-white/5"
+      {/* Empty State or Rows */}
+      {rows.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="text-white/70 text-lg font-medium mb-2">
+            No fleet assets found
+          </div>
+          <div className="text-white/50 text-sm mb-6">
+            Start by adding your first asset to track fuel, location, and more.
+          </div>
+          {/* <Button
+            onClick={() => setOpen(true)}
+            variant="orange"
+            className="w-[200px] lg:w-[248px] h-[48px] lg:h-[52px]"
+            rightIcon={<Plus className="h-4 w-4 ml-2" />}
           >
-            <div className="grid grid-cols-6 items-center gap-x-4">
-              {/* Name / ID */}
-              <div className="col-span-2">
-                <div className="font-medium">
-                  {r.asset_name ?? r.vehicleId ?? r.id}
+            Add New Fleet
+          </Button> */}
+        </div>
+      ) : (
+        <ul>
+          {rows.map((r, i) => (
+            <li
+              key={(r.id ?? r.vehicleId) + i}
+              className="px-6 py-6 border-b border-white/5"
+            >
+              <div className="grid grid-cols-6 items-center gap-x-4">
+                {/* Name / ID */}
+                <div className="col-span-2">
+                  <div className="font-medium">
+                    {r.asset_name ?? r.vehicleId ?? r.id}
+                  </div>
+                  {r.location ? (
+                    <div className="text-sm text-white/60">{r.location}</div>
+                  ) : null}
                 </div>
-                {r.location ? (
-                  <div className="text-sm text-white/60">{r.location}</div>
-                ) : null}
+
+                {/* Type */}
+                <div>{r.asset_type ?? r.vehicleType ?? "—"}</div>
+
+                {/* Fuel */}
+                <div>{(r.fuel_type ?? r.fuelType ?? "—").toString()}</div>
+
+                {/* Capacity */}
+                <div>{r.capacity ?? r.fuelCapacityL ?? "—"}</div>
+
+                {/* Created / last refuel */}
+                <div className="text-right md:text-left text-sm text-white/70">
+                  {r.created_at
+                    ? fmtRefuel(r.created_at)
+                    : r.lastRefuelISO
+                    ? fmtRefuel(r.lastRefuelISO)
+                    : "—"}
+                </div>
               </div>
-
-              {/* Type */}
-              <div>{r.asset_type ?? r.vehicleType ?? "—"}</div>
-
-              {/* Fuel */}
-              <div>{(r.fuel_type ?? r.fuelType ?? "—").toString()}</div>
-
-              {/* Capacity */}
-              <div>{r.capacity ?? r.fuelCapacityL ?? "—"}</div>
-
-              {/* Created / last refuel */}
-              <div className="text-right md:text-left text-sm text-white/70">
-                {r.created_at
-                  ? fmtRefuel(r.created_at)
-                  : r.lastRefuelISO
-                  ? fmtRefuel(r.lastRefuelISO)
-                  : "—"}
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {/* Footer with centered CTA */}
       <div className="border-t border-white/10 px-6 py-8">

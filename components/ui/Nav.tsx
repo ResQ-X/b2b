@@ -201,7 +201,7 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
             >
               <Image
                 src="/input-field.svg"
-                alt="Open sub-admin menu"
+                alt=""
                 width={24}
                 height={24}
                 className="rounded-full"

@@ -61,58 +61,72 @@ export default function BillingPage() {
         <WalletHeaderCard role={userProfile?.role} />
       </div>
 
-      {/* Tabs: match original behavior */}
-      <div className={tab === "subscription" ? "w-full lg:w-3/5" : "w-full"}>
-        <Tabs value={tab} onChange={setTab} />
-      </div>
-
-      {tab === "subscription" ? (
-        <div
-          className={
-            showRightPane
-              ? "w-full flex flex-col lg:flex-row justify-between gap-6"
-              : "w-full lg:w-3/5"
-          }
-        >
-          {/* Left column */}
-          <div className={showRightPane ? "w-full lg:w-3/5" : "w-full"}>
-            {userProfile?.role === "USER" && (
-              <CurrentPlanCard onUpgrade={() => setShowPicker(true)} />
-            )}
-            <FeaturePanel />
-          </div>
-
-          {/* Right column (shows at the right, not below) */}
-          {showRightPane && (
-            <div className="w-full lg:w-[38%] bg-[#3B3835] rounded-2xl h-auto lg:h-[810px] shrink-0 lg:mt-[-21rem] py-5 lg:py-16">
-              <div className="flex justify-end px-4 lg:px-4 -mt-2 lg:-mt-12">
-                <button
-                  onClick={() => setShowPicker(false)}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-              <Sub />
-            </div>
-          )}
-        </div>
-      ) : (
+      {userProfile?.role !== "USER" && (
         <div className="w-full">
+          {/* <button className="w-full h-10 pb-3 text-lg font-medium text-center mt-10">
+            Transaction Table
+          </button> */}
+
           <BillingTable />
         </div>
+      )}
+
+      {userProfile?.role === "USER" && (
+        <>
+          {/* Tabs: match original behavior */}
+          <div
+            className={tab === "subscription" ? "w-full lg:w-3/5" : "w-full"}
+          >
+            <Tabs value={tab} onChange={setTab} />
+          </div>
+
+          {tab === "subscription" ? (
+            <div
+              className={
+                showRightPane
+                  ? "w-full flex flex-col lg:flex-row justify-between gap-6"
+                  : "w-full lg:w-3/5"
+              }
+            >
+              {/* Left column */}
+              <div className={showRightPane ? "w-full lg:w-3/5" : "w-full"}>
+                <CurrentPlanCard onUpgrade={() => setShowPicker(true)} />
+                <FeaturePanel />
+              </div>
+
+              {/* Right column (shows at the right, not below) */}
+              {showRightPane && (
+                <div className="w-full lg:w-[38%] bg-[#3B3835] rounded-2xl h-auto lg:h-[810px] shrink-0 lg:mt-[-21rem] py-5 lg:py-16">
+                  <div className="flex justify-end px-4 lg:px-4 -mt-2 lg:-mt-12">
+                    <button
+                      onClick={() => setShowPicker(false)}
+                      className="text-gray-400 hover:text-white transition-colors"
+                    >
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <Sub />
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="w-full">
+              <BillingTable />
+            </div>
+          )}
+        </>
       )}
     </div>
   );
