@@ -25,7 +25,7 @@ export default function SignupPage() {
     company_phone: "",
     country: "NG",
     password: "",
-    fleetRole: "USERS",
+    fleetRole: "USER",
   });
 
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -219,7 +219,7 @@ export default function SignupPage() {
                   className="w-full h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white px-4 focus:outline-none"
                   required
                 >
-                  <option value="USERS">USERS</option>
+                  <option value="USERS">USER</option>
                   <option value="SUPER">SUPER</option>
                 </select>
               </div>
