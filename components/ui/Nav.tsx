@@ -99,15 +99,15 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelectSub = (admin: SubAdmin) => {
-    // Persist selection so dashboard page can read it
-    sessionStorage.setItem("activeSubAdmin", JSON.stringify(admin));
-    toast.success(`Switched to ${admin.name || admin.email}`);
-    setIsDropdownopen(false);
+  // const handleSelectSub = (admin: SubAdmin) => {
+  //   // Persist selection so dashboard page can read it
+  //   sessionStorage.setItem("activeSubAdmin", JSON.stringify(admin));
+  //   toast.success(`Switched to ${admin.name || admin.email}`);
+  //   setIsDropdownopen(false);
 
-    // Navigate with a query param the dashboard can also use
-    router.push(`/dashboard?sub=${encodeURIComponent(admin.id)}`);
-  };
+  //   // Navigate with a query param the dashboard can also use
+  //   router.push(`/dashboard?sub=${encodeURIComponent(admin.id)}`);
+  // };
 
   const welcomeName =
     userProfile?.role === "SUB"
@@ -195,17 +195,10 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
           {userProfile?.role === "SUPER" && (
             <button
               onClick={() => setIsDropdownopen((s) => !s)}
-              className="absolute right-1"
               aria-haspopup="menu"
               aria-expanded={isDropdownopen}
             >
-              <Image
-                src="/input-field.svg"
-                alt=""
-                width={24}
-                height={24}
-                className="rounded-full"
-              />
+              <Image src="/input-field.svg" alt="" width={24} height={24} />
             </button>
           )}
         </div>
@@ -229,7 +222,7 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
               {subs.map((admin) => (
                 <li key={admin.id}>
                   <button
-                    onClick={() => handleSelectSub(admin)}
+                    // onClick={() => handleSelectSub(admin)}
                     className="w-full text-left hover:bg-[#FFA947] pr-5 pl-2 py-2 rounded-lg transition-all duration-300 text-white"
                   >
                     <div className="font-semibold">
