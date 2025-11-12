@@ -198,7 +198,14 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
               aria-haspopup="menu"
               aria-expanded={isDropdownopen}
             >
-              <Image src="/input-field.svg" alt="" width={24} height={24} />
+              <Image
+                src="/drop-down.svg"
+                alt=""
+                width={24}
+                height={24}
+                className="rounded-full"
+              />
+              {/* <Image src="/input-field.svg" alt="" width={24} height={24} /> */}
             </button>
           )}
         </div>
