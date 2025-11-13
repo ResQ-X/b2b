@@ -3,10 +3,11 @@ import React, { useState, useEffect } from "react";
 import axiosInstance from "@/lib/axios";
 import { WalletHeaderCard } from "@/components/billing/WalletHeaderCard";
 import { Tabs } from "@/components/billing/Tabs";
-import { FeaturePanel } from "@/components/billing/FeaturePanel";
+// import { FeaturePanel } from "@/components/billing/FeaturePanel";
 import { BillingTable } from "@/components/billing/BillingTable";
 import { CurrentPlanCard } from "@/components/billing/CurrentPlanCard";
-import Sub from "@/components/billing/Sub";
+// import Sub from "@/components/billing/Sub";
+import FleetAmount from "@/components/billing/FleetAmount";
 
 export const naira = (n: number) =>
   new Intl.NumberFormat("en-NG", {
@@ -90,35 +91,39 @@ export default function BillingPage() {
             >
               {/* Left column */}
               <div className={showRightPane ? "w-full lg:w-3/5" : "w-full"}>
-                <CurrentPlanCard onUpgrade={() => setShowPicker(true)} />
-                <FeaturePanel />
+                <div className="hidden">
+                  <CurrentPlanCard onUpgrade={() => setShowPicker(true)} />
+                </div>
+                <FleetAmount />
+                {/* <FeaturePanel /> */}
               </div>
 
               {/* Right column (shows at the right, not below) */}
               {showRightPane && (
-                <div className="w-full lg:w-[38%] bg-[#3B3835] rounded-2xl h-auto lg:h-[810px] shrink-0 lg:mt-[-21rem] py-5 lg:py-16">
-                  <div className="flex justify-end px-4 lg:px-4 -mt-2 lg:-mt-12">
-                    <button
-                      onClick={() => setShowPicker(false)}
-                      className="text-gray-400 hover:text-white transition-colors"
-                    >
-                      <svg
-                        className="w-6 h-6"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                  <Sub />
-                </div>
+                <div className=""></div>
+                // <div className="w-full lg:w-[38%] bg-[#3B3835] rounded-2xl h-auto lg:h-[810px] shrink-0 lg:mt-[-21rem] py-5 lg:py-16">
+                //   <div className="flex justify-end px-4 lg:px-4 -mt-2 lg:-mt-12">
+                //     <button
+                //       onClick={() => setShowPicker(false)}
+                //       className="text-gray-400 hover:text-white transition-colors"
+                //     >
+                //       <svg
+                //         className="w-6 h-6"
+                //         fill="none"
+                //         stroke="currentColor"
+                //         viewBox="0 0 24 24"
+                //       >
+                //         <path
+                //           strokeLinecap="round"
+                //           strokeLinejoin="round"
+                //           strokeWidth={2}
+                //           d="M6 18L18 6M6 6l12 12"
+                //         />
+                //       </svg>
+                //     </button>
+                //   </div>
+                //   <Sub />
+                // </div>
               )}
             </div>
           ) : (
