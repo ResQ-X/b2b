@@ -19,7 +19,7 @@ type UserProfile = {
   company_email: string;
   phone: string;
   company_phone: string;
-  role?: string; // "SUPER" | "SUB"
+  role?: string;
 };
 
 type SubAdmin = {
