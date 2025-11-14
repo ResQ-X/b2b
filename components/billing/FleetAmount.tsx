@@ -10,7 +10,7 @@ function FleetAmount() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const handleProceed = async () => {
-    if (!assetCount || assetCount <= 0) {
+    if (!assetCount || Number(assetCount) <= 0) {
       setError("Please enter a valid number of assets");
       return;
     }
@@ -35,7 +35,7 @@ function FleetAmount() {
           response.data.message || "Failed to fetch pricing estimate"
         );
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(
         err.response?.data?.message ||
           err.message ||

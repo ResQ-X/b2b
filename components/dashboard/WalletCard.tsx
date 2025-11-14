@@ -4,9 +4,13 @@ import { Button } from "@/components/ui/button";
 export function WalletCard({
   balance,
   onTopUp,
+  role,
+  setShowRequest,
 }: {
   balance: number;
   onTopUp?: () => void;
+  role?: string;
+  setShowRequest: any;
 }) {
   return (
     <div className="border border-[#777777] rounded-2xl bg-[#3B3835] text-white">
@@ -18,15 +22,29 @@ export function WalletCard({
       </div>
       <hr className="mt-[27px] border-[#5E5E5E]" />
 
-      <div className="flex justify-center w-[159px] m-auto mt-[13px] mb-5">
-        <Button
-          onClick={onTopUp}
-          variant="orange"
-          className="w-[180px] lg:w-[262px] h-[58px] lg:h-[60px]"
-        >
-          Top Up Wallet
-        </Button>
-      </div>
+      {role === "SUB" && (
+        <div className="flex justify-center w-[159px] m-auto mt-[13px] mb-5">
+          <Button
+            onClick={() => setShowRequest(true)}
+            variant="orange"
+            className="w-[180px] lg:w-[262px] h-[58px] lg:h-[60px]"
+          >
+            Request Money
+          </Button>
+        </div>
+      )}
+
+      {role !== "SUB" && (
+        <div className="flex justify-center w-[159px] m-auto mt-[13px] mb-5">
+          <Button
+            onClick={onTopUp}
+            variant="orange"
+            className="w-[180px] lg:w-[262px] h-[58px] lg:h-[60px]"
+          >
+            Top Up Wallet
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
