@@ -24,6 +24,15 @@ export function PaymentInitModal({
     }).format(amount);
   };
 
+  // Calculate total based on billing cycle
+  const calculateTotal = () => {
+    const monthlyTotal = estimateData.total_amount;
+    if (billingCycle === "ANNUAL") {
+      return monthlyTotal * 12;
+    }
+    return monthlyTotal;
+  };
+
   const handleInitPayment = async () => {
     setLoading(true);
     setError("");
@@ -130,10 +139,16 @@ export function PaymentInitModal({
                 {formatCurrency(estimateData.per_asset)}
               </span>
             </div>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[#CCC8C4] text-sm">Billing Cycle:</span>
+              <span className="text-white font-semibold">
+                {billingCycle === "MONTHLY" ? "Monthly" : "Annual"}
+              </span>
+            </div>
             <div className="flex justify-between items-center pt-3 mt-3 border-t border-[#777777]">
               <span className="text-white font-semibold">Total Amount:</span>
               <span className="text-[#FF9933] font-bold text-xl">
-                {formatCurrency(estimateData.total_amount)}
+                {formatCurrency(calculateTotal())}
               </span>
             </div>
           </div>

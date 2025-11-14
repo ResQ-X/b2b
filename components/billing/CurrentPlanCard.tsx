@@ -190,7 +190,7 @@ export function CurrentPlanCard({ onUpgrade }: { onUpgrade: () => void }) {
   const renewalDate = formatDate(subscription.expires_at);
 
   // Prefer total price if provided; otherwise compute from price_per_asset * asset_count
-  let totalPrice = subscription.price_total
+  const totalPrice = subscription.price_total
     ? naira(subscription.price_total)
     : naira(
         (plan.price_per_asset ? Number(plan.price_per_asset) : 0) *

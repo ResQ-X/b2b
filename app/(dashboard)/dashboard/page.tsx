@@ -26,6 +26,18 @@ import {
   // PieDataResponse,
   DashboardStats,
 } from "@/types/dashboard";
+import RequestMoneyModal from "@/components/billing/RequestMoneyModal";
+
+type UserProfile = {
+  id: string;
+  name: string;
+  company_name: string;
+  email: string;
+  company_email: string;
+  phone: string;
+  company_phone: string;
+  role?: string;
+};
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -51,6 +63,10 @@ export default function DashboardPage() {
   );
   const [topUpAmount, setTopUpAmount] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showRequest, setShowRequest] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
+  const availableBalance = walletBalance?.balance ?? 0.0;
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -65,6 +81,22 @@ export default function DashboardPage() {
     };
 
     fetchBalance();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get("/fleets/profile");
+        setUserProfile(response.data.data);
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
   }, []);
 
   const availableYears = [2025];
@@ -417,6 +449,32 @@ export default function DashboardPage() {
     }
   };
 
+  const handleRequestSubmit = async (data: any) => {
+    console.log("Request data:", data);
+
+    try {
+      // Start request
+      toast.info("Submitting fund request...");
+      const response = await axiosInstance.post("/sub/fund-requests", data);
+
+      if (response.data?.status === "OK" || response.data?.success) {
+        toast.success(
+          response.data?.message || "Fund request submitted successfully!"
+        );
+        setShowRequest(false); // close modal
+      } else {
+        toast.error(response.data?.message || "Failed to submit fund request.");
+      }
+    } catch (error: any) {
+      console.error("Fund request failed:", error);
+      const errMsg =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Unable to submit fund request. Please try again.";
+      toast.error(errMsg);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:gap-[52px]">
@@ -445,6 +503,8 @@ export default function DashboardPage() {
         <WalletCard
           balance={walletBalance?.balance ?? 0}
           onTopUp={() => setTopUpOpen(true)}
+          role={userProfile?.role}
+          setShowRequest={setShowRequest}
         />
       </div>
 
@@ -538,6 +598,13 @@ export default function DashboardPage() {
         onAmountChange={setTopUpAmount}
         isProcessing={isProcessing}
         onSubmit={handleTopUpInitiate}
+      />
+
+      <RequestMoneyModal
+        open={showRequest}
+        availableBalance={availableBalance}
+        onOpenChange={setShowRequest}
+        onSubmit={handleRequestSubmit}
       />
     </div>
   );
