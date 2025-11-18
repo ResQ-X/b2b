@@ -151,7 +151,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         />
       </Head>
 
-      <div className="flex h-screen bg-[#242220]">
+      <div className="flex min-h-screen bg-[#242220]">
         {/* Sidebar */}
         <div className="hidden md:flex">
           <Sidebar />
