@@ -33,6 +33,12 @@ export function PaymentInitModal({
     return monthlyTotal;
   };
 
+  const getCategoryLabel = (category: string) => {
+    return category === "UNLIMITED_CALLOUT"
+      ? "Unlimited Callout"
+      : "Capped Callout (8x/month)";
+  };
+
   const handleInitPayment = async () => {
     setLoading(true);
     setError("");
@@ -43,6 +49,7 @@ export function PaymentInitModal({
         {
           asset_count: estimateData.asset_count,
           billing_cycle: billingCycle,
+          category: estimateData.category,
           starts_at: new Date().toISOString(),
         }
       );
@@ -131,6 +138,12 @@ export function PaymentInitModal({
               <span className="text-[#CCC8C4] text-sm">Assets:</span>
               <span className="text-white font-semibold">
                 {estimateData.asset_count}
+              </span>
+            </div>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[#CCC8C4] text-sm">Category:</span>
+              <span className="text-white font-semibold">
+                {getCategoryLabel(estimateData.category)}
               </span>
             </div>
             <div className="flex justify-between items-center mb-2">

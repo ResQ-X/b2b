@@ -4,6 +4,7 @@ import { PaymentInitModal } from "./PaymentInitModal";
 
 function FleetAmount() {
   const [assetCount, setAssetCount] = useState("");
+  const [category, setCategory] = useState("UNLIMITED_CALLOUT");
   const [pricing, setPricing] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -24,6 +25,7 @@ function FleetAmount() {
         {
           asset_count: parseInt(assetCount),
           billing_cycle: "MONTHLY",
+          category: category,
         }
       );
 
@@ -53,10 +55,42 @@ function FleetAmount() {
           Subscription
         </p>
         <p className="mb-6 text-sm font-medium text-[#CCC8C4]">
-          Add the number of assets to get your subscription pricing
+          Add the number of assets and select your subscription plan
         </p>
 
         <div className="mb-6">
+          <p className="pb-3 text-sm font-medium text-[#CCC8C4]">
+            Select Category
+          </p>
+          <div className="flex gap-3 mb-6">
+            <button
+              onClick={() => setCategory("UNLIMITED_CALLOUT")}
+              className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
+                category === "UNLIMITED_CALLOUT"
+                  ? "bg-[#FF9933] text-white"
+                  : "bg-[#2C2926] text-[#CCC8C4] border border-[#777777] hover:border-[#FF9933]"
+              }`}
+            >
+              <div className="text-center">
+                <div className="font-bold">Unlimited Callout</div>
+                <div className="text-xs mt-1 opacity-80">No limits</div>
+              </div>
+            </button>
+            <button
+              onClick={() => setCategory("CAPPED_CALLOUT")}
+              className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
+                category === "CAPPED_CALLOUT"
+                  ? "bg-[#FF9933] text-white"
+                  : "bg-[#2C2926] text-[#CCC8C4] border border-[#777777] hover:border-[#FF9933]"
+              }`}
+            >
+              <div className="text-center">
+                <div className="font-bold">Capped Callout</div>
+                <div className="text-xs mt-1 opacity-80">8 times/month</div>
+              </div>
+            </button>
+          </div>
+
           <p className="pb-3 text-sm font-medium text-[#CCC8C4]">
             How many assets would you like to add?
           </p>
