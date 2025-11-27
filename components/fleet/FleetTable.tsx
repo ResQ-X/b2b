@@ -150,16 +150,16 @@ export default function FleetTable({
         assetTypes={[
           { label: "Generator", value: "generator" },
           { label: "Vehicle", value: "vehicle" },
-          { label: "Other", value: "other" },
+          { label: "Others", value: "other" },
         ]}
         assetSubtypes={[
           { label: "SUV", value: "suv" },
           { label: "Truck", value: "truck" },
           { label: "Sudan", value: "sudan" },
-          { label: "Other", value: "other" },
+          { label: "Others", value: "other" },
         ]}
         fuelTypes={[
-          // { label: "Diesel", value: "diesel" },
+          { label: "Diesel", value: "diesel" },
           { label: "Petrol", value: "petrol" },
         ]}
       />
