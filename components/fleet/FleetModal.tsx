@@ -364,24 +364,6 @@ export default function AssetModal({
           </Field>
 
           {/* Asset Type */}
-          {/* <Field label="Asset Type">
-            <Select
-              value={form.asset_type ? form.asset_type.toLowerCase() : ""}
-              onValueChange={handleAssetTypeChange}
-              required
-            >
-              <SelectTrigger className="h-14 rounded-xl border border-white/20 bg-[#2D2B29] text-white">
-                <SelectValue placeholder="Select asset type" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#2D2B29] text-white border-white/10">
-                {assetTypes.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value.toLowerCase()}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field> */}
           <Field label="Asset Type">
             <Select
               value={form.asset_type ? form.asset_type.toLowerCase() : ""}

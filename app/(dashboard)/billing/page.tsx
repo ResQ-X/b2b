@@ -71,11 +71,7 @@ export default function BillingPage() {
       </div>
 
       {/* Tabs for all roles */}
-      <div
-        className={
-          tab === "subscription" && isUser ? "w-full lg:w-3/5" : "w-full"
-        }
-      >
+      <div className="w-full">
         <Tabs value={tab} onChange={setTab} role={userProfile?.role} />
       </div>
 
@@ -88,7 +84,7 @@ export default function BillingPage() {
               : "w-full lg:w-3/5"
           }
         >
-          <div className={showRightPane ? "w-full lg:w-3/5" : "w-full"}>
+          <div className={showRightPane ? "w-full lg:w-1/2" : "w-full"}>
             <CurrentPlanCard onUpgrade={() => setShowPicker(true)} />
             {showRightPane && <FleetAmount />}
           </div>

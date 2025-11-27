@@ -358,7 +358,7 @@ export default function DashboardPage() {
 
   const fuelTypeOptions = [
     { label: "Petrol", value: "PETROL" },
-    // { label: "Diesel", value: "DIESEL" },
+    { label: "Diesel", value: "DIESEL" },
   ];
 
   const vehicleOptions = assets.map((asset) => ({

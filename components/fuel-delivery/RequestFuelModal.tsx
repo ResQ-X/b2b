@@ -1105,58 +1105,58 @@ export default function RequestFuelModal({
 
             {/* Quantity & Amount */}
             <div className="flex items-center gap-6">
-              {/* Quantity (Litres) → updates Amount locally */}
               <div className="w-4/5">
-                <Field label="Quantity (Litres)" error={errors.quantity}>
+                {/* Amount (₦) → updates Quantity via API */}
+                <Field label="Amount (₦)" error={errors.quantity}>
                   <CustomInput
                     type="number"
-                    min="1"
+                    min="0"
                     step="1"
-                    value={form.quantity === 0 ? "" : String(form.quantity)}
+                    value={amount === "" ? "" : String(amount)}
                     onChange={(e) => {
                       const val = e.target.value;
-                      const litres =
-                        val === "" ? 0 : Math.max(0, parseInt(val, 10) || 0);
-                      setForm((p) => ({ ...p, quantity: litres }));
-                      clearError("quantity");
-                      // keep amount in sync (no API needed for this direction)
                       if (val === "") {
                         setAmount("");
-                      } else {
-                        convertLitresToAmount(litres);
+                        // don't force quantity to zero; keep last computed litres until user confirms/edits
+                        return;
                       }
+                      const naira = Math.max(0, Math.floor(Number(val) || 0));
+                      setAmount(naira);
+                      // debounce to avoid hammering the endpoint
+                      if (upperFuel) queueAmountConvert(naira);
                     }}
-                    placeholder="Enter quantity in litres (min: 25L)"
+                    placeholder="Enter amount in ₦"
                     className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
                   />
+                  {converting && (
+                    <p className="text-xs text-white/60 mt-1">Converting…</p>
+                  )}
                 </Field>
               </div>
 
-              {/* Amount (₦) → updates Quantity via API */}
-              <Field label="Amount (₦)" error={errors.quantity}>
+              {/* Quantity (Litres) → updates Amount locally */}
+              <Field label="Quantity (Litres)" error={errors.quantity}>
                 <CustomInput
                   type="number"
-                  min="0"
+                  min="1"
                   step="1"
-                  value={amount === "" ? "" : String(amount)}
+                  value={form.quantity === 0 ? "" : String(form.quantity)}
                   onChange={(e) => {
                     const val = e.target.value;
+                    const litres =
+                      val === "" ? 0 : Math.max(0, parseInt(val, 10) || 0);
+                    setForm((p) => ({ ...p, quantity: litres }));
+                    clearError("quantity");
+                    // keep amount in sync (no API needed for this direction)
                     if (val === "") {
                       setAmount("");
-                      // don't force quantity to zero; keep last computed litres until user confirms/edits
-                      return;
+                    } else {
+                      convertLitresToAmount(litres);
                     }
-                    const naira = Math.max(0, Math.floor(Number(val) || 0));
-                    setAmount(naira);
-                    // debounce to avoid hammering the endpoint
-                    if (upperFuel) queueAmountConvert(naira);
                   }}
-                  placeholder="Enter amount in ₦"
+                  placeholder="Enter quantity in litres (min: 25L)"
                   className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
                 />
-                {converting && (
-                  <p className="text-xs text-white/60 mt-1">Converting…</p>
-                )}
               </Field>
             </div>
 
