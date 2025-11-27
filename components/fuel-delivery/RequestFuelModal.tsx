@@ -610,8 +610,8 @@ export default function RequestFuelModal({
 
     if (!form.quantity || form.quantity <= 0) {
       next.quantity = "Quantity must be greater than 0";
-    } else if (form.quantity < 25) {
-      next.quantity = "Minimum quantity is 25 litres";
+    } else if (form.quantity < 50) {
+      next.quantity = "Minimum quantity is 50 litres";
     } else if (form.quantity > 5000) {
       next.quantity = "Maximum quantity is 5000 litres";
     } else if (!Number.isInteger(Number(form.quantity))) {
@@ -1154,7 +1154,7 @@ export default function RequestFuelModal({
                       convertLitresToAmount(litres);
                     }
                   }}
-                  placeholder="Enter quantity in litres (min: 25L)"
+                  placeholder="quantity (min: 50L)"
                   className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
                 />
               </Field>
