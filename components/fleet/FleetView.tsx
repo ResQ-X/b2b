@@ -1,4 +1,6 @@
 "use client";
+import axiosInstance from "@/lib/axios";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +25,26 @@ const fmtDate = (iso: string) =>
 
 export function FleetView({ vehicle }: FleetViewProps) {
   const router = useRouter();
+  const [assetLogs, setAssetLogs] = useState<any[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAssetLogs = async () => {
+      try {
+        const res = await axiosInstance.get(
+          `/fleet-order-logging/asset/${vehicle.assetId}`
+        );
+        setAssetLogs(res.data?.data);
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAssetLogs();
+  }, []);
+
+  console.log("assetLogs", assetLogs);
 
   return (
     <div className="bg-[#242220] w-full space-y-8 text-white">
@@ -52,7 +74,7 @@ export function FleetView({ vehicle }: FleetViewProps) {
             <span className="text-white/70">Status:</span>
             <span className="inline-flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
-              <span className="text-white/90">{vehicle.status}</span>
+              {/* <span className="text-white/90">{vehicle.status}</span> */}
             </span>
           </div>
         )}
@@ -84,42 +106,76 @@ export function FleetView({ vehicle }: FleetViewProps) {
       </div>
 
       {/* ACTIVITY LOG */}
-      {/* <div className="bg-[#3B3835] space-y-4 p-6 rounded-[14px] mt-8">
+      <div className="bg-[#3B3835] space-y-4 p-6 rounded-[14px] mt-8">
         <h2 className="text-lg font-semibold">Activity Log</h2>
         <div className="rounded-2xl overflow-hidden">
           <table className="w-full">
             <thead className="bg-[#262422]">
               <tr>
                 <Th>Time</Th>
-                <Th>Activity</Th>
-                <Th>Status</Th>
+                <Th>Details</Th>
+                <Th>Amount</Th>
+                {/* <Th>Status</Th> */}
               </tr>
             </thead>
-            <tbody className="">
-              <Tr
-                time="18 Mar 2025, 08:00 AM"
-                activity="Refueled"
-                status="Confirmed"
-              />
-              <Tr
-                time="18 Mar 2025, 11:30 AM"
-                activity="Low Fuel Alert"
-                status="In Progress"
-              />
-              <Tr
-                time="19 Mar 2025, 05:00 PM"
-                activity="Low Fuel Alert"
-                status="Out for Delivery"
-              />
-              <Tr
-                time="22 Mar 2025, 10:15 AM"
-                activity="Fueling Schedule"
-                status="Out for Delivery"
-              />
+            <tbody>
+              {assetLogs && assetLogs.length > 0 ? (
+                assetLogs.map((log) => (
+                  <tr key={log.id} className="hover:bg-white/[0.03] align-top">
+                    {/* TIME */}
+                    <td className="p-4 text-sm">{fmtDate(log.created_at)}</td>
+
+                    {/* DETAILS */}
+                    <td className="p-4 text-sm space-y-1">
+                      <div className="text-white/90 font-medium">
+                        {log.items?.fuel_type} — {log.items?.litres}L
+                      </div>
+
+                      <div className="text-white/70">
+                        Location: {log.location_name}
+                      </div>
+
+                      <div className="text-white/70">
+                        Fuel Volume: {log.fuel_volume}
+                      </div>
+
+                      <div className="text-white/70">
+                        Coordinates: {log.latitude}, {log.longitude}
+                      </div>
+
+                      <div className="text-white/70">
+                        Tags: {log.tags?.join(", ")}
+                      </div>
+
+                      <div className="text-white/70">
+                        Notes: {log.metadata?.notes ?? "None"}
+                      </div>
+
+                      <div className="text-white/70">
+                        Order ID: {log.order_id}
+                      </div>
+                    </td>
+
+                    {/* AMOUNT */}
+                    <td className="p-4 text-sm">
+                      ₦{Number(log.amount).toLocaleString()}
+                    </td>
+
+                    {/* STATUS */}
+                    {/* <td className="p-4 text-sm capitalize">{log.status}</td> */}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="p-4 text-sm text-white/60">
+                    {loading ? "Loading..." : "No logs found"}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 }
@@ -137,6 +193,7 @@ function Labeled({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
 function Th({ children }: { children: React.ReactNode }) {
   return (
     <th className="text-left p-4 text-sm font-medium text-white/70">
@@ -144,6 +201,7 @@ function Th({ children }: { children: React.ReactNode }) {
     </th>
   );
 }
+
 function Tr({
   time,
   activity,
