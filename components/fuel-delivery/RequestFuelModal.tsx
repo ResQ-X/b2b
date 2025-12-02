@@ -76,18 +76,19 @@ type ValidationErrors = {
 type CheckoutBreakdown = {
   fuel_type: string;
   quantity: number;
-  consumablePrice: number;
-  servicePrice: number;
-  deliveryPrice: number;
-  payAsYouUsePrice: number;
+  fuelProductCost: number;
+  serviceChargeAmount: number;
+  deliveryFeeAmount: number;
+  totalCostWithoutSubscription: number;
   subscriptionApplied: boolean;
-  subscriptionCharge: number | null;
-  estimatedCharge: number;
+  subscriptionCost: number | null;
+  finalTotalCost: number;
   walletBalance: number;
   subscriptionRemainingUses: number | null;
 };
 
 type InitFuelResponse = {
+  note?: string;
   success: boolean;
   breakdown: CheckoutBreakdown;
   assets: Array<{
@@ -111,6 +112,7 @@ const MANUAL_LOCATION_VALUE = "__manual__";
 /* ===================== Checkout Modal ===================== */
 
 function FuelCheckoutModal({
+  note,
   open,
   onOpenChange,
   breakdown,
@@ -119,6 +121,7 @@ function FuelCheckoutModal({
   onConfirm,
   processing,
 }: {
+  note?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   breakdown: CheckoutBreakdown | null;
@@ -195,10 +198,7 @@ function FuelCheckoutModal({
             <h3 className="text-white text-[15px] font-semibold mb-3">
               Additional Note
             </h3>
-            <p className="text-white/80 mt-5">
-              No additional note
-              {/* {orderDetails.additionalNotes} */}
-            </p>
+            <p className="text-white/80 mt-5">{note}</p>
           </div>
           {/* )} */}
 
@@ -210,24 +210,24 @@ function FuelCheckoutModal({
             <div className="space-y-1">
               <SummaryRow
                 label="Fuel Cost"
-                value={formatNaira(breakdown.consumablePrice)}
+                value={formatNaira(breakdown.fuelProductCost)}
               />
               <SummaryRow
                 label="Service Fee"
-                value={formatNaira(breakdown.servicePrice)}
+                value={formatNaira(breakdown.serviceChargeAmount)}
               />
               <SummaryRow
                 label="Delivery Fee"
-                value={formatNaira(breakdown.deliveryPrice)}
+                value={formatNaira(breakdown.deliveryFeeAmount)}
               />
 
-              {breakdown.subscriptionApplied &&
+              {/* {breakdown.subscriptionApplied &&
                 breakdown.subscriptionCharge && (
                   <SummaryRow
                     label="Subscription Charge"
                     value={formatNaira(breakdown.subscriptionCharge)}
                   />
-                )}
+                )} */}
 
               <div className="pt-2 mt-2 border-t border-white/10">
                 <div className="flex items-center justify-between py-2">
@@ -235,7 +235,7 @@ function FuelCheckoutModal({
                     Total Amount:
                   </span>
                   <span className="text-white font-bold text-lg">
-                    {formatNaira(breakdown.estimatedCharge)}
+                    {formatNaira(breakdown.finalTotalCost)}
                   </span>
                 </div>
               </div>
@@ -1108,7 +1108,7 @@ export default function RequestFuelModal({
               <div className="w-4/5">
                 {/* Amount (₦) → updates Quantity via API */}
                 <Field label="Amount (₦)" error={errors.quantity}>
-                  <CustomInput
+                  {/* <CustomInput
                     type="number"
                     min="0"
                     step="1"
@@ -1127,6 +1127,26 @@ export default function RequestFuelModal({
                     }}
                     placeholder="Enter amount in ₦"
                     className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
+                  /> */}
+                  <CustomInput
+                    type="text" // Changed from "number"
+                    value={
+                      amount === ""
+                        ? ""
+                        : Number(amount).toLocaleString("en-NG")
+                    }
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/,/g, ""); // Remove commas
+                      if (val === "") {
+                        setAmount("");
+                        return;
+                      }
+                      const naira = Math.max(0, Math.floor(Number(val) || 0));
+                      setAmount(naira);
+                      if (upperFuel) queueAmountConvert(naira);
+                    }}
+                    placeholder="Enter amount in ₦"
+                    className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
                   />
                   {converting && (
                     <p className="text-xs text-white/60 mt-1">Converting…</p>
@@ -1136,7 +1156,7 @@ export default function RequestFuelModal({
 
               {/* Quantity (Litres) → updates Amount locally */}
               <Field label="Quantity (Litres)" error={errors.quantity}>
-                <CustomInput
+                {/* <CustomInput
                   type="number"
                   min="1"
                   step="1"
@@ -1148,6 +1168,29 @@ export default function RequestFuelModal({
                     setForm((p) => ({ ...p, quantity: litres }));
                     clearError("quantity");
                     // keep amount in sync (no API needed for this direction)
+                    if (val === "") {
+                      setAmount("");
+                    } else {
+                      convertLitresToAmount(litres);
+                    }
+                  }}
+                  placeholder="quantity (min: 50L)"
+                  className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
+                /> */}
+
+                <CustomInput
+                  type="text" // Changed from "number"
+                  value={
+                    form.quantity === 0
+                      ? ""
+                      : form.quantity.toLocaleString("en-NG")
+                  }
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/,/g, ""); // Remove commas
+                    const litres =
+                      val === "" ? 0 : Math.max(0, parseInt(val, 10) || 0);
+                    setForm((p) => ({ ...p, quantity: litres }));
+                    clearError("quantity");
                     if (val === "") {
                       setAmount("");
                     } else {
@@ -1205,6 +1248,7 @@ export default function RequestFuelModal({
         assets={checkoutData?.assets || null}
         onConfirm={handleConfirmCheckout}
         processing={checkoutProcessing}
+        note={checkoutData?.note}
       />
     </>
   );

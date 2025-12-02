@@ -29,6 +29,7 @@ export default function FleetDetailsPage({
       vehicleId: asset.asset_name
         ? asset.asset_name // you can prefer asset.id if you want stable ids
         : asset.id,
+      assetId: asset.id,
       fuelLevelPct:
         typeof asset.capacity === "number"
           ? Math.min(100, Math.max(0, Math.round((asset.capacity / 100) * 100)))

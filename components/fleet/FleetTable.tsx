@@ -8,6 +8,7 @@ import AssetModal from "@/components/fleet/FleetModal";
 /* --- Mock data type used previously (kept for fallback) --- */
 export type FleetRow = {
   vehicleId: string;
+  assetId: string;
   fuelLevelPct: number;
   lastRefuelISO: string;
   location: string;

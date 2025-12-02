@@ -1,7 +1,7 @@
 "use client";
+import axiosInstance from "@/lib/axios";
 import React, { Suspense, useEffect, useState } from "react";
 import { SettingRow } from "@/components/account/SettingRow";
-import axiosInstance from "@/lib/axios";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
@@ -35,6 +35,8 @@ function AccountContent() {
     ...(role === "SUPER" || role === "SUB"
       ? [{ label: "Requests", href: "/account/requests" }]
       : []),
+
+    { label: "Logs", href: "/account/logs" },
   ];
 
   if (loading) {

@@ -56,12 +56,12 @@ type GooglePlacePrediction = {
 
 type EmergencyBreakdown = {
   emergency_type: string; // e.g., "TOWING" | "JUMP_START" | ...
-  servicePrice: number;
-  deliveryPrice: number;
+  emergencyBaseCost: number;
+  deliveryFeeAmount: number;
   payAsYouUse: number;
   subscriptionApplied: boolean;
   subscriptionCharge: number | null;
-  estimatedCharge: number;
+  finalTotalCost: number;
   walletBalance: number;
   subscriptionRemainingUses: number | null;
   towingMethod: string | null;
@@ -69,6 +69,7 @@ type EmergencyBreakdown = {
 };
 
 type InitEmergencyResponse = {
+  note?: string;
   success: boolean;
   breakdown: EmergencyBreakdown;
   assets: Array<{ id: string; plate_number?: string | null }>;
@@ -285,6 +286,7 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 function EmergencyCheckoutModal({
+  note,
   open,
   onOpenChange,
   breakdown,
@@ -294,6 +296,7 @@ function EmergencyCheckoutModal({
   onConfirm,
   processing,
 }: {
+  note?: string;
   open: boolean;
   onOpenChange: (v: boolean) => void;
   breakdown: EmergencyBreakdown | null;
@@ -379,13 +382,7 @@ function EmergencyCheckoutModal({
             <h3 className="text-white text-[15px] font-semibold mb-3">
               Additional Note
             </h3>
-            <p className="text-white/80 mt-5">
-              No additional note
-              {/* {orderDetails?.additionalNotes
-                ? `: ${orderDetails.additionalNotes}`
-                : ""} */}
-              {/* {orderDetails.additionalNotes} */}
-            </p>
+            <p className="text-white/80 mt-5">{note}</p>
           </div>
           {/* )} */}
 
@@ -397,16 +394,16 @@ function EmergencyCheckoutModal({
             <div className="space-y-1">
               <Row
                 label="Service Fee"
-                value={formatNaira(breakdown.servicePrice)}
+                value={formatNaira(breakdown.emergencyBaseCost)}
               />
               <Row
                 label="Delivery Fee"
-                value={formatNaira(breakdown.deliveryPrice)}
+                value={formatNaira(breakdown.deliveryFeeAmount)}
               />
-              <Row
+              {/* <Row
                 label="Pay-as-you-use"
                 value={formatNaira(breakdown.payAsYouUse)}
-              />
+              /> */}
 
               {breakdown.subscriptionApplied &&
                 breakdown.subscriptionCharge != null && (
@@ -422,7 +419,7 @@ function EmergencyCheckoutModal({
                     Total Amount:
                   </span>
                   <span className="text-white font-bold text-lg">
-                    {formatNaira(breakdown.estimatedCharge)}
+                    {formatNaira(breakdown.finalTotalCost)}
                   </span>
                 </div>
               </div>
@@ -1340,6 +1337,7 @@ export function RequestEmergencyServiceCard({
         missingAssets={checkoutData?.missingAssets || null}
         onConfirm={handleConfirmCheckout}
         processing={checkoutProcessing}
+        note={checkoutData?.note}
       />
     </>
   );

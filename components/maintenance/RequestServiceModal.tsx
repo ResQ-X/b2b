@@ -72,17 +72,18 @@ type ValidationErrors = {
 
 type MaintenanceBreakdown = {
   maintenance_type: string;
-  servicePrice: number;
-  deliveryPrice: number;
+  maintenanceBaseCost: number;
+  deliveryFeeAmount: number;
   payAsYouUse: number;
   subscriptionApplied: boolean;
-  subscriptionCharge: number | null;
-  estimatedCharge: number;
+  subscriptionCost: number | null;
+  finalTotalCost: number;
   walletBalance: number;
   subscriptionRemainingUses: number | null;
 };
 
 type InitMaintenanceResponse = {
+  note?: string;
   success: boolean;
   breakdown: MaintenanceBreakdown;
   assets: Array<{ id: string; plate_number?: string | null }>;
@@ -298,6 +299,7 @@ function VehiclesMultiSelect({
 /* ===================== Checkout Modal ===================== */
 
 function MaintenanceCheckoutModal({
+  note,
   open,
   onOpenChange,
   breakdown,
@@ -307,6 +309,7 @@ function MaintenanceCheckoutModal({
   onConfirm,
   processing,
 }: {
+  note?: string;
   open: boolean;
   onOpenChange: (v: boolean) => void;
   breakdown: MaintenanceBreakdown | null;
@@ -384,10 +387,7 @@ function MaintenanceCheckoutModal({
             <h3 className="text-white text-[15px] font-semibold mb-3">
               Additional Note
             </h3>
-            <p className="text-white/80 mt-5">
-              No additional note
-              {/* {orderDetails.additionalNotes} */}
-            </p>
+            <p className="text-white/80 mt-5">{note}</p>
           </div>
           {/* )} */}
 
@@ -399,22 +399,22 @@ function MaintenanceCheckoutModal({
             <div className="space-y-1">
               <Row
                 label="Service Fee"
-                value={formatNaira(breakdown.servicePrice)}
+                value={formatNaira(breakdown.maintenanceBaseCost)}
               />
               <Row
                 label="Delivery Fee"
-                value={formatNaira(breakdown.deliveryPrice)}
+                value={formatNaira(breakdown.deliveryFeeAmount)}
               />
-              <Row
+              {/* <Row
                 label="Pay-as-you-use"
                 value={formatNaira(breakdown.payAsYouUse)}
-              />
+              /> */}
 
               {breakdown.subscriptionApplied &&
-                breakdown.subscriptionCharge != null && (
+                breakdown.subscriptionCost != null && (
                   <Row
                     label="Subscription Charge"
-                    value={formatNaira(breakdown.subscriptionCharge)}
+                    value={formatNaira(breakdown.subscriptionCost)}
                   />
                 )}
 
@@ -424,7 +424,7 @@ function MaintenanceCheckoutModal({
                     Total Amount:
                   </span>
                   <span className="text-white font-bold text-lg">
-                    {formatNaira(breakdown.estimatedCharge)}
+                    {formatNaira(breakdown.finalTotalCost)}
                   </span>
                 </div>
               </div>
@@ -1065,6 +1065,7 @@ export default function RequestServiceModal({
         missingAssets={checkoutData?.missingAssets || null}
         onConfirm={handleConfirmCheckout}
         processing={checkoutProcessing}
+        note={checkoutData?.note}
       />
     </>
   );

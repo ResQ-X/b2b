@@ -45,6 +45,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           ["Dashboard"],
           ["Fuel Delivery", "Maintenance", "Emergency Service"],
           ["Fleet Management", "Schedule"],
+          // ["Analytics", "Fleet Management", "Schedule"],
           ["Billing", "Account"],
         ].map((group, gi, groups) => (
           <div key={gi} className="flex flex-col gap-[12px]">
