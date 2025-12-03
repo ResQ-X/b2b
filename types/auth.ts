@@ -1,6 +1,7 @@
 export interface LoginFormData {
   email: string;
   password: string;
+  userAgent: string;
 }
 export interface ForgotPasswordFormData {
   email: string;

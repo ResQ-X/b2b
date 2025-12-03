@@ -10,7 +10,7 @@ import DisburseMoneyModal from "@/components/billing/DisburseMoneyModal";
 import RequestMoneyModal from "@/components/billing/RequestMoneyModal";
 
 export function WalletHeaderCard({ role }: { role?: string }) {
-  type WalletBalance = { balance: number };
+  type WalletBalance = { balance: number; overdraftBalance: number };
 
   const [walletBalance, setWalletBalance] = useState<WalletBalance | null>(
     null
@@ -25,6 +25,7 @@ export function WalletHeaderCard({ role }: { role?: string }) {
   const [showRequest, setShowRequest] = useState(false);
 
   const availableBalance = walletBalance?.balance ?? 0.0;
+  const overdraftBalance = walletBalance?.overdraftBalance ?? 0.0;
 
   const handleDisburseSubmit = async (data: any) => {
     console.log("Disburse data:", data);
@@ -186,6 +187,15 @@ export function WalletHeaderCard({ role }: { role?: string }) {
                 maximumFractionDigits: 2,
               })}`}
         </h2>
+
+        <p className="text-[#FF8500] mb-2">
+          {loading
+            ? "......."
+            : `₦ - ${overdraftBalance.toLocaleString("en-NG", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`}
+        </p>
 
         <div className="flex gap-4">
           {role !== "SUB" && (
