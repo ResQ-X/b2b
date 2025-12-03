@@ -21,6 +21,7 @@ export default function LoginPage() {
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
+    userAgent: "RFleet",
   });
   const [authState, setAuthState] = useState<AuthState>({
     isLoading: false,

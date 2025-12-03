@@ -57,7 +57,6 @@ export default function Page() {
     fetchSubs();
   }, []);
 
-  // Fetch user data on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -91,70 +90,66 @@ export default function Page() {
     return <div className="p-8 text-red-400 text-center">Error: {error}</div>;
   }
 
-  if (subs.length === 0) {
-    return (
-      <div className="p-8 text-white/80 text-center">No Sub-Admins yet.</div>
-    );
-  }
-
   return (
     <div className="p-8">
       <h1 className="text-white text-2xl font-semibold mb-6">
         Sub-Admins ({subs.length})
       </h1>
 
-      <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#2D2A27]">
-        <table className="min-w-full text-sm text-left text-white">
-          <thead className="bg-[#1F1E1C] text-white/80 text-xs uppercase">
-            <tr>
-              <th className="px-6 py-3">Name</th>
-              <th className="px-6 py-3">Email</th>
-              <th className="px-6 py-3">Phone</th>
-              <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3">Created</th>
-            </tr>
-          </thead>
-          <tbody>
-            {subs.map((u) => (
-              <tr
-                key={u.id}
-                className="border-t border-white/10 hover:bg-white/5 transition"
-              >
-                <td className="px-6 py-4 font-medium">
-                  {u.name || u.company_name || "Unnamed"}
-                </td>
-                <td className="px-6 py-4">{u.email}</td>
-                <td className="px-6 py-4">{u.phone || "—"}</td>
-                <td className="px-6 py-4">
-                  <span className="text-xs bg-white/10 px-2 py-1 rounded-full">
-                    {u.role}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-white/70">
-                  {u.created_at
-                    ? new Date(u.created_at).toLocaleDateString("en-NG", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })
-                    : "—"}
-                </td>
+      {subs.length === 0 ? (
+        <div className="p-8 text-white/80 text-center">No Sub-Admins yet.</div>
+      ) : (
+        <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#2D2A27]">
+          <table className="min-w-full text-sm text-left text-white">
+            <thead className="bg-[#1F1E1C] text-white/80 text-xs uppercase">
+              <tr>
+                <th className="px-6 py-3">Name</th>
+                <th className="px-6 py-3">Email</th>
+                <th className="px-6 py-3">Phone</th>
+                <th className="px-6 py-3">Status</th>
+                <th className="px-6 py-3">Created</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {(user as { role?: string } | null)?.role === "SUPER" && (
-        <Button
-          type="button"
-          variant="light"
-          className="w-auto h-[48px] lg:h-[52px] px-8 mt-5"
-          onClick={() => setIsModalOpen(!isModalOpen)}
-        >
-          Add User
-        </Button>
+            </thead>
+            <tbody>
+              {subs.map((u) => (
+                <tr
+                  key={u.id}
+                  className="border-t border-white/10 hover:bg-white/5 transition"
+                >
+                  <td className="px-6 py-4 font-medium">
+                    {u.name || u.company_name || "Unnamed"}
+                  </td>
+                  <td className="px-6 py-4">{u.email}</td>
+                  <td className="px-6 py-4">{u.phone || "—"}</td>
+                  <td className="px-6 py-4">
+                    <span className="text-xs bg-white/10 px-2 py-1 rounded-full">
+                      {u.role}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-white/70">
+                    {u.created_at
+                      ? new Date(u.created_at).toLocaleDateString("en-NG", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
+
+      <Button
+        type="button"
+        variant="light"
+        className="w-auto h-[48px] lg:h-[52px] px-8 mt-5"
+        onClick={() => setIsModalOpen(!isModalOpen)}
+      >
+        Add User
+      </Button>
 
       <AddUserModal open={isModalOpen} onOpenChange={setIsModalOpen} />
     </div>

@@ -326,10 +326,12 @@ export default function MaintenancePage() {
     } catch (error) {
       console.error(
         "Failed to request maintenance service:",
-        error.response.data.message
+        error?.response?.data.message
       );
-      toast.error(error.response.data.message);
-      // toast.error("Failed to request maintenance service. Please try again.");
+      toast.error(
+        error?.response?.data.message ||
+          "Failed to request maintenance service. Please try again."
+      );
     }
   };
 

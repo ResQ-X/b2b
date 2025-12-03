@@ -24,11 +24,11 @@ export const SIDEBAR_ITEMS = [
     href: "/fleet",
     icon: "CarFront",
   },
-  // {
-  //   title: "Analytics",
-  //   href: "/analytics",
-  //   icon: "CarFront",
-  // },
+  {
+    title: "Analytics",
+    href: "/analytics",
+    icon: "CarFront",
+  },
   {
     title: "Schedule",
     href: "/schedule",

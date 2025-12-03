@@ -1,12 +1,10 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { LogOut } from "lucide-react";
 import * as Icons from "lucide-react";
 import React, { useState } from "react";
-
 import LogoutModal from "@/components/ui/LogoutModal";
 import { SIDEBAR_ITEMS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -23,7 +21,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   };
 
   return (
-    <div className="w-[242px] h-auto bg-[#3B3835] gap-4 flex flex-col py-3">
+    <div className="w-[242px] h-auto bg-[#3B3835] gap-4 py-3">
       <div className="w-full h-[93px]">
         <div className="flex justify-end">
           <button onClick={onClose} className="md:hidden p-2 rounded-md">
@@ -44,8 +42,8 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         {[
           ["Dashboard"],
           ["Fuel Delivery", "Maintenance", "Emergency Service"],
-          ["Fleet Management", "Schedule"],
-          // ["Analytics", "Fleet Management", "Schedule"],
+          // ["Fleet Management", "Schedule"],
+          ["Analytics", "Fleet Management", "Schedule"],
           ["Billing", "Account"],
         ].map((group, gi, groups) => (
           <div key={gi} className="flex flex-col gap-[12px]">
@@ -84,7 +82,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         ))}
       </nav>
 
-      <div className="p-4">
+      <div className="p-4 mt-20">
         <button
           onClick={() => setShowLogoutModal(true)}
           className="flex items-center gap-3 px-3 py-2 w-full text-[#C6C6C6] hover:bg-orange/10 rounded-[10px]"

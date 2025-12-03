@@ -36,7 +36,6 @@ export function StatTile({
         <div className="text-3xl md:text-4xl font-extrabold tracking-tight">
           {value}
         </div>
-
         {link ? (
           <Link href={link}>
             {sub && (
