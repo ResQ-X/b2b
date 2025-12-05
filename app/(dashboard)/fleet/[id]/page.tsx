@@ -42,6 +42,7 @@ export default function FleetDetailsPage({
       fuelCapacityL:
         typeof asset.capacity === "number" ? asset.capacity : undefined,
       status: undefined,
+      plateNumber: asset.plate_number ?? undefined,
     };
   };
 

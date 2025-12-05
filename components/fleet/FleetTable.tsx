@@ -17,6 +17,7 @@ export type FleetRow = {
   fuelType?: string;
   fuelCapacityL?: number;
   status?: "In Transit" | "Available" | "Maintenance" | "Offline";
+  plateNumber?: string;
 };
 
 /* --- helper to format ISO datetimes into your short format --- */
