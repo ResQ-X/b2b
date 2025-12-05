@@ -37,13 +37,16 @@ export default function FuelDeliveryPage() {
       all:
         orders.filter((o) => o.status === "Completed").length +
         orders.filter((o) => o.status === "In Progress").length +
-        orders.filter((o) => o.status === "Scheduled").length,
+        orders.filter((o) => o.status === "Scheduled").length +
+        orders.filter((o) => o.status === "Pending").length,
       completed: orders.filter((o) => o.status === "Completed").length,
       "in-transit": orders.filter((o) => o.status === "In Progress").length,
       scheduled: orders.filter((o) => o.status === "Scheduled").length,
+      pending: orders.filter((o) => o.status === "Pending").length,
     }),
     [orders]
   );
+
 
   const tabsWithCounts = TABS.map((t) => ({
     ...t,
@@ -104,6 +107,7 @@ export default function FuelDeliveryPage() {
           fuel_type?: string;
           service_time_type?: string;
           quantity?: number;
+          total_cost?: string;
           note?: string;
           location: string;
           location_longitude?: string;
@@ -135,20 +139,21 @@ export default function FuelDeliveryPage() {
             vehicleDisplay = assetNames.join(", ");
           }
 
+          const statusUpper = o.status?.toUpperCase() || "";
+          let mappedStatus: "Completed" | "In Progress" | "Pending" | "Scheduled" = "Scheduled";
+
+          if (statusUpper === "COMPLETED") mappedStatus = "Completed";
+          else if (statusUpper === "IN_PROGRESS") mappedStatus = "In Progress";
+          else if (statusUpper === "PENDING") mappedStatus = "Pending";
+          else if (statusUpper === "SCHEDULED") mappedStatus = "Scheduled";
+
           return {
             id: o.id,
             vehicle: vehicleDisplay,
             location: o.location,
             quantityL: o.quantity ?? 0,
-            costNaira: 0,
-            status:
-              o.status === "COMPLETED"
-                ? "Completed"
-                : o.status === "IN_PROGRESS"
-                ? "In Progress"
-                : o.status === "PENDING"
-                ? "Scheduled"
-                : "Scheduled",
+            costNaira: o.total_cost ? parseFloat(o.total_cost) : 0,
+            status: mappedStatus,
             dateISO: o.date_time,
           };
         });
