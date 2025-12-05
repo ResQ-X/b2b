@@ -8,6 +8,7 @@ export function Tabs({
   role?: string;
 }) {
   const isUser = role === "USER";
+  const isSuper = role === "SUPER";
 
   return (
     <div className="w-full mt-6 text-[#FFFFFF]">
@@ -17,9 +18,8 @@ export function Tabs({
           {isUser && (
             <button
               onClick={() => onChange("subscription")}
-              className={`w-1/3 h-10 pb-3 text-lg font-medium text-center ${
-                value === "subscription" ? "text-[#FF8500]" : "text-white"
-              }`}
+              className={`w-1/3 h-10 pb-3 text-lg font-medium text-center ${value === "subscription" ? "text-[#FF8500]" : "text-white"
+                }`}
             >
               Subscription
             </button>
@@ -28,26 +28,34 @@ export function Tabs({
           {/* Transaction tab - for all roles */}
           <button
             onClick={() => onChange("billing")}
-            className={`${
-              isUser ? "w-1/3" : "w-1/2"
-            } h-10 pb-3 text-lg font-medium text-center ${
-              value === "billing" ? "text-[#FF8500]" : "text-white"
-            }`}
+            className={`${isUser ? "w-1/3" : isSuper ? "w-1/2" : "w-full"
+              } h-10 pb-3 text-lg font-medium text-center ${value === "billing" ? "text-[#FF8500]" : "text-white"
+              }`}
           >
-            Transaction
+            Transaction History
           </button>
 
+          
+
           {/* Overdraft tab - for all roles */}
-          <button
+          {isUser || isSuper && (
+            <button
+              onClick={() => onChange("Overdraft")}
+              className={`${isUser ? "w-1/3" : "w-1/2"
+                } h-10 pb-3 text-lg font-medium text-center ${value === "Overdraft" ? "text-[#FF8500]" : "text-white"
+                }`}
+            >
+              Overdraft
+            </button>
+          )}
+          {/* <button
             onClick={() => onChange("Overdraft")}
-            className={`${
-              isUser ? "w-1/3" : "w-1/2"
-            } h-10 pb-3 text-lg font-medium text-center ${
-              value === "Overdraft" ? "text-[#FF8500]" : "text-white"
-            }`}
+            className={`${isUser ? "w-1/3" : "w-1/2"
+              } h-10 pb-3 text-lg font-medium text-center ${value === "Overdraft" ? "text-[#FF8500]" : "text-white"
+              }`}
           >
             Overdraft
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -56,29 +64,26 @@ export function Tabs({
         {/* Subscription underline - only for USER */}
         {isUser && (
           <div
-            className={`w-1/3 transition-colors duration-300 ${
-              value === "subscription" ? "bg-[#FF8500]" : "bg-white"
-            }`}
+            className={`w-1/3 transition-colors duration-300 ${value === "subscription" ? "bg-[#FF8500]" : "bg-white"
+              }`}
           />
         )}
 
         {/* Transaction underline */}
         <div
-          className={`${
-            isUser ? "w-1/3" : "w-1/2"
-          } transition-colors duration-300 ${
-            value === "billing" ? "bg-[#FF8500]" : "bg-white"
-          }`}
+          className={`${isUser ? "w-1/3" : isSuper ? "w-1/2" : "w-full"
+            } transition-colors duration-300 ${value === "billing" ? "bg-[#FF8500]" : "bg-white"
+            }`}
         />
 
         {/* Overdraft underline */}
-        <div
-          className={`${
-            isUser ? "w-1/3" : "w-1/2"
-          } transition-colors duration-300 ${
-            value === "Overdraft" ? "bg-[#FF8500]" : "bg-white"
-          }`}
-        />
+        {isUser || isSuper && (
+          <div
+            className={`${isUser ? "w-1/3" : "w-1/2"
+              } transition-colors duration-300 ${value === "Overdraft" ? "bg-[#FF8500]" : "bg-white"
+              }`}
+          />
+        )}
       </div>
     </div>
   );

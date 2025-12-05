@@ -37,13 +37,16 @@ export default function FuelDeliveryPage() {
       all:
         orders.filter((o) => o.status === "Completed").length +
         orders.filter((o) => o.status === "In Progress").length +
-        orders.filter((o) => o.status === "Scheduled").length,
+        orders.filter((o) => o.status === "Scheduled").length +
+        orders.filter((o) => o.status === "Pending").length,
       completed: orders.filter((o) => o.status === "Completed").length,
       "in-transit": orders.filter((o) => o.status === "In Progress").length,
       scheduled: orders.filter((o) => o.status === "Scheduled").length,
+      pending: orders.filter((o) => o.status === "Pending").length,
     }),
     [orders]
   );
+
 
   const tabsWithCounts = TABS.map((t) => ({
     ...t,
@@ -83,83 +86,88 @@ export default function FuelDeliveryPage() {
     });
   }, [filteredByTab, search]);
 
-  useEffect(() => {
-    const fetchInit = async () => {
-      try {
-        const [assetsRes, locationsRes, ordersRes] = await Promise.all([
-          axiosInstance.get("/fleet-asset/get-asset"),
-          axiosInstance.get("/fleet-asset/get-locations"),
-          axiosInstance.get("/fleet-service/get-fuel-service", {
-            params: { page: 1, limit: 100 }, // Fetch more for client-side filtering
-          }),
-        ]);
+  const fetchData = async () => {
+    try {
+      const [assetsRes, locationsRes, ordersRes] = await Promise.all([
+        axiosInstance.get("/fleet-asset/get-asset"),
+        axiosInstance.get("/fleet-asset/get-locations"),
+        axiosInstance.get("/fleet-service/get-fuel-service", {
+          params: { page: 1, limit: 100 }, // Fetch more for client-side filtering
+        }),
+      ]);
 
-        setAssets(assetsRes.data.assets || []);
-        setLocations(locationsRes.data.data || []);
+      setAssets(assetsRes.data.assets || []);
+      setLocations(locationsRes.data.data || []);
 
-        type ApiOrder = {
+      type ApiOrder = {
+        id: string;
+        status: string;
+        date_time: string;
+        fuel_type?: string;
+        service_time_type?: string;
+        quantity?: number;
+        total_cost?: string;
+        note?: string;
+        location: string;
+        location_longitude?: string;
+        location_latitude?: string;
+        business_id?: string;
+        created_at?: string;
+        updated_at?: string;
+        assets?: Array<{
           id: string;
-          status: string;
-          date_time: string;
+          asset_name: string;
+          plate_number: string | null;
+          asset_type?: string;
+          asset_subtype?: string;
           fuel_type?: string;
-          service_time_type?: string;
-          quantity?: number;
-          note?: string;
-          location: string;
-          location_longitude?: string;
-          location_latitude?: string;
-          business_id?: string;
-          created_at?: string;
-          updated_at?: string;
-          assets?: Array<{
-            id: string;
-            asset_name: string;
-            plate_number: string | null;
-            asset_type?: string;
-            asset_subtype?: string;
-            fuel_type?: string;
-            capacity?: number;
-          }>;
+          capacity?: number;
+        }>;
+      };
+
+      const apiOrders = (ordersRes.data.data || []) as ApiOrder[];
+      console.log("apiOrders", apiOrders);
+
+      const mapped: Order[] = apiOrders.map((o) => {
+        let vehicleDisplay = "N/A";
+
+        if (o.assets && o.assets.length > 0) {
+          const assetNames = o.assets.map(
+            (asset) => asset.plate_number || asset.asset_name
+          );
+          vehicleDisplay = assetNames.join(", ");
+        }
+
+        const statusUpper = o.status?.toUpperCase() || "";
+        let mappedStatus: "Completed" | "In Progress" | "Pending" | "Scheduled" = "Scheduled";
+
+        if (statusUpper === "COMPLETED") mappedStatus = "Completed";
+        else if (statusUpper === "IN_PROGRESS") mappedStatus = "In Progress";
+        else if (statusUpper === "PENDING") mappedStatus = "Pending";
+        else if (statusUpper === "SCHEDULED") mappedStatus = "Scheduled";
+
+        return {
+          id: o.id,
+          vehicle: vehicleDisplay,
+          location: o.location,
+          quantityL: o.quantity ?? 0,
+          costNaira: o.total_cost ? parseFloat(o.total_cost) : 0,
+          status: mappedStatus,
+          dateISO: o.date_time,
         };
+      });
 
-        const apiOrders = (ordersRes.data.data || []) as ApiOrder[];
-        console.log("apiOrders", apiOrders);
+      setOrders(mapped);
+    } catch (e) {
+      console.error("Failed to fetch fuel delivery data", e);
+    }
+  };
 
-        const mapped: Order[] = apiOrders.map((o) => {
-          let vehicleDisplay = "N/A";
-
-          if (o.assets && o.assets.length > 0) {
-            const assetNames = o.assets.map(
-              (asset) => asset.plate_number || asset.asset_name
-            );
-            vehicleDisplay = assetNames.join(", ");
-          }
-
-          return {
-            id: o.id,
-            vehicle: vehicleDisplay,
-            location: o.location,
-            quantityL: o.quantity ?? 0,
-            costNaira: 0,
-            status:
-              o.status === "COMPLETED"
-                ? "Completed"
-                : o.status === "IN_PROGRESS"
-                ? "In Progress"
-                : o.status === "PENDING"
-                ? "Scheduled"
-                : "Scheduled",
-            dateISO: o.date_time,
-          };
-        });
-
-        setOrders(mapped);
-      } catch (e) {
-        console.error("Failed to fetch fuel delivery data", e);
-      }
-    };
-    fetchInit();
+  useEffect(() => {
+    fetchData();
   }, []);
+
+
 
   const tiles = [
     {
@@ -234,6 +242,7 @@ export default function FuelDeliveryPage() {
         locations={locations}
         filteredOrders={filtered}
         searchQuery={search}
+        onRefresh={fetchData}
       />
     </div>
   );

@@ -31,10 +31,12 @@ export function MaintenanceView({ maintenance, onEdit }: MaintenanceViewProps) {
     maintenance.status === "Completed"
       ? "#22C55E"
       : maintenance.status === "In Progress"
-      ? "#8B8CF6"
-      : maintenance.status === "Scheduled"
-      ? "#FACC15"
-      : "#EF4444"; // Overdue
+        ? "#8B8CF6"
+        : maintenance.status === "Scheduled"
+          ? "#FACC15"
+          : maintenance.status === "Pending"
+            ? "#F97316"
+            : "#EF4444"; // Overdue
 
   return (
     <div className="bg-[#242220] w-full space-y-8 text-white">
@@ -78,12 +80,17 @@ export function MaintenanceView({ maintenance, onEdit }: MaintenanceViewProps) {
         <h2 className="text-lg font-semibold">Overview</h2>
 
         <div className="grid md:grid-cols-3 gap-4">
-          <Labeled value={maintenance.vehicle} label="Vehicle" />
-          <Labeled value={maintenance.serviceType} label="Service Type" />
           <Labeled
-            value={`${maintenance.mileageKm.toLocaleString()}km`}
-            label="Current Mileage"
+            value={
+              maintenance.assets && maintenance.assets.length > 0
+                ? maintenance.assets.length > 1
+                  ? `${maintenance.assets.length} Assets`
+                  : `${maintenance.assets[0].asset_name} (${maintenance.assets[0].plate_number})`
+                : maintenance.vehicle
+            }
+            label="Vehicle"
           />
+          <Labeled value={maintenance.serviceType} label="Service Type" />
           <Labeled value={fmtDate(maintenance.dueDateISO)} label="Due Date" />
           <Labeled value={fmtMoney(maintenance.costNaira)} label="Cost" />
           <Labeled value={maintenance.status} label="Status" />
@@ -125,6 +132,52 @@ export function MaintenanceView({ maintenance, onEdit }: MaintenanceViewProps) {
           </table>
         </div>
       </div> */}
+
+      {/* ASSETS TABLE */}
+      <div className="bg-[#3B3835] rounded-[14px] overflow-hidden mt-14">
+        <div className="px-6 py-4 border-b border-white/5">
+          <h2 className="text-base lg:text-lg font-semibold">Assets</h2>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-[#262422] text-white/90 font-semibold">
+              <tr>
+                <th className="px-6 py-4 whitespace-nowrap">Asset Name</th>
+                <th className="px-6 py-4 whitespace-nowrap">Plate Number</th>
+                <th className="px-6 py-4 whitespace-nowrap">Fuel Type</th>
+                <th className="px-6 py-4 whitespace-nowrap">Capacity</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {maintenance.assets && maintenance.assets.length > 0 ? (
+                maintenance.assets.map((assetItem) => (
+                  <tr key={assetItem.id} className="hover:bg-white/5 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap font-medium">
+                      {assetItem.asset_name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-white/80">
+                      {assetItem.plate_number || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-white/80">
+                      {assetItem.fuel_type || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-white/80">
+                      {assetItem.capacity ? `${assetItem.capacity}L` : "N/A"}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-white/60">
+                    No asset information available.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Actions (optional) */}
       {onEdit && (
