@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AssetModal from "@/components/fleet/FleetModal";
+import Link from "next/link";
 
 /* --- Mock data type used previously (kept for fallback) --- */
 export type FleetRow = {
@@ -59,12 +60,13 @@ export default function FleetTable({
     <div className="bg-[#3B3835] rounded-b-[20px] text-white overflow-hidden">
       {/* Header */}
       <div className="h-[80px] rounded-b-xl bg-[#262422] px-6 py-8">
-        <div className="grid grid-cols-6 text-sm font-semibold gap-x-4">
+        <div className="grid grid-cols-7 text-sm font-semibold gap-x-4">
           <div className="col-span-2">Name / ID</div>
           <div>Type</div>
           <div>Fuel</div>
           <div>Capacity (L)</div>
           <div className="text-right md:text-left">Added</div>
+          <div className="text-right">Action</div>
         </div>
       </div>
 
@@ -94,7 +96,7 @@ export default function FleetTable({
               key={(r.id ?? r.vehicleId) + i}
               className="px-6 py-6 border-b border-white/5"
             >
-              <div className="grid grid-cols-6 items-center gap-x-4">
+              <div className="grid grid-cols-7 items-center gap-x-4">
                 {/* Name / ID */}
                 <div className="col-span-2">
                   <div className="font-medium">
@@ -119,8 +121,18 @@ export default function FleetTable({
                   {r.created_at
                     ? fmtRefuel(r.created_at)
                     : r.lastRefuelISO
-                    ? fmtRefuel(r.lastRefuelISO)
-                    : "—"}
+                      ? fmtRefuel(r.lastRefuelISO)
+                      : "—"}
+                </div>
+
+                {/* Action */}
+                <div className="text-right">
+                  <Link
+                    href={`/fleet/${encodeURIComponent(r.id ?? r.vehicleId)}`}
+                    className="text-[#FF8500] font-semibold hover:underline text-sm"
+                  >
+                    View Details
+                  </Link>
                 </div>
               </div>
             </li>
@@ -146,7 +158,7 @@ export default function FleetTable({
       <AssetModal
         open={open}
         onOpenChange={setOpen}
-        onSubmit={async () => {}}
+        onSubmit={async () => { }}
         title="Add Asset"
         assetTypes={[
           { label: "Generator", value: "generator" },

@@ -1,19 +1,27 @@
 "use client";
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-// ton } from "@/components/ui/button";
 import Link from "next/link";
 
-export type OrderStatus = "Completed" | "In Progress" | "Scheduled" | "Overdue";
+export type OrderStatus = "Completed" | "In Progress" | "Scheduled" | "Overdue" | "Pending";
+
+export type Asset = {
+  id: string;
+  asset_name: string;
+  plate_number: string | null;
+  fuel_type?: string;
+  capacity?: number;
+};
 
 export type Order = {
   id: string; // RF-2024-1000
   vehicle: string; // LND-451-AA
   serviceType: string; // Oil Change, Brake Inspection...
-  mileageKm: number; // 45000
   status: OrderStatus;
   dueDateISO: string; // 2025-04-05
   costNaira: number; // 22500
+  mileageKm?: number;
+  assets?: Asset[];
 };
 
 const PER_PAGE = 3;
@@ -38,6 +46,7 @@ const StatusPill = ({ status }: { status: OrderStatus }) => {
     "In Progress": { dot: "#8B8CF6", text: "#8B8CF6" },
     Scheduled: { dot: "#FACC15", text: "#FACC15" },
     Overdue: { dot: "#EF4444", text: "#EF4444" },
+    Pending: { dot: "#F97316", text: "#F97316" }, // Orange for Pending
   } as const;
   const c = map[status];
   return (
@@ -71,11 +80,9 @@ export default function MaintenanceTable({ orders }: { orders?: Order[] }) {
         <div className="w-full">
           {/* Header */}
           <div className="h-[60px] sm:h-[80px] rounded-b-xl bg-[#262422] px-3 sm:px-6 py-4 sm:py-8">
-            <div className="grid grid-cols-7 text-xs sm:text-sm font-semibold text-white/90 gap-1 sm:gap-2">
+            <div className="grid grid-cols-6 text-xs sm:text-sm font-semibold text-white/90 gap-1 sm:gap-2">
               <div className="truncate">Vehicle</div>
               <div className="truncate">Service</div>
-              <div className="hidden sm:block truncate">Mileage</div>
-              <div className="sm:hidden truncate">Miles</div>
               <div className="truncate">Status</div>
               <div className="truncate">Due Date</div>
               <div className="truncate">Cost</div>
@@ -120,7 +127,7 @@ export default function MaintenanceTable({ orders }: { orders?: Order[] }) {
               data.map((o, i) => (
                 <li
                   key={o.id + i}
-                  className="grid grid-cols-7 items-center px-3 sm:px-6 py-4 sm:py-8 gap-1 sm:gap-2 border-b border-white/5 last:border-b-0"
+                  className="grid grid-cols-6 items-center px-3 sm:px-6 py-4 sm:py-8 gap-1 sm:gap-2 border-b border-white/5 last:border-b-0"
                 >
                   <div className="text-white/90 text-xs sm:text-sm font-medium truncate">
                     {o.vehicle}
@@ -130,14 +137,6 @@ export default function MaintenanceTable({ orders }: { orders?: Order[] }) {
                       {o.serviceType.split(" ")[0]}
                     </span>
                     <span className="hidden sm:inline">{o.serviceType}</span>
-                  </div>
-                  <div className="text-white/90 text-xs sm:text-sm truncate">
-                    <span className="sm:hidden">
-                      {Math.round(o.mileageKm / 1000)}k
-                    </span>
-                    <span className="hidden sm:inline">
-                      {o.mileageKm.toLocaleString()}km
-                    </span>
                   </div>
                   <div className="truncate">
                     <StatusPill status={o.status} />

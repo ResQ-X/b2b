@@ -7,6 +7,7 @@ import { StatTile } from "@/components/dashboard/StatTile";
 import { Button } from "@/components/ui/button";
 import MaintenanceTable, {
   type Order,
+  type OrderStatus,
 } from "@/components/maintenance/MaintenanceTable";
 import MaintenanceTabs from "@/components/maintenance/MaintenanceTabs";
 import RequestServiceModal from "@/components/maintenance/RequestServiceModal";
@@ -172,7 +173,7 @@ export default function MaintenancePage() {
         .join(" ")
         .toLowerCase();
 
-      const numbers = `${o.mileageKm} ${o.costNaira}`;
+      const numbers = `${o.costNaira}`;
 
       return hay.includes(q) || numbers.includes(q);
     });
@@ -204,6 +205,7 @@ export default function MaintenancePage() {
         asset_type?: string;
         asset_subtype?: string;
       }>;
+      total_cost?: string;
     };
 
     const apiOrders = (listRes.data.data || []) as ApiItem[];
@@ -222,17 +224,16 @@ export default function MaintenancePage() {
         id: o.id,
         vehicle: vehicleDisplay,
         serviceType: formatMaintenanceType(o.maintenance_type),
-        mileageKm: 0,
         status:
           o.status === "COMPLETED"
             ? "Completed"
             : o.status === "IN_PROGRESS"
-            ? "In Progress"
-            : o.status === "PENDING"
-            ? "Scheduled"
-            : "Completed",
+              ? "In Progress"
+              : o.status === "PENDING"
+                ? ("Pending" as OrderStatus)
+                : ("Scheduled" as OrderStatus),
         dueDateISO: o.date_time,
-        costNaira: 0,
+        costNaira: o.total_cost ? parseFloat(o.total_cost) : 0,
       };
     });
 
@@ -323,14 +324,14 @@ export default function MaintenancePage() {
       await fetchAll();
 
       toast.success("Maintenance service requested successfully!");
-    } catch (error) {
+    } catch (error: any) {
       console.error(
         "Failed to request maintenance service:",
         error?.response?.data.message
       );
       toast.error(
         error?.response?.data.message ||
-          "Failed to request maintenance service. Please try again."
+        "Failed to request maintenance service. Please try again."
       );
     }
   };
@@ -348,7 +349,6 @@ export default function MaintenancePage() {
       "Order ID": o.id,
       Vehicle: o.vehicle,
       "Service Type": o.serviceType,
-      "Mileage (km)": o.mileageKm,
       Status: o.status,
       "Due Date": fmt(o.dueDateISO),
       "Cost (NGN)": o.costNaira,
@@ -395,6 +395,7 @@ export default function MaintenancePage() {
         open={open}
         onOpenChange={setOpen}
         onSubmit={handleSubmit}
+        onSuccess={fetchAll}
         typeOptions={maintenanceTypeOptions}
         vehicleOptions={vehicleOptions}
         locationOptions={locationOptions}

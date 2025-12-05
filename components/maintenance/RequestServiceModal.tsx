@@ -471,6 +471,7 @@ export default function RequestServiceModal({
   open,
   onOpenChange,
   onSubmit,
+  onSuccess,
   initialValues,
   typeOptions = [],
   vehicleOptions = [],
@@ -481,6 +482,7 @@ export default function RequestServiceModal({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: RequestServiceForm) => Promise<void> | void;
+  onSuccess?: () => void;
   initialValues?: Partial<RequestServiceForm>;
   typeOptions?: Option[];
   vehicleOptions?: Option[];
@@ -743,10 +745,10 @@ export default function RequestServiceModal({
           : undefined,
       ...(isManual
         ? {
-            location_address: form.location_address || "",
-            location_longitude: form.location_longitude || "",
-            location_latitude: form.location_latitude || "",
-          }
+          location_address: form.location_address || "",
+          location_longitude: form.location_longitude || "",
+          location_latitude: form.location_latitude || "",
+        }
         : { location_id: form.location_id }),
       time_slot:
         form.time_slot === "NOW" ? new Date().toISOString() : form.time_slot,
@@ -778,7 +780,7 @@ export default function RequestServiceModal({
       console.error("Init maintenance error:", err);
       toast.error(
         err?.response?.data?.message ||
-          "Failed to initialize maintenance service."
+        "Failed to initialize maintenance service."
       );
     } finally {
       setSubmitting(false);
@@ -798,6 +800,7 @@ export default function RequestServiceModal({
       );
 
       toast.success("Maintenance service requested successfully!");
+      if (onSuccess) onSuccess();
 
       // close checkout & main modal
       setCheckoutOpen(false);

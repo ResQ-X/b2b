@@ -102,7 +102,7 @@ export function FuelView({ fuel }: { fuel: FuelOrderDetail }) {
           <Labeled value={fuel.location} label="Delivery Address" />
           <Labeled value={fmtDate(fuel.date_time)} label="Delivery Date" />
           <Labeled value={fmtTime(fuel.date_time)} label="Delivery Time" />
-          <Labeled value={"128,476 km"} label="Odometer" />
+          <Labeled value={fuel.note || "N/A"} label="Note" />
         </div>
       </div>
 

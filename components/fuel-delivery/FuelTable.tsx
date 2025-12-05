@@ -72,11 +72,13 @@ export default function OrdersTable({
   locations = [],
   filteredOrders = [],
   searchQuery = "",
+  onRefresh,
 }: {
   assets?: Asset[];
   locations?: Location[];
   filteredOrders?: Order[];
   searchQuery?: string;
+  onRefresh?: () => void;
 }) {
   // client-side pagination for filtered results
   const [page, setPage] = useState(1);
@@ -271,6 +273,7 @@ export default function OrdersTable({
         typeOptions={fuelTypeOptions}
         vehicleOptions={vehicleOptions}
         locationOptions={locationOptions}
+        onSuccess={onRefresh}
       />
     </div>
   );
