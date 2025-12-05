@@ -27,7 +27,7 @@ export const SIDEBAR_ITEMS = [
   {
     title: "Analytics",
     href: "/analytics",
-    icon: "CarFront",
+    icon: "ChartNoAxesColumnIncreasing",
   },
   {
     title: "Schedule",
