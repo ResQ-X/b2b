@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Wrench, Fuel, Truck, AlertTriangle } from "lucide-react";
 import axiosInstance from "@/lib/axios";
+import ServiceDetailsModal from "@/components/schedule/ServiceDetailsModal";
 
 // Types
 export type OneOffItem = {
@@ -134,14 +135,19 @@ const CardRow = ({
   title,
   subtitle,
   rightTop,
+  onClick,
 }: {
   leftIcon: React.ComponentType<any>;
   title: string;
   subtitle?: string;
   rightTop?: string;
+  onClick?: () => void;
 }) => {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#3B3835] px-4 py-4 shadow-[0_0_0_1px_rgba(255,133,0,0.1)] hover:border-white/20 transition">
+    <div
+      onClick={onClick}
+      className="flex items-center justify-between rounded-xl border border-white/10 bg-[#3B3835] px-4 py-4 shadow-[0_0_0_1px_rgba(255,133,0,0.1)] hover:border-white/20 transition cursor-pointer"
+    >
       <div className="flex items-start gap-3 min-w-0">
         <div className="mt-0.5">
           <LeftIcon className="h-5 w-5 text-[#FF8500]" />
@@ -161,7 +167,13 @@ const CardRow = ({
   );
 };
 
-function ThisWeekSchedule({ items }: { items: OneOffItem[] }) {
+function ThisWeekSchedule({
+  items,
+  onItemClick,
+}: {
+  items: OneOffItem[];
+  onItemClick: (id: string) => void;
+}) {
   const grouped = groupByDate(items);
   const dates = Object.keys(grouped).sort();
 
@@ -192,6 +204,7 @@ function ThisWeekSchedule({ items }: { items: OneOffItem[] }) {
                     title={item.title}
                     subtitle={item.subtitle}
                     rightTop={item.time}
+                    onClick={() => onItemClick(item.id)}
                   />
                 );
               })}
@@ -208,6 +221,9 @@ export default function SchedulePage() {
   const [weekItems, setWeekItems] = useState<OneOffItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedService, setSelectedService] = useState<ServiceData | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [allServices, setAllServices] = useState<ServiceData[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -225,8 +241,13 @@ export default function SchedulePage() {
         console.log("API Response:", data); // Debug log
 
         if (data?.success && Array.isArray(data.data)) {
-          const transformed: OneOffItem[] = data.data
-            .filter((s: ServiceData) => s.assets && s.assets.length > 0) // Filter out services without assets
+          // Store all services for modal access
+          const services = data.data.filter(
+            (s: ServiceData) => s.assets && s.assets.length > 0
+          );
+          setAllServices(services);
+
+          const transformed: OneOffItem[] = services
             .map((s: ServiceData) => {
               try {
                 const d = new Date(s.date_time);
@@ -267,6 +288,14 @@ export default function SchedulePage() {
     })();
   }, []);
 
+  const handleItemClick = (id: string) => {
+    const service = allServices.find((s) => s.id === id);
+    if (service) {
+      setSelectedService(service);
+      setModalOpen(true);
+    }
+  };
+
   if (loading)
     return <div className="text-center py-20 text-white/60">Loading...</div>;
   if (error)
@@ -274,7 +303,13 @@ export default function SchedulePage() {
 
   return (
     <div className="space-y-6">
-      <ThisWeekSchedule items={weekItems} />
+      <ThisWeekSchedule items={weekItems} onItemClick={handleItemClick} />
+      
+      <ServiceDetailsModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        service={selectedService}
+      />
     </div>
   );
 }

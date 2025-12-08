@@ -2,12 +2,15 @@ import { StatusPill } from "./StatusPill";
 
 export function ServiceHistoryList({
   items,
+  onItemClick,
 }: {
   items: Array<{
+    id: string;
     title: string;
     subtitle: string;
-    status: "Completed" | "In Progress" | "Pending";
+    status: "Completed" | "In Progress" | "Pending" | "Cancelled";
   }>;
+  onItemClick?: (id: string) => void;
 }) {
   return (
     <div className="bg-[#2B2A28] rounded-2xl text-white p-6 md:p-8 border border-white/10">
@@ -39,7 +42,11 @@ export function ServiceHistoryList({
       ) : (
         <ul className="">
           {items.map((it, i) => (
-            <li key={i} className="flex items-center justify-between py-4">
+            <li
+              key={i}
+              onClick={() => onItemClick?.(it.id)}
+              className="flex items-center justify-between py-4 cursor-pointer hover:bg-white/5 rounded-lg px-3 -mx-3 transition-colors"
+            >
               <div>
                 <div className="font-medium">{it.title}</div>
                 <div className="text-sm text-white/70">{it.subtitle}</div>
