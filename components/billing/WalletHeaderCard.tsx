@@ -183,19 +183,22 @@ export function WalletHeaderCard({ role }: { role?: string }) {
           {loading
             ? "......."
             : `₦${availableBalance.toLocaleString("en-NG", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}`}
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`}
         </h2>
 
-        <p className="text-[#FF8500] mb-2">
-          {loading
-            ? "......."
-            : `₦ - ${overdraftBalance.toLocaleString("en-NG", {
+        {role === "SUPER" || role === "USER" && (
+          <p className="text-[#FF8500] mb-2">
+            {loading
+              ? "......."
+              : `₦ - ${overdraftBalance.toLocaleString("en-NG", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}`}
-        </p>
+          </p>
+        )}
+
 
         <div className="flex gap-4">
           {role !== "SUB" && (

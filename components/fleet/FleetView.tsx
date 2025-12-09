@@ -96,7 +96,7 @@ export function FleetView({ vehicle }: FleetViewProps) {
             label="Last Refuel"
             value={`${fmtDate(vehicle.lastRefuelISO)}`}
           />
-          <Labeled label="Fuel Level" value={`${vehicle.fuelLevelPct}%`} />
+          <Labeled label="Plate Number" value={`${vehicle.plateNumber}`} />
         </div>
 
         {/* Optional note */}

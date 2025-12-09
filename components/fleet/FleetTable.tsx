@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AssetModal from "@/components/fleet/FleetModal";
+import Link from "next/link";
 
 /* --- Mock data type used previously (kept for fallback) --- */
 export type FleetRow = {
@@ -16,6 +17,7 @@ export type FleetRow = {
   fuelType?: string;
   fuelCapacityL?: number;
   status?: "In Transit" | "Available" | "Maintenance" | "Offline";
+  plateNumber?: string;
 };
 
 /* --- helper to format ISO datetimes into your short format --- */
@@ -66,6 +68,7 @@ export default function FleetTable({
           <div>Fuel</div>
           <div>Capacity (L)</div>
           <div className="text-right md:text-left">Added</div>
+          <div className="text-right">Action</div>
         </div>
       </div>
 
@@ -120,8 +123,18 @@ export default function FleetTable({
                   {r.created_at
                     ? fmtRefuel(r.created_at)
                     : r.lastRefuelISO
-                    ? fmtRefuel(r.lastRefuelISO)
-                    : "—"}
+                      ? fmtRefuel(r.lastRefuelISO)
+                      : "—"}
+                </div>
+
+                {/* Action */}
+                <div className="text-right">
+                  <Link
+                    href={`/fleet/${encodeURIComponent(r.id ?? r.vehicleId)}`}
+                    className="text-[#FF8500] font-semibold hover:underline text-sm"
+                  >
+                    View Details
+                  </Link>
                 </div>
               </div>
             </li>
@@ -147,7 +160,7 @@ export default function FleetTable({
       <AssetModal
         open={open}
         onOpenChange={setOpen}
-        onSubmit={async () => {}}
+        onSubmit={async () => { }}
         title="Add Asset"
         assetTypes={[
           { label: "Generator", value: "generator" },

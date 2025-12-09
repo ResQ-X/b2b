@@ -2,14 +2,15 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "@/lib/axios";
 import { MaintenanceView } from "@/components/maintenance/MaintenanceView";
-import type { Order } from "@/components/maintenance/MaintenanceTable";
+import type { Order, OrderStatus } from "@/components/maintenance/MaintenanceTable";
 
 export default function MaintenanceDetailsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const decodedId = decodeURIComponent(params.id);
+  const { id } = React.use(params);
+  const decodedId = decodeURIComponent(id);
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,12 +24,12 @@ export default function MaintenanceDetailsPage({
         // Try detail endpoint if exists, else fallback to list search
         try {
           const { data } = await axiosInstance.get(
-            `/fleet-service/get-maintenance-service/${decodedId}`
+            `/fleet-service/get-maintenance-service?id=${decodedId}`
           );
           const o = data.data;
           setOrder(mapToOrder(o));
           return;
-        } catch {}
+        } catch { }
 
         const listRes = await axiosInstance.get(
           "/fleet-service/get-maintenance-service",
@@ -69,21 +70,31 @@ export default function MaintenanceDetailsPage({
 }
 
 function mapToOrder(o: any): Order {
+  let vehicleDisplay = "N/A";
+  if (o.assets && o.assets.length > 0) {
+    vehicleDisplay = o.assets
+      .map((a: any) => a.plate_number || a.asset_name)
+      .join(", ");
+  } else if (o.asset) {
+    vehicleDisplay = o.asset.plate_number || o.asset.asset_name || "N/A";
+  }
+
   return {
     id: o.id,
-    vehicle: o.asset?.plate_number || o.asset?.asset_name || "N/A",
+    vehicle: vehicleDisplay,
     serviceType: formatMaintenanceType(o.maintenance_type),
-    mileageKm: 0,
     status:
       o.status === "COMPLETED"
         ? "Completed"
         : o.status === "IN_PROGRESS"
-        ? "In Progress"
-        : o.status === "PENDING"
-        ? "Scheduled"
-        : "Completed",
+          ? "In Progress"
+          : o.status === "PENDING"
+            ? ("Pending" as OrderStatus)
+            : ("Scheduled" as OrderStatus),
     dueDateISO: o.date_time,
-    costNaira: 0,
+    costNaira: o.total_cost ? parseFloat(o.total_cost) : 0,
+    mileageKm: 0, // TODO: Update when API returns mileage
+    assets: o.assets || [],
   };
 }
 

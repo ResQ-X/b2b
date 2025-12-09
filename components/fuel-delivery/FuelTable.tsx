@@ -13,6 +13,7 @@ export type Order = {
   location: string;
   quantityL: number;
   costNaira: number;
+  totalCostNaira?: number;
   status: OrderStatus;
   dateISO: string;
 };
@@ -54,6 +55,7 @@ const StatusPill = ({ status }: { status: OrderStatus }) => {
     Pending: { dot: "#F59E0B", text: "#F59E0B" },
   } as const;
   const c = map[status] ?? map.Scheduled;
+  console.log(`status: ${status}, color: ${c}`)
   return (
     <span className="inline-flex items-center gap-1 sm:gap-2 font-semibold whitespace-nowrap text-xs sm:text-sm">
       <span
@@ -70,11 +72,13 @@ export default function OrdersTable({
   locations = [],
   filteredOrders = [],
   searchQuery = "",
+  onRefresh,
 }: {
   assets?: Asset[];
   locations?: Location[];
   filteredOrders?: Order[];
   searchQuery?: string;
+  onRefresh?: () => void;
 }) {
   // client-side pagination for filtered results
   const [page, setPage] = useState(1);
@@ -269,6 +273,7 @@ export default function OrdersTable({
         typeOptions={fuelTypeOptions}
         vehicleOptions={vehicleOptions}
         locationOptions={locationOptions}
+        onSuccess={onRefresh}
       />
     </div>
   );

@@ -125,11 +125,11 @@ export default function FleetPage() {
         ))}
       </div>
 
-      {/* Fleet table — pass only the 2 most recent assets */}
-      <FleetTable data={recentAssets} />
+      {/* Fleet table — pass all assets */}
+      <FleetTable data={assets} />
 
       {/* Vehicle List */}
-      <VehicleListCard items={vehiclesWithIds} />
+      {/* <VehicleListCard items={vehiclesWithIds} /> */}
     </div>
   );
 }

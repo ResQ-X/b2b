@@ -3,12 +3,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CustomInput from "@/components/ui/CustomInput";
-import type { Order } from "@/components/fuel-delivery/FuelTable";
-
-interface FuelViewProps {
-  fuel: Order;
-  onEdit?: () => void;
-}
+import type { FuelOrderDetail } from "@/types/fuel";
 
 const fmtMoney = (n: number) =>
   new Intl.NumberFormat("en-NG", {
@@ -30,8 +25,10 @@ const fmtTime = (iso: string) =>
     minute: "2-digit",
   });
 
-export function FuelView({ fuel }: FuelViewProps) {
+export function FuelView({ fuel }: { fuel: FuelOrderDetail }) {
   const router = useRouter();
+
+
 
   return (
     <div className="bg-[#242220] w-full space-y-8 text-white">
@@ -63,15 +60,18 @@ export function FuelView({ fuel }: FuelViewProps) {
               className="h-2.5 w-2.5 rounded-full"
               style={{
                 backgroundColor:
-                  fuel.status === "Completed"
+                  fuel.status === "COMPLETED"
                     ? "#22C55E"
-                    : fuel.status === "In Progress"
-                    ? "#8B8CF6"
-                    : "#FACC15",
+                    : fuel.status === "IN_PROGRESS"
+                      ? "#8B8CF6"
+                      : "#FACC15",
               }}
             />
             <span className="text-white/90">
-              {fuel.status === "In Progress" ? "In Transit" : fuel.status}
+              {fuel.status === "IN_PROGRESS"
+                ? "In Transit"
+                : fuel.status.charAt(0).toUpperCase() +
+                fuel.status.slice(1).toLowerCase()}
             </span>
           </span>
         </div>
@@ -82,43 +82,71 @@ export function FuelView({ fuel }: FuelViewProps) {
         <h2 className="text-lg font-semibold">Overview</h2>
 
         <div className="grid md:grid-cols-3 gap-4">
-          <Labeled value={fuel.vehicle} label="Vehicle" />
-          <Labeled value={`${fuel.quantityL}L`} label="Quantity" />
-          <Labeled value={fmtMoney(fuel.costNaira)} label="Total Cost" />
+          <Labeled
+            value={
+              fuel.assets && fuel.assets.length > 0
+                ? fuel.assets.length > 1
+                  ? `${fuel.assets.length} Assets`
+                  : `${fuel.assets[0].asset_name} (${fuel.assets[0].plate_number})`
+                : "N/A"
+            }
+            label="Vehicle(s)"
+          />
+          <Labeled value={`${fuel.quantity}L`} label="Quantity" />
+          <Labeled
+            value={fmtMoney(parseFloat(fuel.total_cost))}
+            label="Total Cost"
+          />
 
-          <Labeled value={fmtDate(fuel.dateISO)} label="Order Date" />
+          <Labeled value={fmtDate(fuel.date_time)} label="Order Date" />
           <Labeled value={fuel.location} label="Delivery Address" />
-          <Labeled value={fmtDate(fuel.dateISO)} label="Delivery Date" />
-          <Labeled value={fmtTime(fuel.dateISO)} label="Delivery Time" />
-          <Labeled value={"128,476 km"} label="Odometer" />
+          <Labeled value={fmtDate(fuel.date_time)} label="Delivery Date" />
+          <Labeled value={fmtTime(fuel.date_time)} label="Delivery Time" />
+          <Labeled value={fuel.note || "N/A"} label="Note" />
         </div>
       </div>
 
-      {/* ACTIVITY LOG */}
-      <div className="bg-[#3B3835] space-y-4 p-2 rounded-[14px] mt-14">
-        <h2 className="text-base lg:text-lg font-semibold">Activity Log</h2>
-        <div className="rounded-2xl overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-[#262422]">
+      {/* ASSETS TABLE */}
+      <div className="bg-[#3B3835] rounded-[14px] overflow-hidden mt-14">
+        <div className="px-6 py-4 border-b border-white/5">
+          <h2 className="text-base lg:text-lg font-semibold">Assets</h2>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-[#262422] text-white/90 font-semibold">
               <tr>
-                <Th>Time</Th>
-                <Th>Activity</Th>
-                <Th>Status</Th>
+                <th className="px-6 py-4 whitespace-nowrap">Asset Name</th>
+                <th className="px-6 py-4 whitespace-nowrap">Plate Number</th>
+                <th className="px-6 py-4 whitespace-nowrap">Fuel Type</th>
+                <th className="px-6 py-4 whitespace-nowrap">Capacity</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10">
-              <Tr
-                time={`${fmtDate(fuel.dateISO)}, 08:00 AM`}
-                activity="Order Placed"
-                status="Confirmed"
-              />
-              <Tr
-                time={`${fmtDate(fuel.dateISO)}, 11:30 AM`}
-                activity="Order Processed"
-                status={
-                  fuel.status === "In Progress" ? "In Progress" : fuel.status
-                }
-              />
+            <tbody className="divide-y divide-white/5">
+              {fuel.assets && fuel.assets.length > 0 ? (
+                fuel.assets.map((assetItem) => (
+                  <tr key={assetItem.id} className="hover:bg-white/5 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap font-medium">
+                      {assetItem.asset_name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-white/80">
+                      {assetItem.plate_number || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-white/80">
+                      {assetItem.fuel_type}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-white/80">
+                      {assetItem.capacity}L
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-white/60">
+                    No asset information available.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -139,31 +167,5 @@ function Labeled({ label, value }: { label: string; value: string }) {
         className="bg-white/[0.06] border border-white/10 text-white rounded-xl h-11"
       />
     </div>
-  );
-}
-
-function Th({ children }: { children: React.ReactNode }) {
-  return (
-    <th className="text-left p-4 text-sm font-medium text-white/70">
-      {children}
-    </th>
-  );
-}
-
-function Tr({
-  time,
-  activity,
-  status,
-}: {
-  time: string;
-  activity: string;
-  status: string;
-}) {
-  return (
-    <tr className="hover:bg-white/[0.03]">
-      <td className="p-2 lg:p-4 text-sm">{time}</td>
-      <td className="p-2 lg:p-4 text-sm">{activity}</td>
-      <td className="p-2 lg:p-4 text-sm">{status}</td>
-    </tr>
   );
 }

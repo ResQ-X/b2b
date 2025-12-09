@@ -456,6 +456,7 @@ export default function RequestFuelModal({
   vehicleOptions = [],
   locationOptions = [],
   title = "Request Fuel Service",
+  onSuccess,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -464,6 +465,7 @@ export default function RequestFuelModal({
   vehicleOptions?: Option[];
   locationOptions?: Option[];
   title?: string;
+  onSuccess?: () => void;
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -579,8 +581,8 @@ export default function RequestFuelModal({
       upperFuel === "DIESEL"
         ? prices?.diesel
         : upperFuel === "PETROL"
-        ? prices?.petrol
-        : undefined;
+          ? prices?.petrol
+          : undefined;
 
     if (!perL) return; // no change if unknown
     const naira = Math.max(0, Math.round((litresRaw || 0) * perL));
@@ -831,10 +833,10 @@ export default function RequestFuelModal({
       ...(isManualLocation ? {} : { location_id: form.location_id }),
       ...(isManualLocation
         ? {
-            location_address: form.location_address || "",
-            location_longitude: form.location_longitude || "",
-            location_latitude: form.location_latitude || "",
-          }
+          location_address: form.location_address || "",
+          location_longitude: form.location_longitude || "",
+          location_latitude: form.location_latitude || "",
+        }
         : {}),
       time_slot:
         form.time_slot === "NOW" ? new Date().toISOString() : form.time_slot,
@@ -910,6 +912,11 @@ export default function RequestFuelModal({
       });
       setErrors({});
       setCheckoutData(null);
+
+      // Trigger refresh
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error: any) {
       console.error("Place fuel service error:", error);
       toast.error(
@@ -930,7 +937,7 @@ export default function RequestFuelModal({
     setAmount("");
     // prime unit prices in the background (best-effort)
     if (upperFuel) {
-      ensureUnitPrices().catch(() => {});
+      ensureUnitPrices().catch(() => { });
     }
     // re-derive amount if we already have litres
     if (form.quantity && form.quantity > 0) {
