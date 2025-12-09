@@ -63,6 +63,7 @@ export default function FleetTable({
       <div className="h-[80px] rounded-b-xl bg-[#262422] px-6 py-8">
         <div className="grid grid-cols-7 text-sm font-semibold gap-x-4">
           <div className="col-span-2">Name / ID</div>
+          <div>Plate number</div>
           <div>Type</div>
           <div>Fuel</div>
           <div>Capacity (L)</div>
@@ -108,15 +109,15 @@ export default function FleetTable({
                   ) : null}
                 </div>
 
+                {/* plate_number */}
+                <div>{r.plate_number ?? r.plate_number ?? "—"}</div>
+
                 {/* Type */}
                 <div>{r.asset_type ?? r.vehicleType ?? "—"}</div>
-
                 {/* Fuel */}
                 <div>{(r.fuel_type ?? r.fuelType ?? "—").toString()}</div>
-
                 {/* Capacity */}
                 <div>{r.capacity ?? r.fuelCapacityL ?? "—"}</div>
-
                 {/* Created / last refuel */}
                 <div className="text-right md:text-left text-sm text-white/70">
                   {r.created_at
