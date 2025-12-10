@@ -6,13 +6,21 @@ import { Button } from "@/components/ui/button";
 import type { User } from "@/types/account";
 import AddUserModal from "@/components/AddUserModal";
 import PasswordModal from "@/components/account/PasswordModal";
+import ReclaimFundsModal from "@/components/account/ReclaimFundsModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Trash2, KeyRound } from "lucide-react";
+import {
+  MoreVertical,
+  Trash2,
+  KeyRound,
+  DollarSign,
+  Activity,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 type SubAdmin = {
@@ -31,13 +39,20 @@ type PasswordAction = {
   userName: string;
 } | null;
 
+type ReclaimAction = {
+  userId: string;
+  userName: string;
+} | null;
+
 export default function Page() {
+  const router = useRouter();
   const [subs, setSubs] = useState<SubAdmin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [passwordAction, setPasswordAction] = useState<PasswordAction>(null);
+  const [reclaimAction, setReclaimAction] = useState<ReclaimAction>(null);
 
   useEffect(() => {
     async function fetchSubs() {
@@ -102,6 +117,10 @@ export default function Page() {
     setPasswordAction({ type: "reset", userId, userName });
   };
 
+  const initiateReclaimFunds = (userId: string, userName: string) => {
+    setReclaimAction({ userId, userName });
+  };
+
   const handlePasswordConfirm = async (password: string) => {
     if (!passwordAction) return;
 
@@ -131,6 +150,38 @@ export default function Page() {
         e?.response?.data?.message ||
         e?.response?.data?.error ||
         `Failed to ${passwordAction.type} account.`;
+      toast.error(msg);
+      throw e; // Re-throw to keep modal open on error
+    }
+  };
+
+  const handleReclaimFunds = async (
+    amount: number,
+    note: string,
+    password: string
+  ) => {
+    if (!reclaimAction) return;
+
+    try {
+      await axiosInstance.post("/super/wallet/reclaim", {
+        subAccountId: reclaimAction.userId,
+        amount,
+        note: note || "Reclaiming funds",
+        password,
+      });
+
+      toast.success(
+        `Successfully reclaimed ₦${amount.toLocaleString()} from ${
+          reclaimAction.userName
+        }`
+      );
+      setReclaimAction(null);
+    } catch (e: any) {
+      console.error("Failed to reclaim funds:", e);
+      const msg =
+        e?.response?.data?.message ||
+        e?.response?.data?.error ||
+        "Failed to reclaim funds.";
       toast.error(msg);
       throw e; // Re-throw to keep modal open on error
     }
@@ -170,6 +221,7 @@ export default function Page() {
                   <th className="px-6 py-3">Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {subs.map((u) => (
                   <tr
@@ -209,6 +261,42 @@ export default function Page() {
                           <DropdownMenuItem
                             className="text-white hover:bg-white/10 cursor-pointer"
                             onClick={() =>
+                              router.push(`/account/teams/${u.id}/activities`)
+                            }
+                          >
+                            <Activity className="w-4 h-4 mr-2" />
+                            See Activity
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem
+                            className="text-white hover:bg-white/10 cursor-pointer"
+                            onClick={() =>
+                              initiateReclaimFunds(
+                                u.id,
+                                u.name || u.company_name || "this user"
+                              )
+                            }
+                          >
+                            <DollarSign className="w-4 h-4 mr-2" />
+                            Place Order For Sub Account
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem
+                            className="text-white hover:bg-white/10 cursor-pointer"
+                            onClick={() =>
+                              initiateReclaimFunds(
+                                u.id,
+                                u.name || u.company_name || "this user"
+                              )
+                            }
+                          >
+                            <DollarSign className="w-4 h-4 mr-2" />
+                            Reclaim Funds
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem
+                            className="text-white hover:bg-white/10 cursor-pointer"
+                            onClick={() =>
                               initiateResetPassword(
                                 u.id,
                                 u.name || u.company_name || "this user"
@@ -218,6 +306,7 @@ export default function Page() {
                             <KeyRound className="w-4 h-4 mr-2" />
                             Reset Password
                           </DropdownMenuItem>
+
                           <DropdownMenuItem
                             className="text-red-400 hover:bg-red-400/10 cursor-pointer"
                             onClick={() =>
@@ -272,6 +361,14 @@ export default function Page() {
             : "Reset Password"
         }
         isDangerous={passwordAction?.type === "delete"}
+      />
+
+      <ReclaimFundsModal
+        isOpen={!!reclaimAction}
+        onClose={() => setReclaimAction(null)}
+        onConfirm={handleReclaimFunds}
+        userName={reclaimAction?.userName || ""}
+        subAccountId={reclaimAction?.userId || ""}
       />
     </div>
   );
