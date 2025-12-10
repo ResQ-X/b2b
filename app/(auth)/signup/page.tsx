@@ -211,17 +211,32 @@ export default function SignupPage() {
                 <label className="block text-sm font-medium mb-2 text-white/80">
                   Role
                 </label>
-                <select
-                  id="fleetRole"
-                  name="fleetRole"
-                  value={formData.fleetRole}
-                  onChange={onChange}
-                  className="w-full h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white px-4 focus:outline-none"
-                  required
-                >
-                  <option value="USERS">USER</option>
-                  <option value="SUPER">SUPER</option>
-                </select>
+                <div className="relative">
+                  <select
+                    id="fleetRole"
+                    name="fleetRole"
+                    value={formData.fleetRole}
+                    onChange={onChange}
+                    className="w-full h-14 rounded-[5px] border border-white/10 bg-[#3B3835] text-white px-4 focus:outline-none appearance-none pr-10"
+                    required
+                  >
+                    <option value="USERS">USER</option>
+                    <option value="SUPER">SUPER</option>
+                  </select>
+                  <svg
+                    className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
               </div>
 
               {/* Phone */}
