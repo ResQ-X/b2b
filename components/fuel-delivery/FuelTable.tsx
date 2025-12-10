@@ -273,6 +273,7 @@ export default function OrdersTable({
         typeOptions={fuelTypeOptions}
         vehicleOptions={vehicleOptions}
         locationOptions={locationOptions}
+        assets={assets}
         onSuccess={onRefresh}
       />
     </div>
