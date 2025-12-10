@@ -624,11 +624,19 @@ export default function RequestFuelModal({
   const ensureUnitPrices = async () => {
     if (unitPrices && (unitPrices.petrol || unitPrices.diesel))
       return unitPrices;
-    if (!upperFuel) return unitPrices; // don't fetch until fuel selected
-    // cheap call; amount=1 is enough to get unit prices
-    const data = await fetchFuelDetails(1, upperFuel);
-    setUnitPrices(data.unit_price || null);
-    return data.unit_price || null;
+    if (!upperFuel) return null; // don't fetch until fuel selected
+
+    try {
+      // Use a realistic amount to ensure backend returns valid pricing
+      const data = await fetchFuelDetails(1000, upperFuel);
+      if (data?.unit_price) {
+        setUnitPrices(data.unit_price);
+        return data.unit_price;
+      }
+    } catch (error) {
+      console.error("Failed to fetch unit prices:", error);
+    }
+    return null;
   };
 
   // Convert NGN→Litres via API (authoritative)
@@ -1175,7 +1183,7 @@ export default function RequestFuelModal({
                     {/* Search Input */}
                     <div className="relative">
                       <svg
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/60"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/60 pointer-events-none"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -1192,7 +1200,7 @@ export default function RequestFuelModal({
                         placeholder="Search Vehicles"
                         value={vehicleSearch}
                         onChange={(e) => setVehicleSearch(e.target.value)}
-                        className="h-12 rounded-xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60 pl-11"
+                        className="h-12 rounded-xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60 pl-12"
                       />
                     </div>
 
@@ -1268,12 +1276,12 @@ export default function RequestFuelModal({
                               {/* Vehicle Name/Plate */}
                               <div className="flex-1 min-w-0">
                                 <span className="text-white font-medium text-sm truncate block">
-                                  #{vehicle.plate_number || vehicle.asset_name}
+                                  {vehicle.asset_name || vehicle.plate_number}
                                 </span>
                               </div>
 
                               {/* Litres Input */}
-                              <div className="w-32">
+                              <div className="w-40">
                                 <CustomInput
                                   type="text"
                                   placeholder="Litres"
@@ -1315,7 +1323,7 @@ export default function RequestFuelModal({
                               </div>
 
                               {/* Amount Input */}
-                              <div className="w-32">
+                              <div className="w-40">
                                 <CustomInput
                                   type="text"
                                   placeholder="Amount"

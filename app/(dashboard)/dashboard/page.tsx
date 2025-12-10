@@ -324,8 +324,8 @@ export default function DashboardPage() {
           delivery.status === "COMPLETED"
             ? "Delivered"
             : delivery.status === "PENDING"
-            ? "Pending"
-            : delivery.status,
+              ? "Pending"
+              : delivery.status,
       };
     });
   };
@@ -540,9 +540,8 @@ export default function DashboardPage() {
         <div className="space-y-6">
           <SideCard
             title="Schedule Service"
-            subtitle={`${
-              stats?.pendingMaintenanceServices || 0
-            } vehicles need maintenance`}
+            subtitle={`${stats?.pendingMaintenanceServices || 0
+              } vehicles need maintenance`}
             actionText="View Schedule"
             icon={FuelIcon}
             onAction={() => router.push("/schedule")}
@@ -586,6 +585,7 @@ export default function DashboardPage() {
         typeOptions={fuelTypeOptions}
         vehicleOptions={vehicleOptions}
         locationOptions={locationOptions}
+        assets={assets}
       />
 
       <TopUpModal
