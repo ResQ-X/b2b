@@ -3,15 +3,12 @@ import { useState, useEffect } from "react";
 import axiosInstance from "@/lib/axios";
 import {
   Filter,
-  Calendar,
   ExternalLink,
   Car,
   TrendingUp,
   Award,
   MapPin,
   Users,
-  CreditCard,
-  Wrench,
 } from "lucide-react";
 import { StatTile } from "@/components/dashboard/StatTile";
 import {
@@ -65,7 +62,6 @@ export default function AnalyticsPage() {
   const [filterVehicle, setFilterVehicle] = useState("");
   const [filterType, setFilterType] = useState("summary");
   const [chartView, setChartView] = useState<"day" | "week" | "month">("month");
-  const [chartYear, setChartYear] = useState("2025");
   const [analysisData, setAnalysisData] = useState<any>(null);
   const [summaryData, setSummaryData] = useState<any>(null);
   const [topAssetsData, setTopAssetsData] = useState<any>(null);
@@ -96,8 +92,6 @@ export default function AnalyticsPage() {
 
     fetchChartData();
   }, [chartView, filterVehicle]);
-
-  console.log("Chart Analytics Data:", vehicles);
 
   // Prepare chart data from API response
   const chartData =
@@ -287,83 +281,18 @@ export default function AnalyticsPage() {
                 <Car className="h-4 w-4 text-white/70" />
                 <span className="text-sm text-white/70">Vehicle</span>
               </div>
-              <div className="relative inline-block w-auto">
-                {" "}
-                {/* 1. Add relative positioning to the wrapper */}
-                <select
-                  value={filterVehicle}
-                  onChange={(e) => setFilterVehicle(e.target.value)}
-                  className="bg-[#3B3835] text-white rounded-lg px-4 py-2 text-sm border border-white/10 focus:outline-none focus:border-[#FF8500] appearance-none pr-10"
-                >
-                  <option value="">All Vehicles</option>
-                  {vehicles.map((vehicle) => (
-                    <option key={vehicle.asset_id} value={vehicle.asset_id}>
-                      {vehicle.asset_name} ({vehicle.plate_number})
-                    </option>
-                  ))}
-                </select>
-                <svg
-                  className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-white/70" />
-                <span className="text-sm text-white/70">Filter by</span>
-              </div>
-              {/* <select
-                value={filterMonth}
-                onChange={(e) => setFilterMonth(e.target.value)}
+              <select
+                value={filterVehicle}
+                onChange={(e) => setFilterVehicle(e.target.value)}
                 className="bg-[#3B3835] text-white rounded-lg px-4 py-2 text-sm border border-white/10 focus:outline-none focus:border-[#FF8500]"
               >
-                <option>summary</option>
-                <option>top-assets</option>
-                <option>top-locations</option>
-                <option>service-breakdown</option>
-                <option>trends</option>
-                <option>driver-stats</option>
-                <option>payment-methods</option>
-              </select> */}
-              <div className="relative inline-block w-auto">
-                {" "}
-                {/* Make the wrapper relative and fit content */}
-                <select
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                  className="bg-[#3B3835] text-white rounded-lg px-4 py-2 text-sm border border-white/10 focus:outline-none focus:border-[#FF8500] appearance-none pr-10"
-                >
-                  <option value="trends">trends</option>
-                  <option value="summary">summary</option>
-                  <option value="top-assets">top-assets</option>
-                  <option value="top-locations">top-locations</option>
-                  <option value="service-breakdown">service-breakdown</option>
-                  <option value="driver-stats">driver-stats</option>
-                  <option value="payment-methods">payment-methods</option>
-                </select>
-                <svg
-                  className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
+                <option value="">All Vehicles</option>
+                {vehicles.map((vehicle) => (
+                  <option key={vehicle.asset_id} value={vehicle.asset_id}>
+                    {vehicle.asset_name} ({vehicle.plate_number})
+                  </option>
+                ))}
+              </select>
             </div>
 
             <button className="p-2 hover:bg-white/5 rounded-lg transition-colors">
@@ -437,13 +366,13 @@ export default function AnalyticsPage() {
                     data={
                       filterType === "service-breakdown"
                         ? analysisData.service_breakdown?.map((item: any) => ({
-                          name: item.service_type || "Unknown",
-                          value: item.order_count,
-                        }))
+                            name: item.service_type || "Unknown",
+                            value: item.order_count,
+                          }))
                         : analysisData.payment_methods?.map((item: any) => ({
-                          name: item.payment_method || "Unknown",
-                          value: item.usage_count,
-                        }))
+                            name: item.payment_method || "Unknown",
+                            value: item.usage_count,
+                          }))
                     }
                     cx="50%"
                     cy="50%"
@@ -486,54 +415,21 @@ export default function AnalyticsPage() {
               <div className="px-6 py-16 text-center">
                 <p className="text-white/50">No transactions found</p>
               </div>
-            </div> */}
-
-            <div className="grid grid-cols-4 gap-4 text-sm font-semibold text-white/70 px-5 m-5">
-              {columns.map((col) => (
-                <div
-                  key={col.key}
-                  className={col.align === "right" ? "text-right" : ""}
-                >
-                  {col.label}
+            ) : (
+              <>
+                <div className="px-6 py-4 bg-[#262422]">
+                  <div className="grid grid-cols-6 gap-4 text-sm font-semibold text-white/70">
+                    <div>Date</div>
+                    <div>Type</div>
+                    <div>Description</div>
+                    <div>Status</div>
+                    <div className="text-right">Amount</div>
+                    <div className="text-right">Balance</div>
+                  </div>
                 </div>
 
-            {/* Table Rows */}
-            {/* <div className="divide-y divide-white/5">
-              {tableData.map((item: any, index: number) => {
-                const uniqueKey = `${item.period}-${
-                  item.asset_id || "all"
-                }-${index}`;
-                return (
-                  <div
-                    key={uniqueKey}
-                    className="px-6 py-5 hover:bg-white/5 transition-colors"
-                  >
-                    <div className="grid grid-cols-4 gap-4 items-center">
-                      <div className="text-sm text-white/90">
-                        {formatDate(item.period)}
-                      </div>
-                      <div className="text-sm font-medium">
-                        {item.asset_name || "All Vehicles"}
-                      </div>
-                      <div className="text-sm text-white/80">
-                        {item.orders_count}{" "}
-                        {item.orders_count === 1 ? "order" : "orders"}
-                      </div>
-                      <div className="text-sm font-semibold text-right">
-                        {formatCurrency(item.total_amount)}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div> */}
-            {rows.map((row: any, idx: number) => (
-              <div
-                key={idx}
-                className="px-10 py-5 hover:bg-white/5 transition-colors"
-              >
-                <div className="grid grid-cols-4 gap-4 items-center">
-                  {columns.map((col) => (
+                <div className="divide-y divide-white/5">
+                  {transactions.map((txn: any) => (
                     <div
                       key={txn.id}
                       className="px-6 py-5 hover:bg-white/5 transition-colors"
@@ -554,23 +450,28 @@ export default function AnalyticsPage() {
                         </div>
                         <div className="text-sm">
                           <span
-                            className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${txn.status === "COMPLETED" || txn.status === "SUCCESS"
-                              ? "bg-green-500/20 text-green-400"
-                              : txn.status === "PENDING"
+                            className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                              txn.status === "COMPLETED" ||
+                              txn.status === "SUCCESS"
+                                ? "bg-green-500/20 text-green-400"
+                                : txn.status === "PENDING"
                                 ? "bg-yellow-500/20 text-yellow-400"
                                 : "bg-red-500/20 text-red-400"
-                              }`}
+                            }`}
                           >
                             {txn.status || "—"}
                           </span>
                         </div>
                         <div
-                          className={`text-sm font-semibold text-right ${txn.type === "CREDIT" || txn.type === "TOP_UP"
-                            ? "text-green-400"
-                            : "text-red-400"
-                            }`}
+                          className={`text-sm font-semibold text-right ${
+                            txn.type === "CREDIT" || txn.type === "TOP_UP"
+                              ? "text-green-400"
+                              : "text-red-400"
+                          }`}
                         >
-                          {txn.type === "CREDIT" || txn.type === "TOP_UP" ? "+" : "-"}
+                          {txn.type === "CREDIT" || txn.type === "TOP_UP"
+                            ? "+"
+                            : "-"}
                           {formatCurrency(Math.abs(txn.amount || 0))}
                         </div>
                         <div className="text-sm text-white/80 text-right">
