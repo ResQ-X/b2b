@@ -63,30 +63,33 @@ export default function FleetPage() {
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const resp = await axiosInstance.get<ApiResponse>(
-          "/fleet-asset/get-asset"
-        );
-        const payload = resp?.data || {};
-        const serverStats = payload.stats || {};
-        const serverAssets = payload.assets || [];
+  const fetchFleetData = async () => {
+    try {
+      setLoading(true);
+      const resp = await axiosInstance.get<ApiResponse>(
+        "/fleet-asset/get-asset"
+      );
+      const payload = resp?.data || {};
+      const serverStats = payload.stats || {};
+      const serverAssets = payload.assets || [];
 
-        setAssets(serverAssets);
-        setStats({
-          vehicle: serverStats.vehicle ?? 0,
-          generator: serverStats.generator ?? 0,
-          others: serverStats.others ?? 0,
-        });
-      } catch (err) {
-        console.error("Failed to fetch fleet assets", err);
-        setAssets([]);
-        setStats({ vehicle: 0, generator: 0, others: 0 });
-      } finally {
-        setLoading(false);
-      }
-    })();
+      setAssets(serverAssets);
+      setStats({
+        vehicle: serverStats.vehicle ?? 0,
+        generator: serverStats.generator ?? 0,
+        others: serverStats.others ?? 0,
+      });
+    } catch (err) {
+      console.error("Failed to fetch fleet assets", err);
+      setAssets([]);
+      setStats({ vehicle: 0, generator: 0, others: 0 });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFleetData();
   }, []);
 
   if (loading) return <Loader content="Loading fleet data...." />;
@@ -126,7 +129,7 @@ export default function FleetPage() {
       </div>
 
       {/* Fleet table — pass all assets */}
-      <FleetTable data={assets} />
+      <FleetTable data={assets} onDataChange={fetchFleetData} />
 
       {/* Vehicle List */}
       {/* <VehicleListCard items={vehiclesWithIds} /> */}

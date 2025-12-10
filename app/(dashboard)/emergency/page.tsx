@@ -6,6 +6,7 @@ import { Wallet } from "lucide-react";
 import { StatTile } from "@/components/dashboard/StatTile";
 import { ServiceHistoryList } from "@/components/emergency/ServiceHistoryList";
 import { RequestEmergencyServiceCard } from "@/components/emergency/RequestEmergencyServiceCard";
+import EmergencyDetailsModal from "@/components/emergency/EmergencyDetailsModal";
 
 type Asset = { id: string; asset_name: string; plate_number: string | null };
 type Location = { id: string; location_name: string };
@@ -17,10 +18,43 @@ type EmergencyRow = {
   status: "Completed" | "Cancelled" | "Pending";
 };
 
+type EmergencyService = {
+  id: string;
+  status: string;
+  date_time: string;
+  emergency_type: string;
+  note?: string;
+  location: string;
+  location_longitude?: string;
+  location_latitude?: string;
+  to_location?: string | null;
+  to_location_longitude?: string | null;
+  to_location_latitude?: string | null;
+  towing_method?: string;
+  assets: Array<{
+    id: string;
+    asset_name: string;
+    plate_number: string | null;
+    asset_type?: string;
+    asset_subtype?: string;
+  }>;
+  business_id: string;
+  total_cost?: string;
+  total_service_charge?: string;
+  total_delivery_charge?: string;
+  is_under_subscription?: boolean;
+  created_at: string;
+  updated_at: string;
+  order_date: string;
+};
+
 export default function EmergencyPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [history, setHistory] = useState<EmergencyRow[]>([]);
+  const [allServices, setAllServices] = useState<EmergencyService[]>([]);
+  const [selectedService, setSelectedService] = useState<EmergencyService | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const counts = useMemo(
     () => ({
@@ -44,50 +78,38 @@ export default function EmergencyPage() {
     setAssets(assetsRes.data.assets || []);
     setLocations(locationsRes.data.data || []);
 
-    type ApiEmergency = {
-      id: string;
-      status: string;
-      date_time: string;
-      emergency_type?: string;
-      note?: string;
-      location: string;
-      assets?: Array<{
-        id: string;
-        asset_name: string;
-        plate_number: string | null;
-        asset_type?: string;
-        asset_subtype?: string;
-      }>;
-    };
+    // Store all services for modal access
+    const services = listRes.data.data || [];
+    setAllServices(services);
 
-    const rows: EmergencyRow[] = (listRes.data.data || []).map(
-      (o: ApiEmergency) => {
-        const when = new Date(o.date_time).toLocaleString();
+    const rows: EmergencyRow[] = services.map((o: EmergencyService) => {
+      const when = new Date(o.date_time).toLocaleString();
 
-        // Handle multiple assets
-        let vehicleDisplay = "N/A";
-        if (o.assets && o.assets.length > 0) {
-          const assetNames = o.assets.map(
-            (asset) => asset.plate_number || asset.asset_name
-          );
-          vehicleDisplay = assetNames.join(", ");
-        }
-
-        const status =
-          o.status === "COMPLETED"
-            ? "Completed"
-            : o.status === "IN_PROGRESS"
-            ? "In Progress"
-            : "Pending";
-
-        return {
-          id: o.id,
-          title: `${vehicleDisplay}`,
-          subtitle: `${o.location} • ${when}`,
-          status,
-        };
+      // Handle multiple assets
+      let vehicleDisplay = "N/A";
+      if (o.assets && o.assets.length > 0) {
+        const assetNames = o.assets.map(
+          (asset) => asset.plate_number || asset.asset_name
+        );
+        vehicleDisplay = assetNames.join(", ");
       }
-    );
+
+      const status =
+        o.status === "COMPLETED"
+          ? "Completed"
+          : o.status === "IN_PROGRESS"
+          ? "In Progress"
+          : o.status === "CANCELLED"
+          ? "Cancelled"
+          : "Pending";
+
+      return {
+        id: o.id,
+        title: `${vehicleDisplay}`,
+        subtitle: `${o.location} • ${when}`,
+        status,
+      };
+    });
     setHistory(rows);
   };
 
@@ -189,6 +211,14 @@ export default function EmergencyPage() {
       .map(({ label, value }) => ({ label, value: value as string }));
   }, []);
 
+  const handleHistoryItemClick = (id: string) => {
+    const service = allServices.find((s) => s.id === id);
+    if (service) {
+      setSelectedService(service);
+      setModalOpen(true);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Top tiles */}
@@ -213,115 +243,23 @@ export default function EmergencyPage() {
         typeOptions={[
           { label: "Flat Tire", value: "FLAT_TIRE" },
           { label: "Jump Start", value: "JUMP_START" },
-          { label: "Out of Fuel", value: "OUT_OF_FUEL" },
+          // { label: "Out of Fuel", value: "OUT_OF_FUEL" }, // Commented out - use fuel delivery instead
           { label: "Towing Service", value: "TOWING" },
           { label: "Other", value: "OTHER" },
         ]}
         slotOptions={slotOptions}
-        onSubmit={async (data) => {
-          try {
-            const isScheduled = data.slot !== "NOW";
-
-            const base: any = {
-              emergency_type: data.type,
-              asset_ids: data.asset_ids,
-              time_slot:
-                data.slot === "NOW" ? new Date().toISOString() : data.slot,
-              is_scheduled: isScheduled,
-              note: data.notes || "",
-            };
-
-            if (data.type !== "TOWING") {
-              // Non-towing flow
-              if (data.location_id && data.location_id !== "__manual__") {
-                base.location_id = data.location_id;
-              } else {
-                if (data.location_name)
-                  base.location_address = data.location_name;
-                if (data.location_latitude != null)
-                  base.location_latitude = data.location_latitude;
-                if (data.location_longitude != null)
-                  base.location_longitude = data.location_longitude;
-              }
-            } else {
-              // TOWING: pickup & dropoff handling
-              base.towing_method = data.towing_method || "";
-
-              const pickupIsSaved =
-                data.pickup_location_id &&
-                data.pickup_location_id !== "__manual__";
-              const dropoffIsSaved =
-                data.dropoff_location_id &&
-                data.dropoff_location_id !== "__manual__";
-
-              // Pickup
-              if (pickupIsSaved) {
-                base.location_id = data.pickup_location_id;
-              } else {
-                if (data.pickup_location_name)
-                  base.location_address = data.pickup_location_name;
-                if (data.pickup_latitude != null)
-                  base.location_latitude = data.pickup_latitude;
-                if (data.pickup_longitude != null)
-                  base.location_longitude = data.pickup_longitude;
-              }
-
-              // Dropoff
-              if (dropoffIsSaved) {
-                base.to_location_id = data.dropoff_location_id;
-              } else {
-                if (data.dropoff_location_name)
-                  base.to_location_address = data.dropoff_location_name;
-                if (data.dropoff_latitude != null)
-                  base.to_location_latitude = data.dropoff_latitude;
-                if (data.dropoff_longitude != null)
-                  base.to_location_longitude = data.dropoff_longitude;
-              }
-
-              const hasPickup =
-                pickupIsSaved ||
-                !!base.location_address ||
-                (base.location_latitude != null &&
-                  base.location_longitude != null) ||
-                !!base.location_id;
-
-              const hasDropoff =
-                dropoffIsSaved ||
-                !!base.to_location_address ||
-                (base.to_location_latitude != null &&
-                  base.to_location_longitude != null) ||
-                !!base.to_location_id;
-
-              if (!hasPickup) {
-                toast.error("Please select or enter a pickup location.");
-                return;
-              }
-              if (!hasDropoff) {
-                toast.error("Please select or enter a drop-off location.");
-                return;
-              }
-            }
-
-            await axiosInstance.post(
-              "/fleet-service/place-emergency-service",
-              base
-            );
-
-            toast.success("Emergency service request submitted successfully!");
-            await fetchAll();
-          } catch (error: any) {
-            console.error("Emergency request failed:", error);
-            const message =
-              error?.response?.data?.message ||
-              error?.message ||
-              "Something went wrong while submitting your request.";
-            toast.error(message);
-          }
-        }}
+        onSuccess={fetchAll}
       />
 
       {/* Service History */}
-      <ServiceHistoryList items={history} />
+      <ServiceHistoryList items={history} onItemClick={handleHistoryItemClick} />
+
+      {/* Emergency Details Modal */}
+      <EmergencyDetailsModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        service={selectedService}
+      />
     </div>
   );
 }

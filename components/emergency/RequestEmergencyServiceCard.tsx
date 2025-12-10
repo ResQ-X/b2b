@@ -478,11 +478,13 @@ export function RequestEmergencyServiceCard({
   locationOptions = [],
   typeOptions = [],
   slotOptions = [],
+  onSuccess,
 }: {
   vehicleOptions?: Option[];
   locationOptions?: Option[];
   typeOptions?: Option[];
   slotOptions?: Option[];
+  onSuccess?: () => void;
 }) {
   /* ---------- Google Maps loader ---------- */
   const [isMounted, setIsMounted] = useState(false);
@@ -941,6 +943,11 @@ export function RequestEmergencyServiceCard({
       );
 
       toast.success("Emergency service requested successfully!");
+
+      // Trigger data refresh
+      if (onSuccess) {
+        onSuccess();
+      }
 
       // close & reset
       setCheckoutOpen(false);

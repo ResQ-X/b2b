@@ -50,12 +50,21 @@ export type FleetAssetFromApi = {
 
 export default function FleetTable({
   data,
+  onDataChange,
 }: {
   data?: FleetAssetFromApi[] | FleetRow[];
+  onDataChange?: () => void;
 }) {
   // if API data provided, render that; otherwise fallback to mock fleetData
   const rows = (data && data.length ? data : []) as any[];
   const [open, setOpen] = useState(false);
+
+  const handleAssetAdded = async () => {
+    // Trigger data refresh in parent
+    if (onDataChange) {
+      onDataChange();
+    }
+  };
 
   return (
     <div className="bg-[#3B3835] rounded-b-[20px] text-white overflow-hidden">
@@ -160,7 +169,7 @@ export default function FleetTable({
       <AssetModal
         open={open}
         onOpenChange={setOpen}
-        onSubmit={async () => { }}
+        onSubmit={handleAssetAdded}
         title="Add Asset"
         assetTypes={[
           { label: "Generator", value: "generator" },

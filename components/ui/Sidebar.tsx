@@ -21,8 +21,9 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   };
 
   return (
-    <div className="w-[242px] h-auto bg-[#3B3835] gap-4 py-3">
-      <div className="w-full h-[93px]">
+    <div className="w-[242px] h-screen bg-[#3B3835] flex flex-col fixed left-0 top-0">
+      {/* Logo Section - Fixed at top */}
+      <div className="w-full h-[93px] flex-shrink-0">
         <div className="flex justify-end">
           <button onClick={onClose} className="md:hidden p-2 rounded-md">
             <Icons.X className="w-6 h-6 text-[#fff]" />
@@ -38,11 +39,21 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         />
       </div>
 
-      <nav className="flex-1 flex flex-col mt-6 px-4">
+      {/* Scrollable Navigation - Hide scrollbar */}
+      <nav className="flex-1 flex flex-col mt-6 px-4 overflow-y-auto scrollbar-hide">
+        <style jsx>{`
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+          .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+        `}</style>
+        
         {[
           ["Dashboard"],
           ["Fuel Delivery", "Maintenance", "Emergency Service"],
-          // ["Fleet Management", "Schedule"],
           ["Analytics", "Fleet Management", "Schedule"],
           ["Billing", "Account"],
         ].map((group, gi, groups) => (
@@ -82,13 +93,14 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         ))}
       </nav>
 
-      <div className="p-4 mt-20">
+      {/* Logout Button - Fixed at bottom */}
+      <div className="p-4 flex-shrink-0">
         <button
           onClick={() => setShowLogoutModal(true)}
           className="flex items-center gap-3 px-3 py-2 w-full text-[#C6C6C6] hover:bg-orange/10 rounded-[10px]"
         >
           <LogOut className="h-5 w-5" />
-          <span>Log Out</span>
+          <span className="text-[14px] font-semibold">Log Out</span>
         </button>
       </div>
 

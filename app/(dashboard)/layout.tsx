@@ -152,11 +152,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       </Head>
 
       <div className="flex min-h-screen bg-[#242220]">
-        {/* Sidebar */}
-        <div className="hidden md:flex">
+        {/* Sidebar - Fixed on desktop */}
+        <div className="hidden md:block">
           <Sidebar />
         </div>
 
+        {/* Mobile Sidebar Overlay */}
         {sidebarOpen && (
           <div className="fixed inset-0 z-50 flex md:hidden">
             <div
@@ -169,7 +170,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        <div className="flex-1 flex flex-col">
+        {/* Main Content - Add left margin to account for fixed sidebar */}
+        <div className="flex-1 flex flex-col md:ml-[242px]">
           <DashboardNav onMenuClick={() => setSidebarOpen(true)} />
           <main className="flex-1 overflow-y-auto bg-[#242220] p-4 sm:p-8">
             {children}
