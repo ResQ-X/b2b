@@ -48,6 +48,8 @@ export default function FuelDetailsPage({
     fetchOrder();
   }, [decodedId]);
 
+  console.log("order", order);
+
   if (loading) {
     return <div className="text-center py-20 text-white/60">Loading...</div>;
   }
