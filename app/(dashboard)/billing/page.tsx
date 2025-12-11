@@ -98,12 +98,12 @@ export default function BillingPage() {
         </div>
       )}
 
-      {/* Overdraft tab content - all roles */}
-      {userProfile?.role === "SUPER" || userProfile?.role === "USER" ? (
+      {/* Overdraft tab content */}
+      {tab === "Overdraft" && (
         <div className="w-full">
           <OverDraftTable />
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

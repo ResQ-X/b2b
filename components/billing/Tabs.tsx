@@ -35,10 +35,10 @@ export function Tabs({
             Transaction History
           </button>
 
-          
+
 
           {/* Overdraft tab - for all roles */}
-          {isUser || isSuper && (
+          {(isUser || isSuper) && (
             <button
               onClick={() => onChange("Overdraft")}
               className={`${isUser ? "w-1/3" : "w-1/2"
@@ -77,7 +77,7 @@ export function Tabs({
         />
 
         {/* Overdraft underline */}
-        {isUser || isSuper && (
+        {(isUser || isSuper) && (
           <div
             className={`${isUser ? "w-1/3" : "w-1/2"
               } transition-colors duration-300 ${value === "Overdraft" ? "bg-[#FF8500]" : "bg-white"

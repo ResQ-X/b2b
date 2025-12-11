@@ -41,70 +41,19 @@ export function BillingTable() {
     const fetchTransactions = async () => {
       try {
         setLoading(true);
-
-        // Build query parameters
-        const params = new URLSearchParams();
-
-        // Add search query
-        if (searchQuery) {
-          params.append("search", searchQuery);
-        }
-
-        // Add date range
-        if (dateRange.start) {
-          params.append("startDate", dateRange.start);
-        }
-        if (dateRange.end) {
-          params.append("endDate", dateRange.end);
-        }
-
-        // Add type filter
-        if (selectedType !== "ALL") {
-          // Map frontend type to backend type
-          const typeMap: Record<string, string> = {
-            "Wallet Top Up": "TOP_UP",
-            "Fuel Service": "FUEL_SERVICE",
-            "Maintenance": "MAINTENANCE",
-            "Emergency Service": "EMERGENCY",
-          };
-          const backendType = typeMap[selectedType];
-          if (backendType) {
-            params.append("type", backendType);
-          }
-        }
-
-        // Add status filter
-        if (selectedStatus !== "ALL") {
-          params.append("status", selectedStatus.toUpperCase());
-        }
-
-        // Add pagination
-        params.append("page", "1");
-        params.append("limit", "100");
-
-        const queryString = params.toString();
-        const endpoint = queryString
-          ? `/fleet-wallet/transactions?${queryString}`
-          : "/fleet-wallet/get-wallet-balance";
-
-        const response = await axiosInstance.get(endpoint);
-
-        // Handle response based on endpoint
-        if (queryString) {
-          setTransactions(response.data.data || []);
-        } else {
-          setTransactions(response.data.data.transactions || []);
-        }
+        const response = await axiosInstance.get(
+          "/fleet-wallet/get-wallet-balance"
+        );
+        setTransactions(response.data.data.transactions || []);
       } catch (error) {
         console.error("Failed to fetch transactions:", error);
-        setTransactions([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchTransactions();
-  }, [searchQuery, dateRange, selectedType, selectedStatus]);
+  }, []);
 
   // Transform transactions to BillRow format
   const transformedBills: BillRow[] = transactions.map((transaction) => {
@@ -136,6 +85,31 @@ export function BillingTable() {
       amount: parseFloat(transaction.amount),
       status: transaction.status === "SUCCESS" ? "Paid" : "Pending",
     };
+  });
+
+  // Filter logic
+  const filteredBills = transformedBills.filter((bill) => {
+    // Search filter (invoice, product, or reference)
+    const matchesSearch =
+      searchQuery === "" ||
+      bill.invoiceNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      bill.product.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      bill.method.toLowerCase().includes(searchQuery.toLowerCase());
+
+    // Date range filter
+    const billDate = new Date(bill.date);
+    const matchesDateRange =
+      (!dateRange.start || billDate >= new Date(dateRange.start)) &&
+      (!dateRange.end || billDate <= new Date(dateRange.end));
+
+    // Type filter
+    const matchesType = selectedType === "ALL" || bill.product === selectedType;
+
+    // Status filter
+    const matchesStatus =
+      selectedStatus === "ALL" || bill.status === selectedStatus;
+
+    return matchesSearch && matchesDateRange && matchesType && matchesStatus;
   });
 
   // Clear all filters
@@ -209,6 +183,14 @@ export function BillingTable() {
     return (
       <div className="bg-[#3B3835] rounded-b-[20px] text-white p-8 text-center">
         <p className="text-white/60">Loading transactions...</p>
+      </div>
+    );
+  }
+
+  if (transformedBills.length === 0) {
+    return (
+      <div className="bg-[#3B3835] rounded-b-[20px] text-white p-8 text-center">
+        <p className="text-white/60">No transactions found</p>
       </div>
     );
   }
@@ -366,7 +348,7 @@ export function BillingTable() {
 
         {/* Results Count */}
         <div className="mt-4 text-sm text-white/60">
-          Showing {transformedBills.length} of {transformedBills.length}{" "}
+          Showing {filteredBills.length} of {transformedBills.length}{" "}
           transaction{transformedBills.length !== 1 ? "s" : ""}
         </div>
       </div>
@@ -391,119 +373,95 @@ export function BillingTable() {
 
       {/* Table Body */}
       <ul className="bg-[#3B3835]">
-        {transformedBills.length === 0 ? (
-          <li className="p-8 text-center">
-            <p className="text-white/60">No transactions found</p>
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="mt-4 text-[#FF8500] hover:text-[#FF8500]/80 font-medium text-sm"
-              >
-                Clear all filters
-              </button>
-            )}
-          </li>
-        ) : (
-          transformedBills.map((b, i) => {
-            // Find the original transaction index
-            const originalIndex = transformedBills.findIndex(
-              (bill) => bill.invoiceNo === b.invoiceNo
-            );
-            return (
-              <li key={i} className="border-b border-white/10 last:border-b-0">
-                {/* Desktop Layout */}
-                <div className="hidden lg:grid lg:grid-cols-7 items-center px-6 py-8">
-                  <div className="font-medium">{b.product}</div>
-                  <div className="text-white/85">{b.date}</div>
-                  <div className="text-white/85">{b.invoiceNo}</div>
-                  <div className="text-white/85 ml-8">TOP UP</div>
-                  <div className="text-white/85">{naira(b.amount)}</div>
-                  <div className="inline-flex items-center gap-2">
-                    <span
-                      className={`h-2.5 w-2.5 rounded-full ${b.status === "Paid" ? "bg-emerald-400" : "bg-yellow-400"
-                        }`}
-                    />
-                    <span
-                      className={`font-semibold ${b.status === "Paid" ? "text-emerald-300" : "text-yellow-300"
-                        }`}
-                    >
-                      {b.status}
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <button
-                      onClick={() => handleDownloadInvoice(transactions[originalIndex], b)}
-                      className="text-[#FF8500] font-semibold hover:underline"
-                    >
-                      Download
-                    </button>
-                  </div>
-                </div>
-
-                {/* Mobile Layout - Card Style */}
-                <div className="lg:hidden px-4 py-6">
-                  <div className="space-y-3">
-                    {/* Product & Status Row */}
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-white">{b.product}</h4>
-                      <div className="inline-flex items-center gap-2">
-                        <span
-                          className={`h-2.5 w-2.5 rounded-full ${b.status === "Paid" ? "bg-emerald-400" : "bg-yellow-400"
-                            }`}
-                        />
-                        <span
-                          className={`font-semibold text-sm ${b.status === "Paid"
-                            ? "text-emerald-300"
-                            : "text-yellow-300"
-                            }`}
-                        >
-                          {b.status}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Details Grid */}
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <div className="text-white/60 text-xs mb-1">
-                          Date Issued
-                        </div>
-                        <div className="text-white/85">{b.date}</div>
-                      </div>
-                      <div>
-                        <div className="text-white/60 text-xs mb-1">Amount</div>
-                        <div className="text-white/85 font-semibold">
-                          {naira(b.amount)}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-white/60 text-xs mb-1">Invoice No</div>
-                        <div className="text-white/85">{b.invoiceNo}</div>
-                      </div>
-                      <div>
-                        <div className="text-white/60 text-xs mb-1">
-                          Payment Method
-                        </div>
-                        <div className="text-white/85">TOP UP</div>
-                      </div>
-                    </div>
-
-                    {/* Action Button */}
-                    <div className="pt-2">
-                      <button
-                        onClick={() => handleDownloadInvoice(transactions[originalIndex], b)}
-                        className="text-[#FF8500] font-semibold text-sm hover:underline"
-                      >
-                        Download Invoice
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </li>
-            );
-          })
-        )}
-      </ul>
+        <div className="text-white/85 ml-8">TOP UP</div>
+        <div className="text-white/85">{naira(b.amount)}</div>
+        <div className="inline-flex items-center gap-2">
+          <span
+            className={`h-2.5 w-2.5 rounded-full ${b.status === "Paid" ? "bg-emerald-400" : "bg-yellow-400"
+              }`}
+          />
+          <span
+            className={`font-semibold ${b.status === "Paid" ? "text-emerald-300" : "text-yellow-300"
+              }`}
+          >
+            {b.status}
+          </span>
+        </div>
+        <div className="text-right">
+          <button
+            onClick={() => handleDownloadInvoice(transactions[i], b)}
+            className="text-[#FF8500] font-semibold hover:underline"
+          >
+            Download
+          </button>
+        </div>
     </div>
+
+            {/* Mobile Layout - Card Style */ }
+  <div className="lg:hidden px-4 py-6">
+    <div className="space-y-3">
+      {/* Product & Status Row */}
+      <div className="flex items-center justify-between">
+        <h4 className="font-medium text-white">{b.product}</h4>
+        <div className="inline-flex items-center gap-2">
+          <span
+            className={`h-2.5 w-2.5 rounded-full ${b.status === "Paid" ? "bg-emerald-400" : "bg-yellow-400"
+              }`}
+          />
+          <span
+            className={`font-semibold text-sm ${b.status === "Paid"
+              ? "text-emerald-300"
+              : "text-yellow-300"
+              }`}
+          >
+            {b.status}
+          </span>
+        </div>
+      </div>
+
+      {/* Details Grid */}
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <div className="text-white/60 text-xs mb-1">
+            Date Issued
+          </div>
+          <div className="text-white/85">{b.date}</div>
+        </div>
+        <div>
+          <div className="text-white/60 text-xs mb-1">Amount</div>
+          <div className="text-white/85 font-semibold">
+            {naira(b.amount)}
+          </div>
+        </div>
+        <div>
+          <div className="text-white/60 text-xs mb-1">Invoice No</div>
+          <div className="text-white/85">{b.invoiceNo}</div>
+        </div>
+        <div>
+          <div className="text-white/60 text-xs mb-1">
+            Payment Method
+          </div>
+          {/* <div className="text-white/85">{b.method}</div> */}
+          <div className="text-white/85">TOP UP</div>
+        </div>
+      </div>
+
+      {/* Action Button */}
+      {/* Action Button */}
+      <div className="pt-2">
+        <button
+          onClick={() => handleDownloadInvoice(transactions[i], b)}
+          className="text-[#FF8500] font-semibold text-sm hover:underline"
+        >
+          Download Invoice
+        </button>
+      </div>
+    </div>
+  </div>
+          </li >
+        ))
+}
+      </ul >
+    </div >
   );
 }
