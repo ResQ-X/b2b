@@ -582,6 +582,7 @@ export default function RequestFuelModal({
   const [vehicleSearch, setVehicleSearch] = useState("");
   const [selectedVehicles, setSelectedVehicles] = useState<string[]>([]);
   const [vehicleDropdownOpen, setVehicleDropdownOpen] = useState(false);
+  const [orderMode, setOrderMode] = useState<'collective' | 'per-asset'>('per-asset');
 
   // Filter vehicles based on search
   const filteredVehicles = useMemo(() => {
@@ -685,8 +686,8 @@ export default function RequestFuelModal({
       upperFuel === "DIESEL"
         ? prices?.diesel
         : upperFuel === "PETROL"
-        ? prices?.petrol
-        : undefined;
+          ? prices?.petrol
+          : undefined;
 
     if (!perL) return; // no change if unknown
     const naira = Math.max(0, Math.round((litresRaw || 0) * perL));
@@ -697,6 +698,15 @@ export default function RequestFuelModal({
 
   const validateForm = (): boolean => {
     const next: ValidationErrors = {};
+
+    console.log("Validating form...");
+    console.log("form.fuel_type:", form.fuel_type);
+    console.log("selectedVehicles:", selectedVehicles);
+    console.log("form.location_id:", form.location_id);
+    console.log("form.time_slot:", form.time_slot);
+    console.log("orderMode:", orderMode);
+    console.log("form.quantity:", form.quantity);
+    console.log("perVehicleData:", perVehicleData);
 
     if (!form.fuel_type) next.fuel_type = "Please select a fuel type";
 
@@ -715,16 +725,14 @@ export default function RequestFuelModal({
 
     if (!form.time_slot) next.time_slot = "Please select a time slot";
 
-    // Check if collective mode (all vehicles selected)
-    const isCollectiveMode =
-      selectedVehicles.length === filteredVehicles.length &&
-      selectedVehicles.length > 0;
+    // Check if collective mode
+    const isCollectiveMode = orderMode === 'collective';
 
     if (isCollectiveMode) {
       // Collective mode: validate single quantity
       if (!form.quantity || form.quantity <= 0) {
         next.quantity = "Quantity must be greater than 0";
-      } else if (form.quantity < 50) {
+      } else if (form.quantity < 25) {
         next.quantity = "Minimum quantity is 50 litres";
       } else if (form.quantity > 5000) {
         next.quantity = "Maximum quantity is 5000 litres";
@@ -737,7 +745,7 @@ export default function RequestFuelModal({
           next.quantity =
             "All selected vehicles must have a quantity greater than 0";
           break;
-        } else if (vehicleData.litres < 50) {
+        } else if (vehicleData.litres < 25) {
           next.quantity = "Minimum quantity is 50 litres per vehicle";
           break;
         } else if (vehicleData.litres > 5000) {
@@ -747,6 +755,7 @@ export default function RequestFuelModal({
       }
     }
 
+    console.log("Validation errors:", next);
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -949,12 +958,8 @@ export default function RequestFuelModal({
     if (!form.location_id) return false;
     if (!form.time_slot) return false;
 
-    // Check if collective mode
-    const isCollectiveMode =
-      selectedVehicles.length === filteredVehicles.length &&
-      selectedVehicles.length > 0;
-
-    if (isCollectiveMode) {
+    // Check mode explicitly using orderMode state
+    if (orderMode === 'collective') {
       // Collective mode: check single quantity
       return form.quantity > 0;
     } else {
@@ -969,18 +974,17 @@ export default function RequestFuelModal({
     form.location_id,
     form.time_slot,
     form.quantity,
+    orderMode,
     selectedVehicles,
-    filteredVehicles,
     perVehicleData,
+    filteredVehicles,
   ]);
 
   /* -------- Build request payload -------- */
 
   const buildRequestPayload = () => {
     const isManualLocation = form.location_id === MANUAL_LOCATION_VALUE;
-    const isCollectiveMode =
-      selectedVehicles.length === filteredVehicles.length &&
-      selectedVehicles.length > 0;
+    const isCollectiveMode = orderMode === 'collective';
 
     if (isCollectiveMode) {
       // Collective mode: all vehicles get same quantity
@@ -992,10 +996,10 @@ export default function RequestFuelModal({
         ...(isManualLocation ? {} : { location_id: form.location_id }),
         ...(isManualLocation
           ? {
-              location_address: form.location_address || "",
-              location_longitude: form.location_longitude || "",
-              location_latitude: form.location_latitude || "",
-            }
+            location_address: form.location_address || "",
+            location_longitude: form.location_longitude || "",
+            location_latitude: form.location_latitude || "",
+          }
           : {}),
         time_slot:
           form.time_slot === "NOW" ? new Date().toISOString() : form.time_slot,
@@ -1015,10 +1019,10 @@ export default function RequestFuelModal({
         ...(isManualLocation ? {} : { location_id: form.location_id }),
         ...(isManualLocation
           ? {
-              location_address: form.location_address || "",
-              location_longitude: form.location_longitude || "",
-              location_latitude: form.location_latitude || "",
-            }
+            location_address: form.location_address || "",
+            location_longitude: form.location_longitude || "",
+            location_latitude: form.location_latitude || "",
+          }
           : {}),
         time_slot:
           form.time_slot === "NOW" ? new Date().toISOString() : form.time_slot,
@@ -1032,7 +1036,9 @@ export default function RequestFuelModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submitted");
     if (!validateForm()) return;
+    console.log("Form is valid");
 
     setSubmitting(true);
     try {
@@ -1121,7 +1127,7 @@ export default function RequestFuelModal({
     setAmount("");
     // prime unit prices in the background (best-effort)
     if (upperFuel) {
-      ensureUnitPrices().catch(() => {});
+      ensureUnitPrices().catch(() => { });
     }
     // re-derive amount if we already have litres
     if (form.quantity && form.quantity > 0) {
@@ -1141,6 +1147,104 @@ export default function RequestFuelModal({
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Order Mode Selection */}
+            <div className="space-y-3">
+              <Label className="text-white/80">Order Mode</Label>
+              <div className="grid grid-cols-2 gap-4">
+                {/* Collective Mode Card */}
+                <button
+                  type="button"
+                  onClick={() => setOrderMode('collective')}
+                  className={`
+                    relative h-28 rounded-2xl border-2 transition-all
+                    flex flex-col items-center justify-center gap-2 p-4
+                    ${orderMode === 'collective'
+                      ? 'border-[#FF8500] bg-[#FF8500]/10'
+                      : 'border-white/10 bg-[#2D2A27] hover:border-white/20'
+                    }
+                  `}
+                >
+                  {/* Icon */}
+                  <svg
+                    className={`w-8 h-8 ${orderMode === 'collective' ? 'text-[#FF8500]' : 'text-white/60'}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                    />
+                  </svg>
+                  {/* Text */}
+                  <div className="text-center">
+                    <div className={`text-sm font-semibold ${orderMode === 'collective' ? 'text-[#FF8500]' : 'text-white'}`}>
+                      Collective Order
+                    </div>
+                    <div className="text-xs text-white/60 mt-0.5">
+                      Shared by # of assets
+                    </div>
+                  </div>
+                  {/* Selected Indicator */}
+                  {orderMode === 'collective' && (
+                    <div className="absolute top-2 right-2">
+                      <svg className="w-5 h-5 text-[#FF8500]" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+
+                {/* Per Asset Mode Card */}
+                <button
+                  type="button"
+                  onClick={() => setOrderMode('per-asset')}
+                  className={`
+                    relative h-28 rounded-2xl border-2 transition-all
+                    flex flex-col items-center justify-center gap-2 p-4
+                    ${orderMode === 'per-asset'
+                      ? 'border-[#FF8500] bg-[#FF8500]/10'
+                      : 'border-white/10 bg-[#2D2A27] hover:border-white/20'
+                    }
+                  `}
+                >
+                  {/* Icon */}
+                  <svg
+                    className={`w-8 h-8 ${orderMode === 'per-asset' ? 'text-[#FF8500]' : 'text-white/60'}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                    />
+                  </svg>
+                  {/* Text */}
+                  <div className="text-center">
+                    <div className={`text-sm font-semibold ${orderMode === 'per-asset' ? 'text-[#FF8500]' : 'text-white'}`}>
+                      Per Asset Order
+                    </div>
+                    <div className="text-xs text-white/60 mt-0.5">
+                      Different per vehicle
+                    </div>
+                  </div>
+                  {/* Selected Indicator */}
+                  {orderMode === 'per-asset' && (
+                    <div className="absolute top-2 right-2">
+                      <svg className="w-5 h-5 text-[#FF8500]" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+              </div>
+            </div>
+
             {/* Fuel Type */}
             <Field label="Fuel Type" error={errors.fuel_type}>
               <Select
@@ -1192,17 +1296,15 @@ export default function RequestFuelModal({
                     >
                       {selectedVehicles.length === 0
                         ? "Select vehicles"
-                        : `${selectedVehicles.length} vehicle${
-                            selectedVehicles.length > 1 ? "s" : ""
-                          } selected`}
+                        : `${selectedVehicles.length} vehicle${selectedVehicles.length > 1 ? "s" : ""
+                        } selected`}
                     </span>
                     <svg
                       width="16"
                       height="16"
                       viewBox="0 0 20 20"
-                      className={`opacity-80 transition-transform ${
-                        vehicleDropdownOpen ? "rotate-180" : ""
-                      }`}
+                      className={`opacity-80 transition-transform ${vehicleDropdownOpen ? "rotate-180" : ""
+                        }`}
                     >
                       <path
                         fill="currentColor"
@@ -1217,7 +1319,7 @@ export default function RequestFuelModal({
                   sideOffset={8}
                   className="p-0 w-[min(644px,92vw)] bg-[#3B3835] text-white border border-white/10 rounded-2xl max-h-[500px] overflow-hidden z-[70]"
                 >
-                  <div className="p-6 space-y-4">
+                  <div className="p-6 space-y-4 space-x-4">
                     {/* Search Input */}
                     <div className="relative">
                       <svg
@@ -1238,7 +1340,7 @@ export default function RequestFuelModal({
                         placeholder="Search Vehicles"
                         value={vehicleSearch}
                         onChange={(e) => setVehicleSearch(e.target.value)}
-                        className="h-12 rounded-xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60 pl-12"
+                        className="h-12 rounded-xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60 ml-9 pl-12"
                       />
                     </div>
 
@@ -1248,7 +1350,7 @@ export default function RequestFuelModal({
                         <Checkbox
                           checked={
                             selectedVehicles.length ===
-                              filteredVehicles.length &&
+                            filteredVehicles.length &&
                             filteredVehicles.length > 0
                           }
                           onCheckedChange={(checked) => {
@@ -1341,7 +1443,7 @@ export default function RequestFuelModal({
                               {/* Vehicle Name/Plate */}
                               <div className="flex-1 min-w-0">
                                 <span className="text-white font-medium text-sm truncate block">
-                                  {vehicle.asset_name || vehicle.plate_number}
+                                  {`${vehicle.asset_name}-${vehicle.plate_number}`}
                                 </span>
                               </div>
 
@@ -1351,17 +1453,14 @@ export default function RequestFuelModal({
                                   type="text"
                                   placeholder="Litres"
                                   value={
-                                    vehicleData.litres === 0
-                                      ? ""
-                                      : vehicleData.litres.toLocaleString(
-                                          "en-NG"
-                                        )
+                                    orderMode === 'collective'
+                                      ? "--"
+                                      : vehicleData.litres === 0
+                                        ? ""
+                                        : vehicleData.litres.toLocaleString("en-NG")
                                   }
                                   onChange={async (e) => {
-                                    const val = e.target.value.replace(
-                                      /,/g,
-                                      ""
-                                    );
+                                    const val = e.target.value.replace(/,/g, "");
                                     const litres =
                                       val === ""
                                         ? 0
@@ -1382,8 +1481,8 @@ export default function RequestFuelModal({
                                         upperFuel === "DIESEL"
                                           ? prices?.diesel
                                           : upperFuel === "PETROL"
-                                          ? prices?.petrol
-                                          : undefined;
+                                            ? prices?.petrol
+                                            : undefined;
 
                                       if (perL) {
                                         const naira = Math.max(
@@ -1405,7 +1504,7 @@ export default function RequestFuelModal({
                                       }));
                                     }
                                   }}
-                                  disabled={!isSelected}
+                                  disabled={!isSelected || orderMode === 'collective'}
                                   className="h-10 rounded-lg bg-[#1F1E1C] border-white/10 text-sm disabled:opacity-50"
                                 />
                               </div>
@@ -1416,24 +1515,23 @@ export default function RequestFuelModal({
                                   type="text"
                                   placeholder="Amount"
                                   value={
-                                    vehicleData.amount === ""
-                                      ? ""
-                                      : Number(
-                                          vehicleData.amount
-                                        ).toLocaleString("en-NG")
+                                    orderMode === 'collective'
+                                      ? amount === "" || selectedVehicles.length === 0
+                                        ? ""
+                                        : Math.floor(Number(amount) / selectedVehicles.length).toLocaleString("en-NG")
+                                      : vehicleData.amount === ""
+                                        ? ""
+                                        : Number(vehicleData.amount).toLocaleString("en-NG")
                                   }
                                   onChange={async (e) => {
-                                    const val = e.target.value.replace(
-                                      /,/g,
-                                      ""
-                                    );
+                                    const val = e.target.value.replace(/,/g, "");
                                     const naira =
                                       val === ""
                                         ? 0
                                         : Math.max(
-                                            0,
-                                            Math.floor(Number(val) || 0)
-                                          );
+                                          0,
+                                          Math.floor(Number(val) || 0)
+                                        );
 
                                     setPerVehicleData((prev) => ({
                                       ...prev,
@@ -1477,7 +1575,7 @@ export default function RequestFuelModal({
                                       }));
                                     }
                                   }}
-                                  disabled={!isSelected}
+                                  disabled={!isSelected || orderMode === 'collective'}
                                   className="h-10 rounded-lg bg-[#1F1E1C] border-white/10 text-sm disabled:opacity-50"
                                 />
                               </div>
@@ -1490,94 +1588,88 @@ export default function RequestFuelModal({
                 </PopoverContent>
               </Popover>
 
-              {/* Collective Amount & Litres - Show when all vehicles selected */}
-              {selectedVehicles.length === filteredVehicles.length &&
-                selectedVehicles.length > 0 && (
-                  <div className="flex items-center gap-6">
-                    <div className="w-4/5">
-                      {/* Amount (₦) → updates Quantity via API */}
-                      <Field label="Amount (₦)" error={errors.quantity}>
-                        <CustomInput
-                          type="text"
-                          value={
-                            amount === ""
-                              ? ""
-                              : Number(amount).toLocaleString("en-NG")
-                          }
-                          onChange={async (e) => {
-                            const val = e.target.value.replace(/,/g, "");
-                            if (val === "") {
-                              setAmount("");
-                              setForm((p) => ({ ...p, quantity: 0 }));
-                              return;
-                            }
-                            const naira = Math.max(
-                              0,
-                              Math.floor(Number(val) || 0)
-                            );
-                            setAmount(naira);
-
-                            // Convert amount to litres instantly using unit price
-                            if (upperFuel && naira > 0) {
-                              const prices = await ensureUnitPrices();
-                              const perL =
-                                upperFuel === "DIESEL"
-                                  ? prices?.diesel
-                                  : upperFuel === "PETROL"
-                                  ? prices?.petrol
-                                  : undefined;
-
-                              if (perL) {
-                                const litres = Math.max(
-                                  0,
-                                  Math.round(naira / perL)
-                                );
-                                setForm((p) => ({ ...p, quantity: litres }));
-                              }
-                            } else if (naira === 0) {
-                              setForm((p) => ({ ...p, quantity: 0 }));
-                            }
-                          }}
-                          placeholder="Enter amount in ₦"
-                          className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
-                        />
-                        {converting && (
-                          <p className="text-xs text-white/60 mt-1">
-                            Converting…
-                          </p>
-                        )}
-                      </Field>
-                    </div>
-
-                    {/* Quantity (Litres) → updates Amount locally */}
-                    <Field label="Quantity (Litres)" error={errors.quantity}>
+              {/* Collective Amount & Litres - Show in collective mode */}
+              {orderMode === 'collective' && selectedVehicles.length > 0 && (
+                <div className="flex items-center gap-6">
+                  <div className="w-4/5">
+                    {/* Amount (₦) → updates Quantity via API */}
+                    <Field label="Amount (₦)" error={errors.quantity}>
                       <CustomInput
                         type="text"
                         value={
-                          form.quantity === 0
+                          amount === ""
                             ? ""
-                            : form.quantity.toLocaleString("en-NG")
+                            : Number(amount).toLocaleString("en-NG")
                         }
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const val = e.target.value.replace(/,/g, "");
-                          const litres =
-                            val === ""
-                              ? 0
-                              : Math.max(0, parseInt(val, 10) || 0);
-                          setForm((p) => ({ ...p, quantity: litres }));
-                          clearError("quantity");
                           if (val === "") {
                             setAmount("");
-                          } else {
-                            convertLitresToAmount(litres);
+                            setForm((p) => ({ ...p, quantity: 0 }));
+                            return;
+                          }
+                          const naira = Math.max(0, Math.floor(Number(val) || 0));
+                          setAmount(naira);
+
+                          // Convert amount to litres instantly using unit price
+                          if (upperFuel && naira > 0) {
+                            const prices = await ensureUnitPrices();
+                            const perL =
+                              upperFuel === "DIESEL"
+                                ? prices?.diesel
+                                : upperFuel === "PETROL"
+                                  ? prices?.petrol
+                                  : undefined;
+
+                            if (perL) {
+                              const litres = Math.max(
+                                0,
+                                Math.round(naira / perL)
+                              );
+                              setForm((p) => ({ ...p, quantity: litres }));
+                            }
+                          } else if (naira === 0) {
+                            setForm((p) => ({ ...p, quantity: 0 }));
                           }
                         }}
-                        placeholder="quantity (min: 50L)"
+                        placeholder="Enter total amount in ₦"
                         className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
                       />
+                      {converting && (
+                        <p className="text-xs text-white/60 mt-1">Converting…</p>
+                      )}
                     </Field>
                   </div>
-                )}
+
+                  {/* Quantity (Litres) - Read-only, shows calculated total litres */}
+                  <Field label="Quantity (Litres)" error={errors.quantity}>
+                    <CustomInput
+                      type="text"
+                      value={
+                        form.quantity === 0
+                          ? ""
+                          : form.quantity.toLocaleString("en-NG")
+                      }
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/,/g, "");
+                        const litres =
+                          val === ""
+                            ? 0
+                            : Math.max(0, parseInt(val, 10) || 0);
+                        setForm((p) => ({ ...p, quantity: litres }));
+                        clearError("quantity");
+                        if (val === "") {
+                          setAmount("");
+                        } else {
+                          convertLitresToAmount(litres);
+                        }
+                      }}
+                      placeholder="quantity (min: 50L)"
+                      className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
+                    />
+                  </Field>
+                </div>
+              )}
 
               {errors.asset_id && (
                 <p className="text-sm text-rose-400">{errors.asset_id}</p>
