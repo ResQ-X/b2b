@@ -7,6 +7,7 @@ import type { User } from "@/types/account";
 import AddUserModal from "@/components/AddUserModal";
 import PasswordModal from "@/components/account/PasswordModal";
 import ReclaimFundsModal from "@/components/account/ReclaimFundsModal";
+import PlaceOrderModal from "@/components/account/PlaceOrderModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ import {
   KeyRound,
   DollarSign,
   Activity,
+  ShoppingCart,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -44,6 +46,11 @@ type ReclaimAction = {
   userName: string;
 } | null;
 
+type PlaceOrderAction = {
+  userId: string;
+  userName: string;
+} | null;
+
 export default function Page() {
   const router = useRouter();
   const [subs, setSubs] = useState<SubAdmin[]>([]);
@@ -53,6 +60,8 @@ export default function Page() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [passwordAction, setPasswordAction] = useState<PasswordAction>(null);
   const [reclaimAction, setReclaimAction] = useState<ReclaimAction>(null);
+  const [placeOrderAction, setPlaceOrderAction] =
+    useState<PlaceOrderAction>(null);
 
   useEffect(() => {
     async function fetchSubs() {
@@ -119,6 +128,10 @@ export default function Page() {
 
   const initiateReclaimFunds = (userId: string, userName: string) => {
     setReclaimAction({ userId, userName });
+  };
+
+  const initiatePlaceOrder = (userId: string, userName: string) => {
+    setPlaceOrderAction({ userId, userName });
   };
 
   const handlePasswordConfirm = async (password: string) => {
@@ -199,6 +212,31 @@ export default function Page() {
     return <div className="p-8 text-red-400 text-center">Error: {error}</div>;
   }
 
+  const handlePlaceOrder = async (orderData: any) => {
+    try {
+      const res = await axiosInstance.post("/super/orders/proxy", orderData);
+
+      toast.success("Order placed successfully");
+      setPlaceOrderAction(null);
+
+      // Optional: refresh activity or reload
+      // router.refresh();
+      // if (res.data && res.data.orderId) {
+      //   router.push(`/super/orders/${res.data.orderId}`);
+      // }
+      console.log("Proxy order response:", res.data);
+    } catch (e: any) {
+      console.error("Failed to place proxy order:", e);
+
+      const msg =
+        e?.response?.data?.message ||
+        e?.response?.data?.error ||
+        "Failed to place order.";
+      toast.error(msg);
+      throw e;
+    }
+  };
+
   return (
     <div className="p-8">
       <h1 className="text-white text-2xl font-semibold mb-6">
@@ -261,7 +299,7 @@ export default function Page() {
                           <DropdownMenuItem
                             className="text-white hover:bg-white/10 cursor-pointer"
                             onClick={() =>
-                              router.push(`/account/teams/${u.id}/activities`)
+                              router.push(`/super/team/${u.id}/activities`)
                             }
                           >
                             <Activity className="w-4 h-4 mr-2" />
@@ -271,13 +309,13 @@ export default function Page() {
                           <DropdownMenuItem
                             className="text-white hover:bg-white/10 cursor-pointer"
                             onClick={() =>
-                              initiateReclaimFunds(
+                              initiatePlaceOrder(
                                 u.id,
                                 u.name || u.company_name || "this user"
                               )
                             }
                           >
-                            <DollarSign className="w-4 h-4 mr-2" />
+                            <ShoppingCart className="w-4 h-4 mr-2" />
                             Place Order For Sub Account
                           </DropdownMenuItem>
 
@@ -369,6 +407,14 @@ export default function Page() {
         onConfirm={handleReclaimFunds}
         userName={reclaimAction?.userName || ""}
         subAccountId={reclaimAction?.userId || ""}
+      />
+
+      <PlaceOrderModal
+        isOpen={!!placeOrderAction}
+        onClose={() => setPlaceOrderAction(null)}
+        onConfirm={handlePlaceOrder}
+        userName={placeOrderAction?.userName || ""}
+        subAccountId={placeOrderAction?.userId || ""}
       />
     </div>
   );

@@ -156,52 +156,6 @@ export default function DashboardPage() {
     }
   };
 
-  // const fetchPieChartData = async () => {
-  //   try {
-  //     const response = await axiosInstance.get("/fleets/dashboard-pie-data");
-
-  //     const pieData: PieDataResponse = response.data.data.data;
-
-  //     const colors = ["#FF8500", "#F59E0B", "#FDBA74", "#FFE6C7"];
-
-  //     const transformedPieData: PieChartData = {
-  //       legend: [
-  //         {
-  //           label: "Fuel Cost",
-  //           value: `${pieData.percentages.fuel}%`,
-  //           color: colors[0],
-  //         },
-  //         {
-  //           label: "Maintenance Cost",
-  //           value: `${pieData.percentages.maintenance}%`,
-  //           color: colors[1],
-  //         },
-  //         {
-  //           label: "Emergency Deliveries",
-  //           value: `${pieData.percentages.emergency}%`,
-  //           color: colors[2],
-  //         },
-  //         {
-  //           label: "Service Charges",
-  //           value: `${pieData.percentages.service}%`,
-  //           color: colors[3],
-  //         },
-  //       ],
-  //       slices: [
-  //         parseFloat(pieData.percentages.fuel),
-  //         parseFloat(pieData.percentages.maintenance),
-  //         parseFloat(pieData.percentages.emergency),
-  //         parseFloat(pieData.percentages.service),
-  //       ],
-  //       colors: colors,
-  //     };
-
-  //     setPieChartData(transformedPieData);
-  //   } catch (error) {
-  //     console.error("Failed to fetch pie chart data:", error);
-  //   }
-  // };
-
   console.log("pieChartData", pieChartData);
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -324,8 +278,8 @@ export default function DashboardPage() {
           delivery.status === "COMPLETED"
             ? "Delivered"
             : delivery.status === "PENDING"
-              ? "Pending"
-              : delivery.status,
+            ? "Pending"
+            : delivery.status,
       };
     });
   };
@@ -540,8 +494,9 @@ export default function DashboardPage() {
         <div className="space-y-6">
           <SideCard
             title="Schedule Service"
-            subtitle={`${stats?.pendingMaintenanceServices || 0
-              } vehicles need maintenance`}
+            subtitle={`${
+              stats?.pendingMaintenanceServices || 0
+            } vehicles need maintenance`}
             actionText="View Schedule"
             icon={FuelIcon}
             onAction={() => router.push("/schedule")}
