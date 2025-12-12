@@ -56,7 +56,8 @@ export type RequestFuelForm = {
   note: string;
   is_scheduled: boolean;
   apply_quantity_to_all_assets: boolean; // NEW
-  per_vehicle_quantities?: Array<{ asset_id: string; quantity: number }>; // NEW
+  is_fill_up: boolean; // NEW
+  per_vehicle_quantities?: Array<{ asset_id: string; quantity: number; is_fill_up: boolean }>; // NEW
 };
 
 type Option = { label: string; value: string };
@@ -541,6 +542,7 @@ export default function RequestFuelModal({
     note: initialValues?.note || "",
     is_scheduled: initialValues?.is_scheduled || false,
     apply_quantity_to_all_assets: true, // NEW: default to collective mode
+    is_fill_up: false, // NEW
     per_vehicle_quantities: [], // NEW
   });
 
@@ -574,6 +576,7 @@ export default function RequestFuelModal({
       {
         litres: number;
         amount: number | "";
+        is_fill_up?: boolean;
       }
     >
   >({});
@@ -606,6 +609,27 @@ export default function RequestFuelModal({
         (v.plate_number && v.plate_number.toLowerCase().includes(query))
     );
   }, [assets, vehicleSearch]);
+
+  // Auto-select all vehicles when switching to collective mode
+  useEffect(() => {
+    if (orderMode === 'collective' && filteredVehicles.length > 0) {
+      const allIds = filteredVehicles.map((v) => v.id);
+      setSelectedVehicles(allIds);
+      // Initialize per-vehicle data for all (though not strictly needed for collective, good for consistency)
+      const newData: Record<
+        string,
+        { litres: number; amount: number | ""; is_fill_up: boolean }
+      > = {};
+      filteredVehicles.forEach((v) => {
+        newData[v.id] = perVehicleData[v.id] || {
+          litres: 0,
+          amount: "",
+          is_fill_up: false,
+        };
+      });
+      setPerVehicleData(newData);
+    }
+  }, [orderMode, filteredVehicles]);
 
   // Fetch details (and unit prices) once; reuse afterwards
   const fetchFuelDetails = async (naira: number, fuelType: string) => {
@@ -729,28 +753,37 @@ export default function RequestFuelModal({
     const isCollectiveMode = orderMode === 'collective';
 
     if (isCollectiveMode) {
-      // Collective mode: validate single quantity
-      if (!form.quantity || form.quantity <= 0) {
-        next.quantity = "Quantity must be greater than 0";
-      } else if (form.quantity < 25) {
-        next.quantity = "Minimum quantity is 50 litres";
-      } else if (form.quantity > 5000) {
-        next.quantity = "Maximum quantity is 5000 litres";
+      // Collective mode: validate single quantity if not fill up
+      if (!form.is_fill_up) {
+        if (!form.quantity || form.quantity <= 0) {
+          next.quantity = "Quantity must be greater than 0";
+        } else if (form.quantity < 25) {
+          next.quantity = "Minimum quantity is 50 litres";
+        } else if (form.quantity > 5000) {
+          next.quantity = "Maximum quantity is 5000 litres";
+        }
       }
     } else {
-      // Per-vehicle mode: validate each vehicle has quantity
+      // Per-vehicle mode: validate each vehicle has quantity if not fill up
       for (const assetId of selectedVehicles) {
         const vehicleData = perVehicleData[assetId];
-        if (!vehicleData || !vehicleData.litres || vehicleData.litres <= 0) {
-          next.quantity =
-            "All selected vehicles must have a quantity greater than 0";
+        if (!vehicleData) {
+          next.quantity = "Vehicle data missing";
           break;
-        } else if (vehicleData.litres < 25) {
-          next.quantity = "Minimum quantity is 50 litres per vehicle";
-          break;
-        } else if (vehicleData.litres > 5000) {
-          next.quantity = "Maximum quantity is 5000 litres per vehicle";
-          break;
+        }
+
+        if (!vehicleData.is_fill_up) {
+          if (!vehicleData.litres || vehicleData.litres <= 0) {
+            next.quantity =
+              "All selected vehicles must have a quantity greater than 0";
+            break;
+          } else if (vehicleData.litres < 25) {
+            next.quantity = "Minimum quantity is 50 litres per vehicle";
+            break;
+          } else if (vehicleData.litres > 5000) {
+            next.quantity = "Maximum quantity is 5000 litres per vehicle";
+            break;
+          }
         }
       }
     }
@@ -789,6 +822,7 @@ export default function RequestFuelModal({
         note: initialValues?.note || "",
         is_scheduled: initialValues?.is_scheduled || false,
         apply_quantity_to_all_assets: true,
+        is_fill_up: false,
         per_vehicle_quantities: [],
       });
       setErrors({});
@@ -960,13 +994,13 @@ export default function RequestFuelModal({
 
     // Check mode explicitly using orderMode state
     if (orderMode === 'collective') {
-      // Collective mode: check single quantity
-      return form.quantity > 0;
+      // Collective mode: check single quantity or fill up
+      return form.is_fill_up || form.quantity > 0;
     } else {
-      // Per-vehicle mode: check all selected vehicles have quantity
+      // Per-vehicle mode: check all selected vehicles have quantity or fill up
       return selectedVehicles.every((assetId) => {
         const data = perVehicleData[assetId];
-        return data && data.litres > 0;
+        return data && (data.is_fill_up || data.litres > 0);
       });
     }
   }, [
@@ -974,6 +1008,7 @@ export default function RequestFuelModal({
     form.location_id,
     form.time_slot,
     form.quantity,
+    form.is_fill_up, // Added dependency
     orderMode,
     selectedVehicles,
     perVehicleData,
@@ -992,7 +1027,8 @@ export default function RequestFuelModal({
         fuel_type: form.fuel_type,
         asset_ids: selectedVehicles,
         apply_quantity_to_all_assets: true,
-        quantity: form.quantity,
+        is_fill_up: form.is_fill_up,
+        quantity: form.is_fill_up ? 0 : form.quantity,
         ...(isManualLocation ? {} : { location_id: form.location_id }),
         ...(isManualLocation
           ? {
@@ -1014,7 +1050,8 @@ export default function RequestFuelModal({
         apply_quantity_to_all_assets: false,
         per_vehicle_quantities: selectedVehicles.map((assetId) => ({
           asset_id: assetId,
-          quantity: perVehicleData[assetId]?.litres || 0,
+          quantity: perVehicleData[assetId]?.is_fill_up ? 0 : (perVehicleData[assetId]?.litres || 0),
+          is_fill_up: perVehicleData[assetId]?.is_fill_up || false,
         })),
         ...(isManualLocation ? {} : { location_id: form.location_id }),
         ...(isManualLocation
@@ -1360,12 +1397,13 @@ export default function RequestFuelModal({
                               // Initialize per-vehicle data for all
                               const newData: Record<
                                 string,
-                                { litres: number; amount: number | "" }
+                                { litres: number; amount: number | ""; is_fill_up: boolean }
                               > = {};
                               filteredVehicles.forEach((v) => {
                                 newData[v.id] = perVehicleData[v.id] || {
                                   litres: 0,
                                   amount: "",
+                                  is_fill_up: false,
                                 };
                               });
                               setPerVehicleData(newData);
@@ -1403,6 +1441,7 @@ export default function RequestFuelModal({
                           const vehicleData = perVehicleData[vehicle.id] || {
                             litres: 0,
                             amount: "",
+                            is_fill_up: false,
                           };
 
                           return (
@@ -1424,6 +1463,7 @@ export default function RequestFuelModal({
                                       [vehicle.id]: prev[vehicle.id] || {
                                         litres: 0,
                                         amount: "",
+                                        is_fill_up: false,
                                       },
                                     }));
                                   } else {
@@ -1448,137 +1488,208 @@ export default function RequestFuelModal({
                               </div>
 
                               {/* Litres Input */}
-                              <div className="w-40">
-                                <CustomInput
-                                  type="text"
-                                  placeholder="Litres"
-                                  value={
-                                    orderMode === 'collective'
-                                      ? "--"
-                                      : vehicleData.litres === 0
-                                        ? ""
-                                        : vehicleData.litres.toLocaleString("en-NG")
-                                  }
-                                  onChange={async (e) => {
-                                    const val = e.target.value.replace(/,/g, "");
-                                    const litres =
-                                      val === ""
-                                        ? 0
-                                        : Math.max(0, parseInt(val, 10) || 0);
-
-                                    setPerVehicleData((prev) => ({
-                                      ...prev,
-                                      [vehicle.id]: {
-                                        litres,
-                                        amount: prev[vehicle.id]?.amount || "",
-                                      },
-                                    }));
-
-                                    // Convert litres to amount
-                                    if (litres > 0 && upperFuel) {
-                                      const prices = await ensureUnitPrices();
-                                      const perL =
-                                        upperFuel === "DIESEL"
-                                          ? prices?.diesel
-                                          : upperFuel === "PETROL"
-                                            ? prices?.petrol
-                                            : undefined;
-
-                                      if (perL) {
-                                        const naira = Math.max(
-                                          0,
-                                          Math.round(litres * perL)
-                                        );
-                                        setPerVehicleData((prev) => ({
-                                          ...prev,
-                                          [vehicle.id]: {
-                                            litres,
-                                            amount: naira,
-                                          },
-                                        }));
-                                      }
-                                    } else if (litres === 0) {
+                              {vehicleData.is_fill_up ? (
+                                <div className="flex-1 flex items-center justify-end gap-2">
+                                  <span className="text-[#FF8500] font-medium text-sm">Fill Up Selected</span>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
                                       setPerVehicleData((prev) => ({
                                         ...prev,
-                                        [vehicle.id]: { litres: 0, amount: "" },
+                                        [vehicle.id]: {
+                                          litres: 0,
+                                          amount: "",
+                                          ...prev[vehicle.id],
+                                          is_fill_up: false,
+                                        },
                                       }));
-                                    }
-                                  }}
-                                  disabled={!isSelected || orderMode === 'collective'}
-                                  className="h-10 rounded-lg bg-[#1F1E1C] border-white/10 text-sm disabled:opacity-50"
-                                />
-                              </div>
-
-                              {/* Amount Input */}
-                              <div className="w-40">
-                                <CustomInput
-                                  type="text"
-                                  placeholder="Amount"
-                                  value={
-                                    orderMode === 'collective'
-                                      ? amount === "" || selectedVehicles.length === 0
-                                        ? ""
-                                        : Math.floor(Number(amount) / selectedVehicles.length).toLocaleString("en-NG")
-                                      : vehicleData.amount === ""
-                                        ? ""
-                                        : Number(vehicleData.amount).toLocaleString("en-NG")
-                                  }
-                                  onChange={async (e) => {
-                                    const val = e.target.value.replace(/,/g, "");
-                                    const naira =
-                                      val === ""
-                                        ? 0
-                                        : Math.max(
-                                          0,
-                                          Math.floor(Number(val) || 0)
-                                        );
-
-                                    setPerVehicleData((prev) => ({
-                                      ...prev,
-                                      [vehicle.id]: {
-                                        litres: prev[vehicle.id]?.litres || 0,
-                                        amount: naira || "",
-                                      },
-                                    }));
-
-                                    // Convert amount to litres via API
-                                    if (naira > 0 && upperFuel) {
-                                      try {
-                                        const data = await fetchFuelDetails(
-                                          naira,
-                                          upperFuel
-                                        );
+                                    }}
+                                    className="h-8 text-white/60 hover:text-white"
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="w-32">
+                                    <CustomInput
+                                      type="text"
+                                      placeholder="Litres"
+                                      value={
+                                        orderMode === 'collective'
+                                          ? "--"
+                                          : vehicleData.litres === 0
+                                            ? ""
+                                            : vehicleData.litres.toLocaleString("en-NG")
+                                      }
+                                      onChange={async (e) => {
+                                        const val = e.target.value.replace(/,/g, "");
                                         const litres =
-                                          data?.estimation?.litres ?? 0;
-                                        const rounded = Math.max(
-                                          0,
-                                          Math.round(litres)
-                                        );
+                                          val === ""
+                                            ? 0
+                                            : Math.max(0, parseInt(val, 10) || 0);
 
                                         setPerVehicleData((prev) => ({
                                           ...prev,
                                           [vehicle.id]: {
-                                            litres: rounded,
-                                            amount: naira,
+                                            is_fill_up: false,
+                                            ...prev[vehicle.id],
+                                            litres,
+                                            amount: prev[vehicle.id]?.amount || "",
                                           },
                                         }));
-                                      } catch (e) {
-                                        console.error(
-                                          "Amount conversion failed",
-                                          e
-                                        );
+
+                                        // Convert litres to amount
+                                        if (litres > 0 && upperFuel) {
+                                          const prices = await ensureUnitPrices();
+                                          const perL =
+                                            upperFuel === "DIESEL"
+                                              ? prices?.diesel
+                                              : upperFuel === "PETROL"
+                                                ? prices?.petrol
+                                                : undefined;
+
+                                          if (perL) {
+                                            const naira = Math.max(
+                                              0,
+                                              Math.round(litres * perL)
+                                            );
+                                            setPerVehicleData((prev) => ({
+                                              ...prev,
+                                              [vehicle.id]: {
+                                                is_fill_up: false,
+                                                ...prev[vehicle.id],
+                                                litres,
+                                                amount: naira,
+                                              },
+                                            }));
+                                          }
+                                        } else if (litres === 0) {
+                                          setPerVehicleData((prev) => ({
+                                            ...prev,
+                                            [vehicle.id]: {
+                                              is_fill_up: false,
+                                              ...prev[vehicle.id],
+                                              litres: 0,
+                                              amount: "",
+                                            },
+                                          }));
+                                        }
+                                      }}
+                                      disabled={!isSelected || orderMode === 'collective'}
+                                      className="h-10 rounded-lg bg-[#1F1E1C] border-white/10 text-sm disabled:opacity-50"
+                                    />
+                                  </div>
+
+                                  {/* Amount Input */}
+                                  <div className="w-32">
+                                    <CustomInput
+                                      type="text"
+                                      placeholder="Amount"
+                                      value={
+                                        orderMode === 'collective'
+                                          ? amount === "" || selectedVehicles.length === 0
+                                            ? ""
+                                            : Math.floor(Number(amount) / selectedVehicles.length).toLocaleString("en-NG")
+                                          : vehicleData.amount === ""
+                                            ? ""
+                                            : Number(vehicleData.amount).toLocaleString("en-NG")
                                       }
-                                    } else if (naira === 0) {
-                                      setPerVehicleData((prev) => ({
-                                        ...prev,
-                                        [vehicle.id]: { litres: 0, amount: "" },
-                                      }));
-                                    }
-                                  }}
-                                  disabled={!isSelected || orderMode === 'collective'}
-                                  className="h-10 rounded-lg bg-[#1F1E1C] border-white/10 text-sm disabled:opacity-50"
-                                />
-                              </div>
+                                      onChange={async (e) => {
+                                        const val = e.target.value.replace(/,/g, "");
+                                        const naira =
+                                          val === ""
+                                            ? 0
+                                            : Math.max(
+                                              0,
+                                              Math.floor(Number(val) || 0)
+                                            );
+
+                                        setPerVehicleData((prev) => ({
+                                          ...prev,
+                                          [vehicle.id]: {
+                                            is_fill_up: false,
+                                            ...prev[vehicle.id],
+                                            litres: prev[vehicle.id]?.litres || 0,
+                                            amount: naira || "",
+                                          },
+                                        }));
+
+                                        // Convert amount to litres via API
+                                        if (naira > 0 && upperFuel) {
+                                          try {
+                                            const data = await fetchFuelDetails(
+                                              naira,
+                                              upperFuel
+                                            );
+                                            const litres =
+                                              data?.estimation?.litres ?? 0;
+                                            const rounded = Math.max(
+                                              0,
+                                              Math.round(litres)
+                                            );
+
+                                            setPerVehicleData((prev) => ({
+                                              ...prev,
+                                              [vehicle.id]: {
+                                                is_fill_up: false,
+                                                ...prev[vehicle.id],
+                                                litres: rounded,
+                                                amount: naira,
+                                              },
+                                            }));
+                                          } catch (e) {
+                                            console.error(
+                                              "Amount conversion failed",
+                                              e
+                                            );
+                                          }
+                                        } else if (naira === 0) {
+                                          setPerVehicleData((prev) => ({
+                                            ...prev,
+                                            [vehicle.id]: {
+                                              is_fill_up: false,
+                                              ...prev[vehicle.id],
+                                              litres: 0,
+                                              amount: "",
+                                            },
+                                          }));
+                                        }
+                                      }}
+                                      disabled={!isSelected || orderMode === 'collective'}
+                                      className="h-10 rounded-lg bg-[#1F1E1C] border-white/10 text-sm disabled:opacity-50"
+                                    />
+                                  </div>
+
+                                  {/* Fill Up Button (Per Asset) */}
+                                  {orderMode === 'per-asset' && (
+                                    <Button
+                                      type="button"
+                                      variant="orange"
+                                      size="sm"
+                                      onClick={() => {
+                                        if (!isSelected) {
+                                          setSelectedVehicles((prev) => [...prev, vehicle.id]);
+                                        }
+                                        setPerVehicleData((prev) => ({
+                                          ...prev,
+                                          [vehicle.id]: {
+                                            litres: 0,
+                                            amount: "",
+                                            ...(prev[vehicle.id] || {}),
+                                            is_fill_up: true,
+                                          },
+                                        }));
+                                      }}
+                                      className="h-10 px-4 rounded-lg text-sm whitespace-nowrap"
+                                    >
+                                      Fill Up
+                                    </Button>
+                                  )}
+                                </>
+                              )}
                             </div>
                           );
                         })
@@ -1589,85 +1700,105 @@ export default function RequestFuelModal({
               </Popover>
 
               {/* Collective Amount & Litres - Show in collective mode */}
-              {orderMode === 'collective' && selectedVehicles.length > 0 && (
-                <div className="flex items-center gap-6">
-                  <div className="w-4/5">
-                    {/* Amount (₦) → updates Quantity via API */}
-                    <Field label="Amount (₦)" error={errors.quantity}>
-                      <CustomInput
-                        type="text"
-                        value={
-                          amount === ""
-                            ? ""
-                            : Number(amount).toLocaleString("en-NG")
-                        }
-                        onChange={async (e) => {
-                          const val = e.target.value.replace(/,/g, "");
-                          if (val === "") {
-                            setAmount("");
-                            setForm((p) => ({ ...p, quantity: 0 }));
-                            return;
-                          }
-                          const naira = Math.max(0, Math.floor(Number(val) || 0));
-                          setAmount(naira);
-
-                          // Convert amount to litres instantly using unit price
-                          if (upperFuel && naira > 0) {
-                            const prices = await ensureUnitPrices();
-                            const perL =
-                              upperFuel === "DIESEL"
-                                ? prices?.diesel
-                                : upperFuel === "PETROL"
-                                  ? prices?.petrol
-                                  : undefined;
-
-                            if (perL) {
-                              const litres = Math.max(
-                                0,
-                                Math.round(naira / perL)
-                              );
-                              setForm((p) => ({ ...p, quantity: litres }));
-                            }
-                          } else if (naira === 0) {
-                            setForm((p) => ({ ...p, quantity: 0 }));
-                          }
-                        }}
-                        placeholder="Enter total amount in ₦"
-                        className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
-                      />
-                      {converting && (
-                        <p className="text-xs text-white/60 mt-1">Converting…</p>
-                      )}
-                    </Field>
-                  </div>
-
-                  {/* Quantity (Litres) - Read-only, shows calculated total litres */}
-                  <Field label="Quantity (Litres)" error={errors.quantity}>
-                    <CustomInput
-                      type="text"
-                      value={
-                        form.quantity === 0
-                          ? ""
-                          : form.quantity.toLocaleString("en-NG")
-                      }
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/,/g, "");
-                        const litres =
-                          val === ""
-                            ? 0
-                            : Math.max(0, parseInt(val, 10) || 0);
-                        setForm((p) => ({ ...p, quantity: litres }));
-                        clearError("quantity");
-                        if (val === "") {
+              {orderMode === 'collective' && (
+                <div className="space-y-4">
+                  {/* Fill Up Checkbox */}
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      checked={form.is_fill_up}
+                      onCheckedChange={(checked) => {
+                        setForm((p) => ({ ...p, is_fill_up: !!checked }));
+                        if (checked) {
                           setAmount("");
-                        } else {
-                          convertLitresToAmount(litres);
+                          setForm((p) => ({ ...p, quantity: 0 }));
                         }
                       }}
-                      placeholder="quantity (min: 50L)"
-                      className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
+                      className="border-white/40 data-[state=checked]:bg-[#FF8500] data-[state=checked]:border-[#FF8500]"
                     />
-                  </Field>
+                    <Label className="text-white font-medium">Fill Up</Label>
+                  </div>
+
+                  {!form.is_fill_up && (
+                    <div className="flex items-center gap-6">
+                      <div className="w-4/5">
+                        {/* Amount (₦) → updates Quantity via API */}
+                        <Field label="Amount (₦)" error={errors.quantity}>
+                          <CustomInput
+                            type="text"
+                            value={
+                              amount === ""
+                                ? ""
+                                : Number(amount).toLocaleString("en-NG")
+                            }
+                            onChange={async (e) => {
+                              const val = e.target.value.replace(/,/g, "");
+                              if (val === "") {
+                                setAmount("");
+                                setForm((p) => ({ ...p, quantity: 0 }));
+                                return;
+                              }
+                              const naira = Math.max(0, Math.floor(Number(val) || 0));
+                              setAmount(naira);
+
+                              // Convert amount to litres instantly using unit price
+                              if (upperFuel && naira > 0) {
+                                const prices = await ensureUnitPrices();
+                                const perL =
+                                  upperFuel === "DIESEL"
+                                    ? prices?.diesel
+                                    : upperFuel === "PETROL"
+                                      ? prices?.petrol
+                                      : undefined;
+
+                                if (perL) {
+                                  const litres = Math.max(
+                                    0,
+                                    Math.round(naira / perL)
+                                  );
+                                  setForm((p) => ({ ...p, quantity: litres }));
+                                }
+                              } else if (naira === 0) {
+                                setForm((p) => ({ ...p, quantity: 0 }));
+                              }
+                            }}
+                            placeholder="Enter total amount in ₦"
+                            className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
+                          />
+                          {converting && (
+                            <p className="text-xs text-white/60 mt-1">Converting…</p>
+                          )}
+                        </Field>
+                      </div>
+
+                      {/* Quantity (Litres) - Read-only, shows calculated total litres */}
+                      <Field label="Quantity (Litres)" error={errors.quantity}>
+                        <CustomInput
+                          type="text"
+                          value={
+                            form.quantity === 0
+                              ? ""
+                              : form.quantity.toLocaleString("en-NG")
+                          }
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/,/g, "");
+                            const litres =
+                              val === ""
+                                ? 0
+                                : Math.max(0, parseInt(val, 10) || 0);
+                            setForm((p) => ({ ...p, quantity: litres }));
+                            clearError("quantity");
+                            if (val === "") {
+                              setAmount("");
+                            } else {
+                              convertLitresToAmount(litres);
+                            }
+                          }}
+                          placeholder="quantity (min: 50L)"
+                          className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
+                        />
+                      </Field>
+                    </div>
+                  )}
                 </div>
               )}
 
