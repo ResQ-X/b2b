@@ -58,24 +58,14 @@ export function BillingTable() {
           params.append("endDate", dateRange.end);
         }
 
-        // Add type filter
+        // Add type filter (DEBIT, CREDIT, INFO)
         if (selectedType !== "ALL") {
-          // Map frontend type to backend type
-          const typeMap: Record<string, string> = {
-            "Wallet Top Up": "TOP_UP",
-            "Fuel Service": "FUEL_SERVICE",
-            "Maintenance": "MAINTENANCE",
-            "Emergency Service": "EMERGENCY",
-          };
-          const backendType = typeMap[selectedType];
-          if (backendType) {
-            params.append("type", backendType);
-          }
+          params.append("type", selectedType);
         }
 
-        // Add status filter
+        // Add status filter (SUCCESS, PENDING, FAILED, DECLINED)
         if (selectedStatus !== "ALL") {
-          params.append("status", selectedStatus.toUpperCase());
+          params.append("status", selectedStatus);
         }
 
         // Add pagination
@@ -314,10 +304,9 @@ export function BillingTable() {
                 className="w-full h-10 px-3 rounded-lg border border-white/10 bg-[#2D2A27] text-white focus:outline-none focus:border-[#FF8500]/50"
               >
                 <option value="ALL">All Types</option>
-                <option value="Wallet Top Up">Wallet Top Up</option>
-                <option value="Fuel Service">Fuel Service</option>
-                <option value="Maintenance">Maintenance</option>
-                <option value="Emergency Service">Emergency Service</option>
+                <option value="DEBIT">Debit</option>
+                <option value="CREDIT">Credit</option>
+                <option value="INFO">Info</option>
               </select>
             </div>
 
@@ -332,8 +321,10 @@ export function BillingTable() {
                 className="w-full h-10 px-3 rounded-lg border border-white/10 bg-[#2D2A27] text-white focus:outline-none focus:border-[#FF8500]/50"
               >
                 <option value="ALL">All Status</option>
-                <option value="Paid">Paid</option>
-                <option value="Pending">Pending</option>
+                <option value="SUCCESS">Success</option>
+                <option value="PENDING">Pending</option>
+                <option value="FAILED">Failed</option>
+                <option value="DECLINED">Declined</option>
               </select>
             </div>
           </div>
