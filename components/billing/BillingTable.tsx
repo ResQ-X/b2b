@@ -3,12 +3,20 @@ import jsPDF from "jspdf";
 import { naira } from "@/app/(dashboard)/billing/page";
 import React, { useState, useEffect } from "react";
 import axiosInstance from "@/lib/axios";
+import { toCSV, downloadText } from "@/lib/export";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type Transaction = {
   id: string;
   status: string;
   reference_number: string;
   type: string;
+  description: string;
   amount: string;
   created_at: string;
   updated_at: string;
@@ -36,6 +44,10 @@ export function BillingTable() {
   const [selectedType, setSelectedType] = useState<string>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
   const [showFilters, setShowFilters] = useState(false);
+
+  // Modal state
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -147,54 +159,216 @@ export function BillingTable() {
   const handleDownloadInvoice = (transaction: Transaction, bill: BillRow) => {
     try {
       const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
 
-      // Add header
-      doc.setFontSize(20);
+      // Header - Company Logo/Name
+      doc.setFontSize(24);
       doc.setTextColor(255, 133, 0); // Orange color
-      doc.text("ResQ-X", 20, 20);
+      doc.setFont("helvetica", "bold");
+      doc.text("ResQ-X", 20, 25);
 
-      doc.setFontSize(16);
+      // Company tagline
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.setFont("helvetica", "normal");
+      doc.text("Fleet Management System", 20, 32);
+
+      // Invoice title (right aligned)
+      doc.setFontSize(28);
       doc.setTextColor(0, 0, 0);
-      doc.text("INVOICE", 20, 35);
+      doc.setFont("helvetica", "bold");
+      doc.text("INVOICE", pageWidth - 20, 25, { align: "right" });
 
-      // Add invoice details
+      // Invoice metadata (right aligned)
       doc.setFontSize(10);
-      doc.text(`Invoice No: ${bill.invoiceNo}`, 20, 50);
-      doc.text(`Date Issued: ${bill.date}`, 20, 58);
-      doc.text(`Status: ${bill.status}`, 20, 66);
+      doc.setTextColor(60, 60, 60);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Invoice No: ${bill.invoiceNo}`, pageWidth - 20, 35, { align: "right" });
+      doc.text(`Date Issued: ${bill.date}`, pageWidth - 20, 42, { align: "right" });
 
-      // Add line
-      doc.line(20, 75, 190, 75);
+      // Status badge
+      const statusColor = bill.status === "Paid" ? [34, 197, 94] : [234, 179, 8];
+      doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      const statusWidth = doc.getTextWidth(bill.status) + 8;
+      doc.roundedRect(pageWidth - 20 - statusWidth, 46, statusWidth, 7, 2, 2, "F");
+      doc.text(bill.status, pageWidth - 20 - statusWidth / 2, 51, { align: "center" });
 
-      // Add transaction details
-      doc.setFontSize(12);
-      doc.text("Transaction Details", 20, 85);
+      // Horizontal line
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.line(20, 60, pageWidth - 20, 60);
 
-      doc.setFontSize(10);
-      doc.text(`Product: ${bill.product}`, 20, 95);
-      doc.text(`Payment Method: TOP UP`, 20, 103);
-      doc.text(`Reference: ${transaction.reference_number}`, 20, 111);
-
-      // Add line
-      doc.line(20, 120, 190, 120);
-
-      // Add amount
+      // Transaction Information Section
       doc.setFontSize(14);
-      doc.text(`Total Amount: ${naira(bill.amount)}`, 20, 135);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "bold");
+      doc.text("Transaction Information", 20, 72);
 
-      // Add footer
+      // Transaction details in a box
+      doc.setFillColor(250, 250, 250);
+      doc.roundedRect(20, 78, pageWidth - 40, 50, 3, 3, "F");
+
+      doc.setFontSize(10);
+      doc.setTextColor(80, 80, 80);
+      doc.setFont("helvetica", "normal");
+
+      let yPos = 86;
+      const leftCol = 25;
+      const rightCol = 110;
+
+      // Left column
+      doc.setFont("helvetica", "bold");
+      doc.text("Transaction ID:", leftCol, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(transaction.id.substring(0, 24) + "...", leftCol + 35, yPos);
+
+      yPos += 7;
+      doc.setFont("helvetica", "bold");
+      doc.text("Reference Number:", leftCol, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(transaction.reference_number, leftCol + 35, yPos);
+
+      yPos += 7;
+      doc.setFont("helvetica", "bold");
+      doc.text("Transaction Type:", leftCol, yPos);
+      doc.setFont("helvetica", "normal");
+      const typeColor = transaction.type === "CREDIT" ? [34, 197, 94] : [239, 68, 68];
+      doc.setTextColor(typeColor[0], typeColor[1], typeColor[2]);
+      doc.text(transaction.type, leftCol + 35, yPos);
+      doc.setTextColor(80, 80, 80);
+
+      yPos += 7;
+      doc.setFont("helvetica", "bold");
+      doc.text("Product/Service:", leftCol, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(bill.product, leftCol + 35, yPos);
+
+      yPos += 7;
+      doc.setFont("helvetica", "bold");
+      doc.text("Payment Method:", leftCol, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text("Wallet", leftCol + 35, yPos);
+
+      // Description section
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "bold");
+      doc.text("Description", 20, 138);
+
+      doc.setFillColor(250, 250, 250);
+      doc.roundedRect(20, 144, pageWidth - 40, 20, 3, 3, "F");
+
+      doc.setFontSize(9);
+      doc.setTextColor(80, 80, 80);
+      doc.setFont("helvetica", "normal");
+      const description = transaction.description || "No description provided";
+      const splitDescription = doc.splitTextToSize(description, pageWidth - 50);
+      doc.text(splitDescription, 25, 150);
+
+      // Amount breakdown
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "bold");
+      doc.text("Amount Details", 20, 176);
+
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineWidth(0.3);
+
+      yPos = 186;
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 60);
+      doc.setFont("helvetica", "normal");
+      doc.text("Amount", 25, yPos);
+      doc.text(naira(bill.amount), pageWidth - 25, yPos, { align: "right" });
+      doc.line(20, yPos + 2, pageWidth - 20, yPos + 2);
+
+      // Total (highlighted)
+      yPos += 12;
+      doc.setFillColor(255, 133, 0);
+      doc.roundedRect(20, yPos - 8, pageWidth - 40, 12, 2, 2, "F");
+
+      doc.setFontSize(14);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.text("Total Amount", 25, yPos);
+      doc.text(naira(bill.amount), pageWidth - 25, yPos, { align: "right" });
+
+      // Timestamps section
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "bold");
+      doc.text("Transaction Timeline", 20, 220);
+
+      doc.setFillColor(250, 250, 250);
+      doc.roundedRect(20, 226, pageWidth - 40, 20, 3, 3, "F");
+
+      doc.setFontSize(9);
+      doc.setTextColor(80, 80, 80);
+      doc.setFont("helvetica", "normal");
+
+      yPos = 232;
+      doc.setFont("helvetica", "bold");
+      doc.text("Created:", 25, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(new Date(transaction.created_at).toLocaleString(), 50, yPos);
+
+      yPos += 7;
+      doc.setFont("helvetica", "bold");
+      doc.text("Updated:", 25, yPos);
+      doc.setFont("helvetica", "normal");
+      doc.text(new Date(transaction.updated_at).toLocaleString(), 50, yPos);
+
+      // Footer
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.line(20, pageHeight - 30, pageWidth - 20, pageHeight - 30);
+
+      doc.setFontSize(9);
+      doc.setTextColor(120, 120, 120);
+      doc.setFont("helvetica", "italic");
+      doc.text("Thank you for your business!", pageWidth / 2, pageHeight - 22, { align: "center" });
+
       doc.setFontSize(8);
-      doc.setTextColor(128, 128, 128);
-      doc.text("Thank you for your business!", 20, 270);
-      doc.text("ResQ-X Fleet Management System", 20, 278);
+      doc.setFont("helvetica", "normal");
+      doc.text("ResQ-X Fleet Management System", pageWidth / 2, pageHeight - 16, { align: "center" });
+      doc.text(`Generated on ${new Date().toLocaleString()}`, pageWidth / 2, pageHeight - 11, { align: "center" });
 
       // Save the PDF
-      doc.save(`invoice-${bill.invoiceNo}.pdf`);
+      doc.save(`ResQX-Invoice-${bill.invoiceNo}.pdf`);
     } catch (error) {
       console.error("Failed to generate invoice:", error);
       alert("Failed to generate invoice. Please try again.");
     }
   };
+
+
+  const handleExportCSV = () => {
+    const rows = transformedBills.map((b, i) => ({
+      "Transaction ID": transactions[i]?.id || "",
+      "Product": b.product,
+      "Date Issued": b.date,
+      "Invoice No": b.invoiceNo,
+      "Reference Number": b.method,
+      "Type": transactions[i]?.type || "",
+      "Description": transactions[i]?.description || "",
+      "Amount (NGN)": b.amount,
+      "Status": b.status,
+    }));
+    const csv = toCSV(rows);
+    downloadText(
+      `transactions-${new Date().toISOString().slice(0, 10)}.csv`,
+      csv
+    );
+  };
+
+  const handleViewDetails = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setIsModalOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="bg-[#3B3835] rounded-b-[20px] text-white p-8 text-center">
@@ -257,6 +431,27 @@ export function BillingTable() {
                 Active
               </span>
             )}
+          </button>
+
+          {/* Export CSV Button */}
+          <button
+            onClick={handleExportCSV}
+            className="h-12 px-6 rounded-xl border border-white/10 bg-[#FF8500] text-white hover:bg-[#FF8500]/90 transition-colors flex items-center gap-2"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <span>Download CSV</span>
           </button>
         </div>
 
@@ -423,10 +618,10 @@ export function BillingTable() {
                   </div>
                   <div className="text-right">
                     <button
-                      onClick={() => handleDownloadInvoice(transactions[originalIndex], b)}
+                      onClick={() => handleViewDetails(transactions[originalIndex])}
                       className="text-[#FF8500] font-semibold hover:underline"
                     >
-                      Download
+                      View Details
                     </button>
                   </div>
                 </div>
@@ -482,10 +677,10 @@ export function BillingTable() {
                     {/* Action Button */}
                     <div className="pt-2">
                       <button
-                        onClick={() => handleDownloadInvoice(transactions[originalIndex], b)}
+                        onClick={() => handleViewDetails(transactions[originalIndex])}
                         className="text-[#FF8500] font-semibold text-sm hover:underline"
                       >
-                        Download Invoice
+                        View Details
                       </button>
                     </div>
                   </div>
@@ -495,6 +690,118 @@ export function BillingTable() {
           })
         )}
       </ul>
+
+      {/* Transaction Details Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-[600px] max-h-[90vh] overflow-y-auto rounded-3xl border border-white/10 bg-[#1E1D1B] text-white p-6 md:p-8">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Transaction Details</DialogTitle>
+          </DialogHeader>
+          {selectedTransaction && (
+            <div className="mt-6 space-y-4">
+              {/* Transaction ID */}
+              <div className="bg-[#2D2B29] rounded-xl p-4">
+                <label className="text-sm font-medium text-white/70 block mb-2">Transaction ID</label>
+                <div className="text-white font-mono text-sm break-all">
+                  {selectedTransaction.id}
+                </div>
+              </div>
+
+              {/* Reference Number */}
+              <div className="bg-[#2D2B29] rounded-xl p-4">
+                <label className="text-sm font-medium text-white/70 block mb-2">Reference Number</label>
+                <div className="text-white font-mono text-sm break-all">
+                  {selectedTransaction.reference_number}
+                </div>
+              </div>
+
+              {/* Type and Status */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-[#2D2B29] rounded-xl p-4">
+                  <label className="text-sm font-medium text-white/70 block mb-2">Type</label>
+                  <div className={`font-semibold ${selectedTransaction.type === "CREDIT" ? "text-green-400" : "text-red-400"
+                    }`}>
+                    {selectedTransaction.type}
+                  </div>
+                </div>
+                <div className="bg-[#2D2B29] rounded-xl p-4">
+                  <label className="text-sm font-medium text-white/70 block mb-2">Status</label>
+                  <div className="inline-flex items-center gap-2">
+                    <span className={`h-2.5 w-2.5 rounded-full ${selectedTransaction.status === "SUCCESS" ? "bg-emerald-400" : "bg-yellow-400"
+                      }`} />
+                    <span className={`font-semibold ${selectedTransaction.status === "SUCCESS" ? "text-emerald-400" : "text-yellow-400"
+                      }`}>
+                      {selectedTransaction.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Amount */}
+              <div className="bg-[#2D2B29] rounded-xl p-4">
+                <label className="text-sm font-medium text-white/70 block mb-2">Amount</label>
+                <div className="text-3xl font-bold text-[#FF8500]">
+                  {naira(parseFloat(selectedTransaction.amount))}
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="bg-[#2D2B29] rounded-xl p-4">
+                <label className="text-sm font-medium text-white/70 block mb-2">Description</label>
+                <div className="text-white/90 text-sm">
+                  {selectedTransaction.description}
+                </div>
+              </div>
+
+              {/* Dates */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-[#2D2B29] rounded-xl p-4">
+                  <label className="text-sm font-medium text-white/70 block mb-2">Created At</label>
+                  <div className="text-white text-sm">
+                    {new Date(selectedTransaction.created_at).toLocaleString()}
+                  </div>
+                </div>
+                <div className="bg-[#2D2B29] rounded-xl p-4">
+                  <label className="text-sm font-medium text-white/70 block mb-2">Updated At</label>
+                  <div className="text-white text-sm">
+                    {new Date(selectedTransaction.updated_at).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Download Button */}
+              <div className="pt-4">
+                <button
+                  onClick={() => {
+                    const bill = transformedBills.find(
+                      b => b.method === selectedTransaction.reference_number
+                    );
+                    if (bill) {
+                      handleDownloadInvoice(selectedTransaction, bill);
+                    }
+                  }}
+                  className="w-full h-12 px-6 rounded-xl bg-[#FF8500] text-white font-medium hover:bg-[#E67600] transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  Download Invoice
+                </button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
