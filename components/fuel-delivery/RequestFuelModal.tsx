@@ -922,15 +922,21 @@ export default function RequestFuelModal({
 
     if (
       typeof window !== "undefined" &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).google &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).google.maps &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).google.maps.Geocoder
     ) {
       try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const geocoder = new (window as any).google.maps.Geocoder();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const results: any = await new Promise((resolve, reject) => {
           geocoder.geocode(
             { address: description },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (res: any, status: string) => {
               if (status === "OK" && res && res[0]) resolve(res);
               else reject(status);
@@ -1012,7 +1018,6 @@ export default function RequestFuelModal({
     orderMode,
     selectedVehicles,
     perVehicleData,
-    filteredVehicles,
   ]);
 
   /* -------- Build request payload -------- */
@@ -1092,6 +1097,7 @@ export default function RequestFuelModal({
       } else {
         toast.error("Failed to initialize fuel service");
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Init fuel service error:", error);
       toast.error(
@@ -1144,6 +1150,7 @@ export default function RequestFuelModal({
       if (onSuccess) {
         onSuccess();
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Place fuel service error:", error);
       toast.error(
@@ -1354,11 +1361,32 @@ export default function RequestFuelModal({
                 <PopoverContent
                   align="start"
                   sideOffset={8}
-                  className="p-0 w-[min(644px,92vw)] bg-[#3B3835] text-white border border-white/10 rounded-2xl max-h-[500px] overflow-hidden z-[70]"
+                  className="p-0 w-[min(644px,92vw)] bg-[#3B3835] text-white border border-white/10 rounded-2xl max-h-[500px] flex flex-col overflow-hidden z-[70] pointer-events-auto"
                 >
-                  <div className="p-6 space-y-4 space-x-4">
+                  <style jsx global>{`
+                    .custom-scrollbar {
+                      scrollbar-width: thin !important;
+                      scrollbar-color: #FF8500 rgba(255, 255, 255, 0.05) !important;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar {
+                      width: 6px;
+                      display: block;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-track {
+                      background: rgba(255, 255, 255, 0.05);
+                      border-radius: 3px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb {
+                      background: #FF8500;
+                      border-radius: 3px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                      background: #e67a00;
+                    }
+                  `}</style>
+                  <div className="p-6 flex flex-col gap-4 h-full overflow-hidden">
                     {/* Search Input */}
-                    <div className="relative">
+                    <div className="relative shrink-0">
                       <svg
                         className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/60 pointer-events-none"
                         fill="none"
@@ -1382,7 +1410,7 @@ export default function RequestFuelModal({
                     </div>
 
                     {/* Select All Checkbox */}
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-[#2D2A27] border border-white/10">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-[#2D2A27] border border-white/10 shrink-0">
                       <div className="flex items-center gap-3">
                         <Checkbox
                           checked={
@@ -1426,7 +1454,10 @@ export default function RequestFuelModal({
                     </div>
 
                     {/* Vehicle List - Scrollable */}
-                    <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                    <div
+                      className="space-y-2 overflow-y-auto custom-scrollbar pr-2 pb-8 flex-1 min-h-0 touch-pan-y"
+                      onWheel={(e) => e.stopPropagation()}
+                    >
                       {filteredVehicles.length === 0 ? (
                         <div className="text-center py-8 text-white/60">
                           {vehicleSearch
