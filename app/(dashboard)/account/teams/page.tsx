@@ -299,7 +299,7 @@ export default function Page() {
                           <DropdownMenuItem
                             className="text-white hover:bg-white/10 cursor-pointer"
                             onClick={() =>
-                              router.push(`/super/team/${u.id}/activities`)
+                              router.push(`/account/teams/${u.id}/activities`)
                             }
                           >
                             <Activity className="w-4 h-4 mr-2" />
@@ -391,7 +391,7 @@ export default function Page() {
         description={
           passwordAction?.type === "delete"
             ? `Are you sure you want to delete ${passwordAction?.userName}'s account? Enter your password to confirm this action.`
-            : `Enter your password to confirm password reset for ${passwordAction?.userName}.`
+            : `Enter new password to confirm password reset for ${passwordAction?.userName}.`
         }
         confirmButtonText={
           passwordAction?.type === "delete"
