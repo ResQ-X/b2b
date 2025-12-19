@@ -252,7 +252,8 @@ export default function SubAdminActivityPage() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-[#1F1E1C] border-white/10 text-white"
+              // className="bg-[#1F1E1C] border-white/10 text-white"
+              className="bg-[#1F1E1C] border-white/10 text-white [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
             />
           </div>
 
@@ -265,15 +266,17 @@ export default function SubAdminActivityPage() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="bg-[#1F1E1C] border-white/10 text-white"
+              // className="bg-[#1F1E1C] border-white/10 text-white"
+              className="bg-[#1F1E1C] border-white/10 text-white [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
             />
           </div>
 
           <div className="space-y-2 flex flex-col justify-end">
             <div className="flex gap-2">
               <Button
+                variant="orange"
                 onClick={handleApplyFilters}
-                className="flex-1 bg-white text-black hover:bg-white/90"
+                className="flex-1 text-white"
               >
                 Apply
               </Button>
