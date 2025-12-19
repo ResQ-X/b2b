@@ -345,9 +345,14 @@ export function BillingTable() {
       doc.setFontSize(9);
       doc.setTextColor(120, 120, 120);
       doc.setFont("helvetica", "italic");
-      doc.text("Thank you for your business!", pageWidth / 2, pageHeight - 22, {
-        align: "center",
-      });
+      doc.text(
+        "Thank you for doing business!",
+        pageWidth / 2,
+        pageHeight - 22,
+        {
+          align: "center",
+        }
+      );
 
       doc.setFontSize(8);
       doc.setFont("helvetica", "normal");

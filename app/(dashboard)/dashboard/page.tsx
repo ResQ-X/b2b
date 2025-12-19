@@ -136,7 +136,7 @@ export default function DashboardPage() {
       // Transform chart data into your PieChartData shape
       const transformedPieData = {
         legend: resData.data.map((asset: any, index: number) => ({
-          label: asset.label,
+          label: asset.asset_name,
           value: `${asset.total_orders} orders`,
           color: colors[index % colors.length],
           details: {
