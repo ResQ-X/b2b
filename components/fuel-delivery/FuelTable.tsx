@@ -254,7 +254,7 @@ export default function OrdersTable({
               <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
-        )}
+        )} 
 
         <Button
           variant="orange"

@@ -413,7 +413,10 @@ function VehiclesMultiSelect({
             </div>
           </div>
 
-          <CommandList className="max-h-[50vh] overflow-y-auto touch-pan-y overscroll-contain">
+          <CommandList
+            className="max-h-[50vh] overflow-y-auto touch-pan-y overscroll-contain"
+            onWheel={(e) => e.stopPropagation()}
+          >
             <CommandEmpty className="px-4 py-3 text-white/60">
               No vehicles found.
             </CommandEmpty>
