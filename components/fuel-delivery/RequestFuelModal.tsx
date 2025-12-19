@@ -1488,7 +1488,7 @@ export default function RequestFuelModal({
                               });
                               setPerVehicleData(newData);
                               // Close dropdown when selecting all
-                              setVehicleDropdownOpen(false);
+                              // setVehicleDropdownOpen(false);
                             } else {
                               setSelectedVehicles([]);
                               setPerVehicleData({});
