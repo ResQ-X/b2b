@@ -3,7 +3,6 @@ import jsPDF from "jspdf";
 import { naira } from "@/app/(dashboard)/billing/page";
 import React, { useState, useEffect } from "react";
 import axiosInstance from "@/lib/axios";
-import { toCSV, downloadText } from "@/lib/export";
 import {
   Dialog,
   DialogContent,
@@ -46,7 +45,8 @@ export function BillingTable() {
   const [showFilters, setShowFilters] = useState(false);
 
   // Modal state
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<Transaction | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -184,17 +184,32 @@ export function BillingTable() {
       doc.setFontSize(10);
       doc.setTextColor(60, 60, 60);
       doc.setFont("helvetica", "normal");
-      doc.text(`Invoice No: ${bill.invoiceNo}`, pageWidth - 20, 35, { align: "right" });
-      doc.text(`Date Issued: ${bill.date}`, pageWidth - 20, 42, { align: "right" });
+      doc.text(`Invoice No: ${bill.invoiceNo}`, pageWidth - 20, 35, {
+        align: "right",
+      });
+      doc.text(`Date Issued: ${bill.date}`, pageWidth - 20, 42, {
+        align: "right",
+      });
 
       // Status badge
-      const statusColor = bill.status === "Paid" ? [34, 197, 94] : [234, 179, 8];
+      const statusColor =
+        bill.status === "Paid" ? [34, 197, 94] : [234, 179, 8];
       doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
       doc.setTextColor(255, 255, 255);
       doc.setFont("helvetica", "bold");
       const statusWidth = doc.getTextWidth(bill.status) + 8;
-      doc.roundedRect(pageWidth - 20 - statusWidth, 46, statusWidth, 7, 2, 2, "F");
-      doc.text(bill.status, pageWidth - 20 - statusWidth / 2, 51, { align: "center" });
+      doc.roundedRect(
+        pageWidth - 20 - statusWidth,
+        46,
+        statusWidth,
+        7,
+        2,
+        2,
+        "F"
+      );
+      doc.text(bill.status, pageWidth - 20 - statusWidth / 2, 51, {
+        align: "center",
+      });
 
       // Horizontal line
       doc.setDrawColor(200, 200, 200);
@@ -217,7 +232,7 @@ export function BillingTable() {
 
       let yPos = 86;
       const leftCol = 25;
-      const rightCol = 110;
+      // const rightCol = 110;
 
       // Left column
       doc.setFont("helvetica", "bold");
@@ -235,7 +250,8 @@ export function BillingTable() {
       doc.setFont("helvetica", "bold");
       doc.text("Transaction Type:", leftCol, yPos);
       doc.setFont("helvetica", "normal");
-      const typeColor = transaction.type === "CREDIT" ? [34, 197, 94] : [239, 68, 68];
+      const typeColor =
+        transaction.type === "CREDIT" ? [34, 197, 94] : [239, 68, 68];
       doc.setTextColor(typeColor[0], typeColor[1], typeColor[2]);
       doc.text(transaction.type, leftCol + 35, yPos);
       doc.setTextColor(80, 80, 80);
@@ -329,12 +345,24 @@ export function BillingTable() {
       doc.setFontSize(9);
       doc.setTextColor(120, 120, 120);
       doc.setFont("helvetica", "italic");
-      doc.text("Thank you for your business!", pageWidth / 2, pageHeight - 22, { align: "center" });
+      doc.text("Thank you for your business!", pageWidth / 2, pageHeight - 22, {
+        align: "center",
+      });
 
       doc.setFontSize(8);
       doc.setFont("helvetica", "normal");
-      doc.text("ResQ-X Fleet Management System", pageWidth / 2, pageHeight - 16, { align: "center" });
-      doc.text(`Generated on ${new Date().toLocaleString()}`, pageWidth / 2, pageHeight - 11, { align: "center" });
+      doc.text(
+        "ResQ-X Fleet Management System",
+        pageWidth / 2,
+        pageHeight - 16,
+        { align: "center" }
+      );
+      doc.text(
+        `Generated on ${new Date().toLocaleString()}`,
+        pageWidth / 2,
+        pageHeight - 11,
+        { align: "center" }
+      );
 
       // Save the PDF
       doc.save(`ResQX-Invoice-${bill.invoiceNo}.pdf`);
@@ -344,24 +372,175 @@ export function BillingTable() {
     }
   };
 
+  const handleExportPDF = () => {
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      let yPos = 20;
 
-  const handleExportCSV = () => {
-    const rows = transformedBills.map((b, i) => ({
-      "Transaction ID": transactions[i]?.id || "",
-      "Product": b.product,
-      "Date Issued": b.date,
-      "Invoice No": b.invoiceNo,
-      "Reference Number": b.method,
-      "Type": transactions[i]?.type || "",
-      "Description": transactions[i]?.description || "",
-      "Amount (NGN)": b.amount,
-      "Status": b.status,
-    }));
-    const csv = toCSV(rows);
-    downloadText(
-      `transactions-${new Date().toISOString().slice(0, 10)}.csv`,
-      csv
-    );
+      // Header
+      doc.setFontSize(24);
+      doc.setTextColor(255, 133, 0);
+      doc.setFont("helvetica", "bold");
+      doc.text("ResQ-X", pageWidth / 2, yPos, { align: "center" });
+
+      yPos += 8;
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.setFont("helvetica", "normal");
+      doc.text("Transaction Report", pageWidth / 2, yPos, { align: "center" });
+
+      yPos += 5;
+      doc.setFontSize(9);
+      doc.text(
+        `Generated on ${new Date().toLocaleString()}`,
+        pageWidth / 2,
+        yPos,
+        { align: "center" }
+      );
+
+      yPos += 10;
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.line(20, yPos, pageWidth - 20, yPos);
+
+      yPos += 10;
+
+      // Summary
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Total Transactions: ${transformedBills.length}`, 20, yPos);
+
+      const totalAmount = transformedBills.reduce(
+        (sum, b) => sum + b.amount,
+        0
+      );
+      doc.text(`Total Amount: ${naira(totalAmount)}`, pageWidth - 20, yPos, {
+        align: "right",
+      });
+
+      yPos += 10;
+
+      // Table Headers
+      doc.setFillColor(255, 133, 0);
+      doc.rect(20, yPos, pageWidth - 40, 8, "F");
+
+      doc.setFontSize(9);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      const colWidths = [35, 30, 35, 25, 30, 20];
+      const headers = [
+        "Product",
+        "Date",
+        // "Invoice No",
+        "Type",
+        "Amount",
+        "Status",
+      ];
+      let xPos = 22;
+
+      headers.forEach((header, i) => {
+        doc.text(header, xPos, yPos + 5.5);
+        xPos += colWidths[i];
+      });
+
+      yPos += 8;
+
+      // Table Rows
+      doc.setTextColor(60, 60, 60);
+      doc.setFont("helvetica", "normal");
+
+      transformedBills.forEach((bill, index) => {
+        const transaction = transactions[index];
+
+        // Check if we need a new page
+        if (yPos > pageHeight - 30) {
+          doc.addPage();
+          yPos = 20;
+
+          // Repeat headers on new page
+          doc.setFillColor(255, 133, 0);
+          doc.rect(20, yPos, pageWidth - 40, 8, "F");
+          doc.setTextColor(255, 255, 255);
+          doc.setFont("helvetica", "bold");
+          xPos = 22;
+          headers.forEach((header, i) => {
+            doc.text(header, xPos, yPos + 5.5);
+            xPos += colWidths[i];
+          });
+          yPos += 8;
+          doc.setTextColor(60, 60, 60);
+          doc.setFont("helvetica", "normal");
+        }
+
+        // Alternating row colors
+        if (index % 2 === 0) {
+          doc.setFillColor(250, 250, 250);
+          doc.rect(20, yPos, pageWidth - 40, 8, "F");
+        }
+
+        xPos = 22;
+
+        // Product (truncated if too long)
+        const productText = doc.splitTextToSize(bill.product, colWidths[0] - 2);
+        doc.text(productText[0], xPos, yPos + 5.5);
+        xPos += colWidths[0];
+
+        // Date
+        doc.text(bill.date, xPos, yPos + 5.5);
+        xPos += colWidths[1];
+
+        // Invoice No
+        // doc.text(bill.invoiceNo, xPos, yPos + 5.5);
+        // xPos += colWidths[2];
+
+        // Type
+        const typeColor =
+          transaction?.type === "CREDIT" ? [34, 197, 94] : [239, 68, 68];
+        doc.setTextColor(typeColor[0], typeColor[1], typeColor[2]);
+        doc.text(transaction?.type || "N/A", xPos, yPos + 5.5);
+        doc.setTextColor(60, 60, 60);
+        xPos += colWidths[3];
+
+        // Amount
+        doc.text(naira(bill.amount), xPos, yPos + 5.5);
+        xPos += colWidths[4];
+
+        // Status
+        const statusColor =
+          bill.status === "Paid" ? [34, 197, 94] : [234, 179, 8];
+        doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+        doc.text(bill.status, xPos, yPos + 5.5);
+        doc.setTextColor(60, 60, 60);
+
+        yPos += 8;
+      });
+
+      // Footer
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.line(20, pageHeight - 20, pageWidth - 20, pageHeight - 20);
+
+      doc.setFontSize(8);
+      doc.setTextColor(120, 120, 120);
+      doc.setFont("helvetica", "italic");
+      doc.text(
+        "ResQ-X Fleet Management System",
+        pageWidth / 2,
+        pageHeight - 12,
+        { align: "center" }
+      );
+
+      // Save the PDF
+      doc.save(
+        `ResQX-Transactions-${new Date().toISOString().slice(0, 10)}.pdf`
+      );
+    } catch (error) {
+      console.error("Failed to generate PDF:", error);
+      alert("Failed to generate PDF. Please try again.");
+    }
   };
 
   const handleViewDetails = (transaction: Transaction) => {
@@ -435,7 +614,7 @@ export function BillingTable() {
 
           {/* Export CSV Button */}
           <button
-            onClick={handleExportCSV}
+            onClick={handleExportPDF}
             className="h-12 px-6 rounded-xl border border-white/10 bg-[#FF8500] text-white hover:bg-[#FF8500]/90 transition-colors flex items-center gap-2"
           >
             <svg
@@ -451,7 +630,7 @@ export function BillingTable() {
                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            <span>Download CSV</span>
+            <span>Download PDF</span>
           </button>
         </div>
 
@@ -606,19 +785,25 @@ export function BillingTable() {
                   <div className="text-white/85">{naira(b.amount)}</div>
                   <div className="inline-flex items-center gap-2">
                     <span
-                      className={`h-2.5 w-2.5 rounded-full ${b.status === "Paid" ? "bg-emerald-400" : "bg-yellow-400"
-                        }`}
+                      className={`h-2.5 w-2.5 rounded-full ${
+                        b.status === "Paid" ? "bg-emerald-400" : "bg-yellow-400"
+                      }`}
                     />
                     <span
-                      className={`font-semibold ${b.status === "Paid" ? "text-emerald-300" : "text-yellow-300"
-                        }`}
+                      className={`font-semibold ${
+                        b.status === "Paid"
+                          ? "text-emerald-300"
+                          : "text-yellow-300"
+                      }`}
                     >
                       {b.status}
                     </span>
                   </div>
                   <div className="text-right">
                     <button
-                      onClick={() => handleViewDetails(transactions[originalIndex])}
+                      onClick={() =>
+                        handleViewDetails(transactions[originalIndex])
+                      }
                       className="text-[#FF8500] font-semibold hover:underline"
                     >
                       View Details
@@ -634,14 +819,18 @@ export function BillingTable() {
                       <h4 className="font-medium text-white">{b.product}</h4>
                       <div className="inline-flex items-center gap-2">
                         <span
-                          className={`h-2.5 w-2.5 rounded-full ${b.status === "Paid" ? "bg-emerald-400" : "bg-yellow-400"
-                            }`}
+                          className={`h-2.5 w-2.5 rounded-full ${
+                            b.status === "Paid"
+                              ? "bg-emerald-400"
+                              : "bg-yellow-400"
+                          }`}
                         />
                         <span
-                          className={`font-semibold text-sm ${b.status === "Paid"
-                            ? "text-emerald-300"
-                            : "text-yellow-300"
-                            }`}
+                          className={`font-semibold text-sm ${
+                            b.status === "Paid"
+                              ? "text-emerald-300"
+                              : "text-yellow-300"
+                          }`}
                         >
                           {b.status}
                         </span>
@@ -663,7 +852,9 @@ export function BillingTable() {
                         </div>
                       </div>
                       <div>
-                        <div className="text-white/60 text-xs mb-1">Invoice No</div>
+                        <div className="text-white/60 text-xs mb-1">
+                          Invoice No
+                        </div>
                         <div className="text-white/85">{b.invoiceNo}</div>
                       </div>
                       <div>
@@ -677,7 +868,9 @@ export function BillingTable() {
                     {/* Action Button */}
                     <div className="pt-2">
                       <button
-                        onClick={() => handleViewDetails(transactions[originalIndex])}
+                        onClick={() =>
+                          handleViewDetails(transactions[originalIndex])
+                        }
                         className="text-[#FF8500] font-semibold text-sm hover:underline"
                       >
                         View Details
@@ -695,13 +888,17 @@ export function BillingTable() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-[600px] max-h-[90vh] overflow-y-auto rounded-3xl border border-white/10 bg-[#1E1D1B] text-white p-6 md:p-8">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Transaction Details</DialogTitle>
+            <DialogTitle className="text-2xl font-bold">
+              Transaction Details
+            </DialogTitle>
           </DialogHeader>
           {selectedTransaction && (
             <div className="mt-6 space-y-4">
               {/* Transaction ID */}
               <div className="bg-[#2D2B29] rounded-xl p-4">
-                <label className="text-sm font-medium text-white/70 block mb-2">Transaction ID</label>
+                <label className="text-sm font-medium text-white/70 block mb-2">
+                  Transaction ID
+                </label>
                 <div className="text-white font-mono text-sm break-all">
                   {selectedTransaction.id}
                 </div>
@@ -709,7 +906,9 @@ export function BillingTable() {
 
               {/* Reference Number */}
               <div className="bg-[#2D2B29] rounded-xl p-4">
-                <label className="text-sm font-medium text-white/70 block mb-2">Reference Number</label>
+                <label className="text-sm font-medium text-white/70 block mb-2">
+                  Reference Number
+                </label>
                 <div className="text-white font-mono text-sm break-all">
                   {selectedTransaction.reference_number}
                 </div>
@@ -718,19 +917,38 @@ export function BillingTable() {
               {/* Type and Status */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-[#2D2B29] rounded-xl p-4">
-                  <label className="text-sm font-medium text-white/70 block mb-2">Type</label>
-                  <div className={`font-semibold ${selectedTransaction.type === "CREDIT" ? "text-green-400" : "text-red-400"
-                    }`}>
+                  <label className="text-sm font-medium text-white/70 block mb-2">
+                    Type
+                  </label>
+                  <div
+                    className={`font-semibold ${
+                      selectedTransaction.type === "CREDIT"
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
+                  >
                     {selectedTransaction.type}
                   </div>
                 </div>
                 <div className="bg-[#2D2B29] rounded-xl p-4">
-                  <label className="text-sm font-medium text-white/70 block mb-2">Status</label>
+                  <label className="text-sm font-medium text-white/70 block mb-2">
+                    Status
+                  </label>
                   <div className="inline-flex items-center gap-2">
-                    <span className={`h-2.5 w-2.5 rounded-full ${selectedTransaction.status === "SUCCESS" ? "bg-emerald-400" : "bg-yellow-400"
-                      }`} />
-                    <span className={`font-semibold ${selectedTransaction.status === "SUCCESS" ? "text-emerald-400" : "text-yellow-400"
-                      }`}>
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full ${
+                        selectedTransaction.status === "SUCCESS"
+                          ? "bg-emerald-400"
+                          : "bg-yellow-400"
+                      }`}
+                    />
+                    <span
+                      className={`font-semibold ${
+                        selectedTransaction.status === "SUCCESS"
+                          ? "text-emerald-400"
+                          : "text-yellow-400"
+                      }`}
+                    >
                       {selectedTransaction.status}
                     </span>
                   </div>
@@ -739,7 +957,9 @@ export function BillingTable() {
 
               {/* Amount */}
               <div className="bg-[#2D2B29] rounded-xl p-4">
-                <label className="text-sm font-medium text-white/70 block mb-2">Amount</label>
+                <label className="text-sm font-medium text-white/70 block mb-2">
+                  Amount
+                </label>
                 <div className="text-3xl font-bold text-[#FF8500]">
                   {naira(parseFloat(selectedTransaction.amount))}
                 </div>
@@ -747,7 +967,9 @@ export function BillingTable() {
 
               {/* Description */}
               <div className="bg-[#2D2B29] rounded-xl p-4">
-                <label className="text-sm font-medium text-white/70 block mb-2">Description</label>
+                <label className="text-sm font-medium text-white/70 block mb-2">
+                  Description
+                </label>
                 <div className="text-white/90 text-sm">
                   {selectedTransaction.description}
                 </div>
@@ -756,13 +978,17 @@ export function BillingTable() {
               {/* Dates */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-[#2D2B29] rounded-xl p-4">
-                  <label className="text-sm font-medium text-white/70 block mb-2">Created At</label>
+                  <label className="text-sm font-medium text-white/70 block mb-2">
+                    Created At
+                  </label>
                   <div className="text-white text-sm">
                     {new Date(selectedTransaction.created_at).toLocaleString()}
                   </div>
                 </div>
                 <div className="bg-[#2D2B29] rounded-xl p-4">
-                  <label className="text-sm font-medium text-white/70 block mb-2">Updated At</label>
+                  <label className="text-sm font-medium text-white/70 block mb-2">
+                    Updated At
+                  </label>
                   <div className="text-white text-sm">
                     {new Date(selectedTransaction.updated_at).toLocaleString()}
                   </div>
@@ -774,7 +1000,7 @@ export function BillingTable() {
                 <button
                   onClick={() => {
                     const bill = transformedBills.find(
-                      b => b.method === selectedTransaction.reference_number
+                      (b) => b.method === selectedTransaction.reference_number
                     );
                     if (bill) {
                       handleDownloadInvoice(selectedTransaction, bill);
