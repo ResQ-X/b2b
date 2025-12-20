@@ -125,11 +125,7 @@ export default function DashboardPage() {
     try {
       const response = await axiosInstance.get("/fleets/dashboard-pie-data");
 
-      const resData = response.data.data; // access "data" inside main "data"
-
-      // The chart data (for the pie chart itself)
-      // const chartLabels = resData.chart.labels; // e.g. ["Asset 1", "Asset 2"]
-      // const chartSeries = resData.chart.series; // e.g. [5, 4]
+      const resData = response.data.data;
 
       const colors = ["#FF8500", "#F59E0B", "#FDBA74", "#FFE6C7", "#9CA3AF"];
 
