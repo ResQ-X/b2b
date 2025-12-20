@@ -37,8 +37,6 @@ import { DateTimePicker } from "@/components/ui/DateTimePicker";
 import axiosInstance from "@/lib/axios";
 import { toast } from "react-toastify";
 
-/* ===================== Types ===================== */
-
 export type RequestFuelForm = {
   slot: string;
   location: any;
@@ -1032,6 +1030,7 @@ export default function RequestFuelModal({
     const isManualLocation = form.location_id === MANUAL_LOCATION_VALUE;
     const isCollectiveMode = orderMode === "collective";
 
+<<<<<<< HEAD
     if (isCollectiveMode) {
       // Collective mode: all vehicles get same quantity
       return {
@@ -1080,6 +1079,25 @@ export default function RequestFuelModal({
         is_scheduled: form.time_slot !== "NOW",
       };
     }
+=======
+    return {
+      fuel_type: form.fuel_type,
+      asset_ids: form.asset_ids,
+      ...(isManualLocation ? {} : { location_id: form.location_id }),
+      ...(isManualLocation
+        ? {
+            location_address: form.location_address || "",
+            location_longitude: form.location_longitude || "",
+            location_latitude: form.location_latitude || "",
+          }
+        : {}),
+      time_slot:
+        form.time_slot === "NOW" ? new Date().toISOString() : form.time_slot,
+      quantity: form.quantity,
+      note: form.note,
+      is_scheduled: form.time_slot !== "NOW",
+    };
+>>>>>>> 24bc59f (place order)
   };
 
   /* -------- Submit: Call init endpoint & show checkout -------- */
@@ -1115,8 +1133,6 @@ export default function RequestFuelModal({
       setSubmitting(false);
     }
   };
-
-  /* -------- Confirm checkout: Call place endpoint -------- */
 
   const handleConfirmCheckout = async () => {
     setCheckoutProcessing(true);
@@ -1169,19 +1185,15 @@ export default function RequestFuelModal({
     }
   };
 
-  // When dialog opens, reset amount mirror
   useEffect(() => {
     if (open) setAmount("");
   }, [open]);
 
-  // When fuel type changes, clear amount and refetch prices lazily
   useEffect(() => {
     setAmount("");
-    // prime unit prices in the background (best-effort)
     if (upperFuel) {
       ensureUnitPrices().catch(() => {});
     }
-    // re-derive amount if we already have litres
     if (form.quantity && form.quantity > 0) {
       convertLitresToAmount(form.quantity);
     }
@@ -2017,6 +2029,67 @@ export default function RequestFuelModal({
               />
             </Field>
 
+<<<<<<< HEAD
+=======
+            {/* Quantity & Amount */}
+            <div className="flex items-center gap-6">
+              <div className="w-4/5">
+                {/* Amount (₦) → updates Quantity via API */}
+                <Field label="Amount (₦)" error={errors.quantity}>
+                  <CustomInput
+                    type="text" // Changed from "number"
+                    value={
+                      amount === ""
+                        ? ""
+                        : Number(amount).toLocaleString("en-NG")
+                    }
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/,/g, ""); // Remove commas
+                      if (val === "") {
+                        setAmount("");
+                        return;
+                      }
+                      const naira = Math.max(0, Math.floor(Number(val) || 0));
+                      setAmount(naira);
+                      if (upperFuel) queueAmountConvert(naira);
+                    }}
+                    placeholder="Enter amount in ₦"
+                    className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
+                  />
+                  {converting && (
+                    <p className="text-xs text-white/60 mt-1">Converting…</p>
+                  )}
+                </Field>
+              </div>
+
+              {/* Quantity (Litres) → updates Amount locally */}
+              <Field label="Quantity (Litres)" error={errors.quantity}>
+                <CustomInput
+                  type="text" // Changed from "number"
+                  value={
+                    form.quantity === 0
+                      ? ""
+                      : form.quantity.toLocaleString("en-NG")
+                  }
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/,/g, ""); // Remove commas
+                    const litres =
+                      val === "" ? 0 : Math.max(0, parseInt(val, 10) || 0);
+                    setForm((p) => ({ ...p, quantity: litres }));
+                    clearError("quantity");
+                    if (val === "") {
+                      setAmount("");
+                    } else {
+                      convertLitresToAmount(litres);
+                    }
+                  }}
+                  placeholder="quantity (min: 50L)"
+                  className="h-14 rounded-2xl border border-white/10 bg-[#2D2A27] text-white placeholder:text-white/60"
+                />
+              </Field>
+            </div>
+
+>>>>>>> 24bc59f (place order)
             {/* Notes */}
             <div className="space-y-2">
               <Label className="text-white/80">Additional Notes</Label>

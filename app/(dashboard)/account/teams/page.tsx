@@ -299,7 +299,7 @@ export default function Page() {
                           <DropdownMenuItem
                             className="text-white hover:bg-white/10 cursor-pointer"
                             onClick={() =>
-                              router.push(`/account/teams/${u.id}/activities`)
+                              router.push(`/super/team/${u.id}/activities`)
                             }
                           >
                             <Activity className="w-4 h-4 mr-2" />
