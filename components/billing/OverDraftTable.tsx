@@ -107,7 +107,11 @@ export function OverDraftTable() {
       doc.line(20, 120, 190, 120);
 
       doc.setFontSize(14);
-      doc.text(`Overdraft Amount: ${naira(bill.amount)}`, 20, 135);
+      doc.text(
+        `Overdraft Amount: NGN ${bill.amount.toLocaleString("en-NG")}`,
+        20,
+        135
+      );
 
       if (overdraft.approvedAt) {
         const approvedDate = new Date(overdraft.approvedAt).toLocaleDateString(
@@ -124,7 +128,7 @@ export function OverDraftTable() {
 
       doc.setFontSize(8);
       doc.setTextColor(128, 128, 128);
-      doc.text("Thank you for using ResQ-X", 20, 270);
+      doc.text("Thank you for doing business!", 20, 270);
       doc.text("ResQ-X Fleet Management System", 20, 278);
 
       doc.save(`overdraft-${bill.invoiceNo}.pdf`);

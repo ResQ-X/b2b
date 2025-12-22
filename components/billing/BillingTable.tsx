@@ -250,11 +250,7 @@ export function BillingTable() {
       doc.setFont("helvetica", "bold");
       doc.text("Transaction Type:", leftCol, yPos);
       doc.setFont("helvetica", "normal");
-      const typeColor =
-        transaction.type === "CREDIT" ? [34, 197, 94] : [239, 68, 68];
-      doc.setTextColor(typeColor[0], typeColor[1], typeColor[2]);
       doc.text(transaction.type, leftCol + 35, yPos);
-      doc.setTextColor(80, 80, 80);
 
       yPos += 7;
       doc.setFont("helvetica", "bold");
@@ -298,7 +294,12 @@ export function BillingTable() {
       doc.setTextColor(60, 60, 60);
       doc.setFont("helvetica", "normal");
       doc.text("Amount", 25, yPos);
-      doc.text(naira(bill.amount), pageWidth - 25, yPos, { align: "right" });
+      doc.text(
+        `NGN ${bill.amount.toLocaleString("en-NG")}`,
+        pageWidth - 25,
+        yPos,
+        { align: "right" }
+      );
       doc.line(20, yPos + 2, pageWidth - 20, yPos + 2);
 
       // Total (highlighted)
@@ -310,7 +311,12 @@ export function BillingTable() {
       doc.setTextColor(255, 255, 255);
       doc.setFont("helvetica", "bold");
       doc.text("Total Amount", 25, yPos);
-      doc.text(naira(bill.amount), pageWidth - 25, yPos, { align: "right" });
+      doc.text(
+        `NGN ${bill.amount.toLocaleString("en-NG")}`,
+        pageWidth - 25,
+        yPos,
+        { align: "right" }
+      );
 
       // Timestamps section
       doc.setFontSize(12);
@@ -422,9 +428,14 @@ export function BillingTable() {
         (sum, b) => sum + b.amount,
         0
       );
-      doc.text(`Total Amount: ${naira(totalAmount)}`, pageWidth - 20, yPos, {
-        align: "right",
-      });
+      doc.text(
+        `Total Amount: NGN ${totalAmount.toLocaleString("en-NG")}`,
+        pageWidth - 20,
+        yPos,
+        {
+          align: "right",
+        }
+      );
 
       yPos += 10;
 
@@ -510,7 +521,7 @@ export function BillingTable() {
         xPos += colWidths[3];
 
         // Amount
-        doc.text(naira(bill.amount), xPos, yPos + 5.5);
+        doc.text(`NGN ${bill.amount.toLocaleString("en-NG")}`, xPos, yPos + 5.5);
         xPos += colWidths[4];
 
         // Status
@@ -790,16 +801,14 @@ export function BillingTable() {
                   <div className="text-white/85">{naira(b.amount)}</div>
                   <div className="inline-flex items-center gap-2">
                     <span
-                      className={`h-2.5 w-2.5 rounded-full ${
-                        b.status === "Paid" ? "bg-emerald-400" : "bg-yellow-400"
-                      }`}
+                      className={`h-2.5 w-2.5 rounded-full ${b.status === "Paid" ? "bg-emerald-400" : "bg-yellow-400"
+                        }`}
                     />
                     <span
-                      className={`font-semibold ${
-                        b.status === "Paid"
-                          ? "text-emerald-300"
-                          : "text-yellow-300"
-                      }`}
+                      className={`font-semibold ${b.status === "Paid"
+                        ? "text-emerald-300"
+                        : "text-yellow-300"
+                        }`}
                     >
                       {b.status}
                     </span>
@@ -824,18 +833,16 @@ export function BillingTable() {
                       <h4 className="font-medium text-white">{b.product}</h4>
                       <div className="inline-flex items-center gap-2">
                         <span
-                          className={`h-2.5 w-2.5 rounded-full ${
-                            b.status === "Paid"
-                              ? "bg-emerald-400"
-                              : "bg-yellow-400"
-                          }`}
+                          className={`h-2.5 w-2.5 rounded-full ${b.status === "Paid"
+                            ? "bg-emerald-400"
+                            : "bg-yellow-400"
+                            }`}
                         />
                         <span
-                          className={`font-semibold text-sm ${
-                            b.status === "Paid"
-                              ? "text-emerald-300"
-                              : "text-yellow-300"
-                          }`}
+                          className={`font-semibold text-sm ${b.status === "Paid"
+                            ? "text-emerald-300"
+                            : "text-yellow-300"
+                            }`}
                         >
                           {b.status}
                         </span>
@@ -926,11 +933,10 @@ export function BillingTable() {
                     Type
                   </label>
                   <div
-                    className={`font-semibold ${
-                      selectedTransaction.type === "CREDIT"
-                        ? "text-green-400"
-                        : "text-red-400"
-                    }`}
+                    className={`font-semibold ${selectedTransaction.type === "CREDIT"
+                      ? "text-green-400"
+                      : "text-red-400"
+                      }`}
                   >
                     {selectedTransaction.type}
                   </div>
@@ -941,18 +947,16 @@ export function BillingTable() {
                   </label>
                   <div className="inline-flex items-center gap-2">
                     <span
-                      className={`h-2.5 w-2.5 rounded-full ${
-                        selectedTransaction.status === "SUCCESS"
-                          ? "bg-emerald-400"
-                          : "bg-yellow-400"
-                      }`}
+                      className={`h-2.5 w-2.5 rounded-full ${selectedTransaction.status === "SUCCESS"
+                        ? "bg-emerald-400"
+                        : "bg-yellow-400"
+                        }`}
                     />
                     <span
-                      className={`font-semibold ${
-                        selectedTransaction.status === "SUCCESS"
-                          ? "text-emerald-400"
-                          : "text-yellow-400"
-                      }`}
+                      className={`font-semibold ${selectedTransaction.status === "SUCCESS"
+                        ? "text-emerald-400"
+                        : "text-yellow-400"
+                        }`}
                     >
                       {selectedTransaction.status}
                     </span>
