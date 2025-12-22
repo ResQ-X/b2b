@@ -1,5 +1,5 @@
-"use client";
 import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { naira } from "@/app/(dashboard)/billing/page";
 import React, { useState, useEffect } from "react";
 import axiosInstance from "@/lib/axios";
@@ -16,6 +16,7 @@ type Transaction = {
   reference_number: string;
   type: string;
   description: string;
+  service: string;
   amount: string;
   created_at: string;
   updated_at: string;
@@ -130,7 +131,8 @@ export function BillingTable() {
     };
 
     return {
-      product: productMap[transaction.type] || transaction.type,
+      product:
+        transaction.service || productMap[transaction.type] || transaction.type,
       date: formattedDate,
       // invoiceNo: transaction.reference_number,
       invoiceNo: transaction.reference_number.split("-").slice(1).join("-"),
@@ -386,173 +388,161 @@ export function BillingTable() {
   const handleExportPDF = () => {
     try {
       const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      let yPos = 20;
 
       // Header
       doc.setFontSize(24);
-      doc.setTextColor(255, 133, 0);
+      doc.setTextColor(255, 133, 0); // Orange
       doc.setFont("helvetica", "bold");
-      doc.text("ResQ-X", pageWidth / 2, yPos, { align: "center" });
+      doc.text("ResQ-X", 14, 20);
 
-      yPos += 8;
-      doc.setFontSize(12);
+      doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
       doc.setFont("helvetica", "normal");
-      doc.text("Transaction Report", pageWidth / 2, yPos, { align: "center" });
+      doc.text("Fleet Management System", 14, 26);
 
-      yPos += 5;
-      doc.setFontSize(9);
-      doc.text(
-        `Generated on ${new Date().toLocaleString()}`,
-        pageWidth / 2,
-        yPos,
-        { align: "center" }
-      );
-
-      yPos += 10;
-      doc.setDrawColor(200, 200, 200);
-      doc.setLineWidth(0.5);
-      doc.line(20, yPos, pageWidth - 20, yPos);
-
-      yPos += 10;
-
-      // Summary
-      doc.setFontSize(11);
+      // Report Title & Date
+      doc.setFontSize(16);
       doc.setTextColor(0, 0, 0);
       doc.setFont("helvetica", "bold");
-      doc.text(`Total Transactions: ${transformedBills.length}`, 20, yPos);
+      doc.text("Transaction Report", 14, 40);
 
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 46);
+
+      // Summary Stats
       const totalAmount = transformedBills.reduce(
         (sum, b) => sum + b.amount,
         0
       );
+
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 60);
+      doc.text(`Total Transactions: ${transformedBills.length}`, 14, 55);
       doc.text(
-        `Total Amount: NGN ${totalAmount.toLocaleString("en-NG")}`,
-        pageWidth - 20,
-        yPos,
-        {
-          align: "right",
-        }
+        `Total Value: NGN ${totalAmount.toLocaleString("en-NG", {
+          minimumFractionDigits: 2,
+        })}`,
+        100,
+        55
       );
 
-      yPos += 10;
-
-      // Table Headers
-      doc.setFillColor(255, 133, 0);
-      doc.rect(20, yPos, pageWidth - 40, 8, "F");
-
-      doc.setFontSize(9);
-      doc.setTextColor(255, 255, 255);
-      doc.setFont("helvetica", "bold");
-      const colWidths = [35, 30, 35, 25, 30, 20];
-      const headers = [
-        "Product",
+      // Table
+      const tableColumn = [
+        "#",
         "Date",
-        // "Invoice No",
+        "Reference",
         "Type",
-        "Amount",
+        "Service",
+        "Amount (NGN)",
         "Status",
       ];
-      let xPos = 22;
+      const tableRows: any[] = [];
 
-      headers.forEach((header, i) => {
-        doc.text(header, xPos, yPos + 5.5);
-        xPos += colWidths[i];
+      transactions.forEach((transaction, index) => {
+        const bill = transformedBills[index];
+        const date = new Date(transaction.created_at);
+        const formattedDate = date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+
+        const transactionData = [
+          index + 1,
+          formattedDate,
+          transaction.reference_number,
+          transaction.type,
+          transaction.service || bill.product,
+          bill.amount.toLocaleString("en-NG", { minimumFractionDigits: 2 }),
+          bill.status,
+        ];
+        tableRows.push(transactionData);
       });
 
-      yPos += 8;
-
-      // Table Rows
-      doc.setTextColor(60, 60, 60);
-      doc.setFont("helvetica", "normal");
-
-      transformedBills.forEach((bill, index) => {
-        const transaction = transactions[index];
-
-        // Check if we need a new page
-        if (yPos > pageHeight - 30) {
-          doc.addPage();
-          yPos = 20;
-
-          // Repeat headers on new page
-          doc.setFillColor(255, 133, 0);
-          doc.rect(20, yPos, pageWidth - 40, 8, "F");
-          doc.setTextColor(255, 255, 255);
-          doc.setFont("helvetica", "bold");
-          xPos = 22;
-          headers.forEach((header, i) => {
-            doc.text(header, xPos, yPos + 5.5);
-            xPos += colWidths[i];
-          });
-          yPos += 8;
-          doc.setTextColor(60, 60, 60);
-          doc.setFont("helvetica", "normal");
-        }
-
-        // Alternating row colors
-        if (index % 2 === 0) {
-          doc.setFillColor(250, 250, 250);
-          doc.rect(20, yPos, pageWidth - 40, 8, "F");
-        }
-
-        xPos = 22;
-
-        // Product (truncated if too long)
-        const productText = doc.splitTextToSize(bill.product, colWidths[0] - 2);
-        doc.text(productText[0], xPos, yPos + 5.5);
-        xPos += colWidths[0];
-
-        // Date
-        doc.text(bill.date, xPos, yPos + 5.5);
-        xPos += colWidths[1];
-
-        // Invoice No
-        // doc.text(bill.invoiceNo, xPos, yPos + 5.5);
-        // xPos += colWidths[2];
-
-        // Type
-        const typeColor =
-          transaction?.type === "CREDIT" ? [34, 197, 94] : [239, 68, 68];
-        doc.setTextColor(typeColor[0], typeColor[1], typeColor[2]);
-        doc.text(transaction?.type || "N/A", xPos, yPos + 5.5);
-        doc.setTextColor(60, 60, 60);
-        xPos += colWidths[3];
-
-        // Amount
-        doc.text(`NGN ${bill.amount.toLocaleString("en-NG")}`, xPos, yPos + 5.5);
-        xPos += colWidths[4];
-
-        // Status
-        const statusColor =
-          bill.status === "Paid" ? [34, 197, 94] : [234, 179, 8];
-        doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
-        doc.text(bill.status, xPos, yPos + 5.5);
-        doc.setTextColor(60, 60, 60);
-
-        yPos += 8;
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 65,
+        theme: "grid",
+        styles: {
+          fontSize: 8,
+          cellPadding: 3,
+          textColor: [60, 60, 60],
+          valign: "middle",
+        },
+        headStyles: {
+          fillColor: [255, 133, 0], // Orange header
+          textColor: [255, 255, 255],
+          fontStyle: "bold",
+          fontSize: 9,
+          halign: "center",
+        },
+        columnStyles: {
+          0: { cellWidth: 10, halign: "center" }, // Index
+          1: { cellWidth: 25 }, // Date
+          2: { cellWidth: 45 }, // Reference
+          3: { cellWidth: 20, halign: "center" }, // Type
+          4: { cellWidth: 35 }, // Service
+          5: { cellWidth: 30, halign: "right" }, // Amount
+          6: { cellWidth: 20, halign: "center" }, // Status
+        },
+        didParseCell: function (data: any) {
+          // Color code Status column
+          if (data.section === "body" && data.column.index === 6) {
+            if (data.cell.raw === "Paid") {
+              data.cell.styles.textColor = [34, 197, 94]; // Green
+              data.cell.styles.fontStyle = "bold";
+            } else {
+              data.cell.styles.textColor = [234, 179, 8]; // Yellow
+            }
+          }
+          // Color code Type column
+          if (data.section === "body" && data.column.index === 3) {
+            if (data.cell.raw === "CREDIT") {
+              data.cell.styles.textColor = [34, 197, 94]; // Green
+            } else if (data.cell.raw === "DEBIT") {
+              data.cell.styles.textColor = [239, 68, 68]; // Red
+            }
+          }
+        },
+        foot: [
+          [
+            "",
+            "",
+            "",
+            "",
+            "Total",
+            totalAmount.toLocaleString("en-NG", { minimumFractionDigits: 2 }),
+            "",
+          ],
+        ],
+        footStyles: {
+          fillColor: [240, 240, 240],
+          textColor: [0, 0, 0],
+          fontStyle: "bold",
+          halign: "right",
+        },
       });
 
       // Footer
-      doc.setDrawColor(200, 200, 200);
-      doc.setLineWidth(0.5);
-      doc.line(20, pageHeight - 20, pageWidth - 20, pageHeight - 20);
+      const pageCount = (doc as any).internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        const pageSize = doc.internal.pageSize;
+        const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
 
-      doc.setFontSize(8);
-      doc.setTextColor(120, 120, 120);
-      doc.setFont("helvetica", "italic");
-      doc.text(
-        "ResQ-X Fleet Management System",
-        pageWidth / 2,
-        pageHeight - 12,
-        { align: "center" }
-      );
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(
+          `Page ${i} of ${pageCount}`,
+          pageSize.width / 2,
+          pageHeight - 10,
+          { align: "center" }
+        );
+      }
 
-      // Save the PDF
-      doc.save(
-        `ResQX-Transactions-${new Date().toISOString().slice(0, 10)}.pdf`
-      );
+      doc.save(`ResQX-Transaction-Report-${new Date().toISOString().split("T")[0]}.pdf`);
     } catch (error) {
       console.error("Failed to generate PDF:", error);
       alert("Failed to generate PDF. Please try again.");
