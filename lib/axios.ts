@@ -2,9 +2,10 @@ import axios from "axios";
 import { Cookies } from "react-cookie";
 
 const cookies = new Cookies();
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL;
 
 const axiosInstance = axios.create({
-  baseURL: "https://backend-v2-dkn8.onrender.com",
+  baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
     "x-resqx-key": "OGCALMDOWNLETMETHROUGH",

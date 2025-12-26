@@ -86,6 +86,7 @@ export function WalletHeaderCard({ role }: { role?: string }) {
         "/fleet-wallet/top-up-initiate",
         {
           amount: parseFloat(topUpAmount),
+          callback_url: `${window.location.origin}/payment/payment_callback`,
         }
       );
 
@@ -105,16 +106,46 @@ export function WalletHeaderCard({ role }: { role?: string }) {
         return;
       }
 
-      setTopUpOpen(false);
-      setTopUpAmount("");
-      setIsProcessing(false);
-
+      // Poll the popup to check for closure or URL change
       const checkPopup = setInterval(() => {
         if (popup.closed) {
           clearInterval(checkPopup);
           verifyPayment(reference);
+          return;
         }
-      }, 500);
+
+        try {
+          // Wrap in try-catch to handle cross-origin restrictions
+          const currentUrl = popup.location.href;
+          if (
+            currentUrl.includes("payment/payment_callback") ||
+            currentUrl.includes(window.location.host)
+          ) {
+            // URL changed to our domain - successful redirection
+            clearInterval(checkPopup);
+            popup.close();
+            verifyPayment(reference);
+          }
+        } catch (e) {
+          // Ignore cross-origin errors while user is on Paystack domain
+        }
+      }, 1000);
+
+      // Listen for postMessage from backend success page
+      const messageHandler = (event: MessageEvent) => {
+        if (event.data?.type === "PAYMENT_SUCCESS") {
+          // Verify reference matches if needed, or just proceed
+          if (event.data?.reference === reference) {
+            clearInterval(checkPopup);
+            popup.close(); // Ensure popup is closed
+            verifyPayment(reference);
+            window.removeEventListener("message", messageHandler);
+          }
+        }
+      };
+
+      window.addEventListener("message", messageHandler);
+
     } catch (error) {
       console.error("Failed to initiate top-up:", error);
       toast.error("Failed to initiate payment. Please try again.");
@@ -124,31 +155,23 @@ export function WalletHeaderCard({ role }: { role?: string }) {
 
   const verifyPayment = async (ref: string) => {
     try {
-      toast.info("Verifying payment...");
+      toast.info("Refreshing wallet balance...");
 
-      const response = await axiosInstance.post(
-        "/fleet-wallet/verify-payment",
-        {
-          ref,
-          action: "TOP_UP",
-        }
+      // Refresh wallet balance
+      setLoading(true);
+      const balanceResponse = await axiosInstance.get(
+        "/fleet-wallet/get-wallet-balance"
       );
+      setWalletBalance(balanceResponse?.data?.data);
 
-      if (response.data.status === "OK") {
-        toast.success(response.data.message);
-
-        // Refresh wallet balance
-        setLoading(true);
-        const balanceResponse = await axiosInstance.get(
-          "/fleet-wallet/get-wallet-balance"
-        );
-        setWalletBalance(balanceResponse?.data?.data);
-      } else {
-        toast.error("Payment verification failed.");
-      }
+      setTopUpOpen(false);
+      setTopUpAmount("");
+      setIsProcessing(false);
+      toast.success("Wallet balance updated");
     } catch (error) {
-      console.error("Payment verification failed:", error);
-      toast.error("Payment verification failed. Please contact support.");
+      console.error("Balance refresh failed:", error);
+      toast.error("Failed to refresh balance. Please reload the page.");
+      setIsProcessing(false);
     } finally {
       sessionStorage.removeItem("paystack_reference");
       setLoading(false);
