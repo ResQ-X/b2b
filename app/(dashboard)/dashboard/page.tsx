@@ -125,18 +125,14 @@ export default function DashboardPage() {
     try {
       const response = await axiosInstance.get("/fleets/dashboard-pie-data");
 
-      const resData = response.data.data; // access "data" inside main "data"
-
-      // The chart data (for the pie chart itself)
-      // const chartLabels = resData.chart.labels; // e.g. ["Asset 1", "Asset 2"]
-      // const chartSeries = resData.chart.series; // e.g. [5, 4]
+      const resData = response.data.data;
 
       const colors = ["#FF8500", "#F59E0B", "#FDBA74", "#FFE6C7", "#9CA3AF"];
 
       // Transform chart data into your PieChartData shape
       const transformedPieData = {
         legend: resData.data.map((asset: any, index: number) => ({
-          label: asset.label,
+          label: asset.asset_name,
           value: `${asset.total_orders} orders`,
           color: colors[index % colors.length],
           details: {
@@ -155,52 +151,6 @@ export default function DashboardPage() {
       console.error("Failed to fetch pie chart data:", error);
     }
   };
-
-  // const fetchPieChartData = async () => {
-  //   try {
-  //     const response = await axiosInstance.get("/fleets/dashboard-pie-data");
-
-  //     const pieData: PieDataResponse = response.data.data.data;
-
-  //     const colors = ["#FF8500", "#F59E0B", "#FDBA74", "#FFE6C7"];
-
-  //     const transformedPieData: PieChartData = {
-  //       legend: [
-  //         {
-  //           label: "Fuel Cost",
-  //           value: `${pieData.percentages.fuel}%`,
-  //           color: colors[0],
-  //         },
-  //         {
-  //           label: "Maintenance Cost",
-  //           value: `${pieData.percentages.maintenance}%`,
-  //           color: colors[1],
-  //         },
-  //         {
-  //           label: "Emergency Deliveries",
-  //           value: `${pieData.percentages.emergency}%`,
-  //           color: colors[2],
-  //         },
-  //         {
-  //           label: "Service Charges",
-  //           value: `${pieData.percentages.service}%`,
-  //           color: colors[3],
-  //         },
-  //       ],
-  //       slices: [
-  //         parseFloat(pieData.percentages.fuel),
-  //         parseFloat(pieData.percentages.maintenance),
-  //         parseFloat(pieData.percentages.emergency),
-  //         parseFloat(pieData.percentages.service),
-  //       ],
-  //       colors: colors,
-  //     };
-
-  //     setPieChartData(transformedPieData);
-  //   } catch (error) {
-  //     console.error("Failed to fetch pie chart data:", error);
-  //   }
-  // };
 
   console.log("pieChartData", pieChartData);
   useEffect(() => {
@@ -324,8 +274,8 @@ export default function DashboardPage() {
           delivery.status === "COMPLETED"
             ? "Delivered"
             : delivery.status === "PENDING"
-            ? "Pending"
-            : delivery.status,
+              ? "Pending"
+              : delivery.status,
       };
     });
   };
@@ -373,6 +323,27 @@ export default function DashboardPage() {
     value: location.id,
   }));
 
+  const verifyPayment = async (ref: string) => {
+    try {
+      toast.info("Refreshing wallet balance...");
+
+      const balanceResponse = await axiosInstance.get(
+        "/fleet-wallet/get-wallet-balance"
+      );
+      setWalletBalance(balanceResponse?.data?.data);
+
+      sessionStorage.removeItem("paystack_reference");
+      setTopUpOpen(false);
+      setTopUpAmount("");
+      setIsProcessing(false);
+      toast.success("Wallet balance updated");
+    } catch (error) {
+      console.error("Balance refresh failed:", error);
+      toast.error("Failed to refresh balance. Please reload the page.");
+      setIsProcessing(false);
+    }
+  };
+
   const handleTopUpInitiate = async () => {
     try {
       setIsProcessing(true);
@@ -381,6 +352,7 @@ export default function DashboardPage() {
         "/fleet-wallet/top-up-initiate",
         {
           amount: parseFloat(topUpAmount),
+          callback_url: `${window.location.origin}/payment/payment_callback`,
         }
       );
 
@@ -400,52 +372,52 @@ export default function DashboardPage() {
         return;
       }
 
-      setTopUpOpen(false);
-      setTopUpAmount("");
-      setIsProcessing(false);
-
+      // Poll the popup to check for closure or URL change
+      // Poll the popup to check for closure or URL change
       const checkPopup = setInterval(() => {
         if (popup.closed) {
           clearInterval(checkPopup);
           verifyPayment(reference);
+          return;
         }
-      }, 500);
+
+        try {
+          // Wrap in try-catch to handle cross-origin restrictions
+          const currentUrl = popup.location.href;
+          if (
+            currentUrl.includes("payment/payment_callback") ||
+            currentUrl.includes(window.location.host)
+          ) {
+            // URL changed to our domain - successful redirection
+            clearInterval(checkPopup);
+            popup.close();
+            verifyPayment(reference);
+          }
+        } catch (e) {
+          // Ignore cross-origin errors while user is on Paystack domain
+        }
+      }, 1000);
+
+      // Listen for postMessage from backend success page
+      const messageHandler = (event: MessageEvent) => {
+        if (event.data?.type === "PAYMENT_SUCCESS") {
+          // Verify reference matches if needed, or just proceed
+          if (event.data?.reference === reference) {
+            clearInterval(checkPopup);
+            popup.close(); // Ensure popup is closed
+            verifyPayment(reference);
+            window.removeEventListener("message", messageHandler);
+          }
+        }
+      };
+
+      window.addEventListener("message", messageHandler);
+
+
     } catch (error) {
       console.error("Failed to initiate top-up:", error);
       toast.error("Failed to initiate payment. Please try again.");
       setIsProcessing(false);
-    }
-  };
-
-  const verifyPayment = async (ref: string) => {
-    try {
-      toast.info("Verifying payment...");
-
-      const response = await axiosInstance.post(
-        "/fleet-wallet/verify-payment",
-        {
-          ref,
-          action: "TOP_UP",
-        }
-      );
-
-      if (response.data.status === "OK") {
-        toast.success(response.data.message);
-
-        const balanceResponse = await axiosInstance.get(
-          "/fleet-wallet/get-wallet-balance"
-        );
-        setWalletBalance(balanceResponse?.data?.data);
-
-        sessionStorage.removeItem("paystack_reference");
-      } else {
-        toast.error("Payment verification failed.");
-        sessionStorage.removeItem("paystack_reference");
-      }
-    } catch (error) {
-      console.error("Payment verification failed:", error);
-      toast.error("Payment verification failed. Please contact support.");
-      sessionStorage.removeItem("paystack_reference");
     }
   };
 
@@ -540,9 +512,8 @@ export default function DashboardPage() {
         <div className="space-y-6">
           <SideCard
             title="Schedule Service"
-            subtitle={`${
-              stats?.pendingMaintenanceServices || 0
-            } vehicles need maintenance`}
+            subtitle={`${stats?.pendingMaintenanceServices || 0
+              } vehicles need maintenance`}
             actionText="View Schedule"
             icon={FuelIcon}
             onAction={() => router.push("/schedule")}
@@ -586,6 +557,7 @@ export default function DashboardPage() {
         typeOptions={fuelTypeOptions}
         vehicleOptions={vehicleOptions}
         locationOptions={locationOptions}
+        assets={assets}
       />
 
       <TopUpModal

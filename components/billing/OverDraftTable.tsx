@@ -8,7 +8,7 @@ type Overdraft = {
   id: string;
   amount: string;
   reason: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  status: "PENDING" | "CLEARED";
   business: {
     id: string;
     name: string;
@@ -28,7 +28,7 @@ type BillRow = {
   invoiceNo: string;
   reason: string;
   amount: number;
-  status: "Approved" | "Pending" | "Rejected";
+  status: "PENDING" | "CLEARED";
 };
 
 export function OverDraftTable() {
@@ -62,10 +62,9 @@ export function OverDraftTable() {
       year: "numeric",
     });
 
-    const statusMap: Record<string, "Approved" | "Pending" | "Rejected"> = {
-      APPROVED: "Approved",
-      PENDING: "Pending",
-      REJECTED: "Rejected",
+    const statusMap: Record<string, "PENDING" | "CLEARED"> = {
+      PENDING: "PENDING",
+      CLEARED: "CLEARED",
     };
 
     return {
@@ -108,7 +107,11 @@ export function OverDraftTable() {
       doc.line(20, 120, 190, 120);
 
       doc.setFontSize(14);
-      doc.text(`Overdraft Amount: ${naira(bill.amount)}`, 20, 135);
+      doc.text(
+        `Overdraft Amount: NGN ${bill.amount.toLocaleString("en-NG")}`,
+        20,
+        135
+      );
 
       if (overdraft.approvedAt) {
         const approvedDate = new Date(overdraft.approvedAt).toLocaleDateString(
@@ -125,7 +128,7 @@ export function OverDraftTable() {
 
       doc.setFontSize(8);
       doc.setTextColor(128, 128, 128);
-      doc.text("Thank you for using ResQ-X", 20, 270);
+      doc.text("Thank you for doing business!", 20, 270);
       doc.text("ResQ-X Fleet Management System", 20, 278);
 
       doc.save(`overdraft-${bill.invoiceNo}.pdf`);
@@ -189,22 +192,20 @@ export function OverDraftTable() {
                 <div className="flex items-center justify-between">
                   <div className="inline-flex items-center gap-2">
                     <span
-                      className={`h-2.5 w-2.5 rounded-full ${
-                        b.status === "Approved"
-                          ? "bg-emerald-400"
-                          : b.status === "Rejected"
+                      className={`h-2.5 w-2.5 rounded-full ${b.status === "CLEARED"
+                        ? "bg-emerald-400"
+                        : b.status === "PENDING"
                           ? "bg-red-400"
                           : "bg-yellow-400"
-                      }`}
+                        }`}
                     />
                     <span
-                      className={`font-semibold ${
-                        b.status === "Approved"
-                          ? "text-emerald-300"
-                          : b.status === "Rejected"
+                      className={`font-semibold ${b.status === "CLEARED"
+                        ? "text-emerald-300"
+                        : b.status === "PENDING"
                           ? "text-red-300"
                           : "text-yellow-300"
-                      }`}
+                        }`}
                     >
                       {b.status}
                     </span>
@@ -225,22 +226,18 @@ export function OverDraftTable() {
                     <h4 className="font-medium text-white">{b.product}</h4>
                     <div className="inline-flex items-center gap-2">
                       <span
-                        className={`h-2.5 w-2.5 rounded-full ${
-                          b.status === "Approved"
-                            ? "bg-emerald-400"
-                            : b.status === "Rejected"
+                        className={`h-2.5 w-2.5 rounded-full ${b.status === "CLEARED"
+                          ? "bg-emerald-400"
+                          : b.status === "PENDING"
                             ? "bg-red-400"
                             : "bg-yellow-400"
-                        }`}
+                          }`}
                       />
                       <span
-                        className={`font-semibold text-sm ${
-                          b.status === "Approved"
-                            ? "text-emerald-300"
-                            : b.status === "Rejected"
-                            ? "text-red-300"
-                            : "text-yellow-300"
-                        }`}
+                        className={`font-semibold text-sm ${b.status === "CLEARED"
+                          ? "text-emerald-300"
+                          : "text-yellow-300"
+                          }`}
                       >
                         {b.status}
                       </span>

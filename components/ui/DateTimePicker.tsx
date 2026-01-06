@@ -35,8 +35,8 @@ const generateDateOptions = () => {
       i === 0
         ? "Today"
         : i === 1
-        ? "Tomorrow"
-        : format(date, "MMM d, yyyy (EEEE)");
+          ? "Tomorrow"
+          : format(date, "MMM d, yyyy (EEEE)");
     options.push({ value, label });
   }
   return options;
@@ -185,15 +185,35 @@ export function DateTimePicker({
                   <SelectValue placeholder="Choose a time" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#1F1E1C] text-white border-white/10 max-h-60">
-                  {timeSlots.map((slot) => (
-                    <SelectItem
-                      key={slot.value}
-                      value={slot.value}
-                      className="cursor-pointer transition-colors hover:bg-[#FF8500]/20 focus:bg-[#FF8500]/25 hover:text-white focus:text-white"
-                    >
-                      {slot.label}
-                    </SelectItem>
-                  ))}
+                  {timeSlots
+                    .filter((slot) => {
+                      // If today is selected, filter out past times
+                      const isSelectedToday = isToday(new Date(selectedDate));
+                      if (!isSelectedToday) return true;
+
+                      // Get current time
+                      const now = new Date();
+                      const currentHour = now.getHours();
+                      const currentMinute = now.getMinutes();
+
+                      // Parse slot time
+                      const [slotHour, slotMinute] = slot.value.split(":").map(Number);
+
+                      // Check if slot time is in the future
+                      if (slotHour > currentHour) return true;
+                      if (slotHour === currentHour && slotMinute >= currentMinute) return true;
+
+                      return false;
+                    })
+                    .map((slot) => (
+                      <SelectItem
+                        key={slot.value}
+                        value={slot.value}
+                        className="cursor-pointer transition-colors hover:bg-[#FF8500]/20 focus:bg-[#FF8500]/25 hover:text-white focus:text-white"
+                      >
+                        {slot.label}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
