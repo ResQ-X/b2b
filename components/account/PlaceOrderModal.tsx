@@ -185,7 +185,9 @@ export default function PlaceOrderModal({
   const fetchAssets = async () => {
     try {
       setLoadingAssets(true);
-      const res = await axiosInstance.get("/fleet-asset/get-asset");
+      const res = await axiosInstance.get(
+        `/fleet-asset/get-asset?subAccountId=${subAccountId}`
+      );
       const list = res.data?.assets || [];
 
       setAssets(
@@ -205,7 +207,9 @@ export default function PlaceOrderModal({
   const fetchLocations = async () => {
     try {
       setLoadingLocations(true);
-      const res = await axiosInstance.get("/fleet-asset/get-locations");
+      const res = await axiosInstance.get(
+        `/fleet-asset/get-locations?subAccountId=${subAccountId}`
+      );
       const list = res.data?.data || [];
 
       setLocations(

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 // import FuelCheckoutModal, {
@@ -34,14 +34,19 @@ export function CTABanner({
       <div>
         <h3 className="text-2xl font-semibold text-[#FFFFFF]">{title}</h3>
         <p className="text-sm font-medium mt-[16px] mb-6">{formatDesc(desc)}</p>
-        <div className="flex flex-col gap-3 ">
-          <Button
-            variant="orange"
-            onClick={onAction}
-            className="w-[180px] lg:w-[262px] h-[58px] lg:h-[60px]"
-          >
-            {buttonText}
-          </Button>
+        <div className="flex flex-col gap-3">
+          <div className="relative inline-block">
+            <Button
+              variant="orange"
+              onClick={onAction}
+              className="w-[180px] lg:w-[262px] h-[58px] lg:h-[60px] relative z-10 animate-wiggle"
+            >
+              {buttonText}
+            </Button>
+
+            <div className="w-[180px] lg:w-[262px] absolute inset-0 rounded-lg animate-ring"></div>
+          </div>
+
           {/* 
           <Button
             variant="orange"

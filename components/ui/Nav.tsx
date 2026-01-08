@@ -26,7 +26,7 @@ type SubAdmin = {
   id: string;
   name: string | null;
   email: string;
-  role: string; // should be "SUB"
+  role: string;
 };
 
 export function DashboardNav({ onMenuClick }: DashboardNavProps) {
@@ -36,6 +36,8 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
 
   const [subs, setSubs] = useState<SubAdmin[]>([]);
   const [subsLoading, setSubsLoading] = useState(false);
+
+  const [pmsPrice, setPmsPrice] = useState<number | null>(null);
 
   const [isDropdownopen, setIsDropdownopen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -56,7 +58,20 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
     fetchUserProfile();
   }, []);
 
-  // console.log("userProfile", userProfile);
+  useEffect(() => {
+    const fetchPMSPrice = async () => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get("/settings/pms-price");
+        setPmsPrice(response.data.data.price);
+      } catch (error) {
+        console.error("Failed to fetch PMS price:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPMSPrice();
+  }, []);
 
   // Fetch sub-admins (only if SUPER)
   useEffect(() => {
@@ -133,7 +148,10 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
           Welcome {loading ? "..." : welcomeName || "User"},
         </h1>
         <p className="text-[#E2E2E2] text-base font-medium">
-          Today&apos;s snapshot of your operations.
+          Today PMS Price:{" "}
+          <span className="text-[#FF8500] animate-bounce inline-block">
+            {pmsPrice ? `₦${pmsPrice}/Ltr` : "Loading..."}
+          </span>
         </p>
       </div>
 

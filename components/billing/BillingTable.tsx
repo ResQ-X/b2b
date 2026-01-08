@@ -530,7 +530,9 @@ export function BillingTable() {
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
         const pageSize = doc.internal.pageSize;
-        const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
+        const pageHeight = pageSize.height
+          ? pageSize.height
+          : pageSize.getHeight();
 
         doc.setFontSize(8);
         doc.setTextColor(150, 150, 150);
@@ -542,7 +544,9 @@ export function BillingTable() {
         );
       }
 
-      doc.save(`ResQX-Transaction-Report-${new Date().toISOString().split("T")[0]}.pdf`);
+      doc.save(
+        `ResQX-Transaction-Report-${new Date().toISOString().split("T")[0]}.pdf`
+      );
     } catch (error) {
       console.error("Failed to generate PDF:", error);
       alert("Failed to generate PDF. Please try again.");
@@ -791,14 +795,16 @@ export function BillingTable() {
                   <div className="text-white/85">{naira(b.amount)}</div>
                   <div className="inline-flex items-center gap-2">
                     <span
-                      className={`h-2.5 w-2.5 rounded-full ${b.status === "Paid" ? "bg-emerald-400" : "bg-yellow-400"
-                        }`}
+                      className={`h-2.5 w-2.5 rounded-full ${
+                        b.status === "Paid" ? "bg-emerald-400" : "bg-yellow-400"
+                      }`}
                     />
                     <span
-                      className={`font-semibold ${b.status === "Paid"
-                        ? "text-emerald-300"
-                        : "text-yellow-300"
-                        }`}
+                      className={`font-semibold ${
+                        b.status === "Paid"
+                          ? "text-emerald-300"
+                          : "text-yellow-300"
+                      }`}
                     >
                       {b.status}
                     </span>
@@ -823,16 +829,18 @@ export function BillingTable() {
                       <h4 className="font-medium text-white">{b.product}</h4>
                       <div className="inline-flex items-center gap-2">
                         <span
-                          className={`h-2.5 w-2.5 rounded-full ${b.status === "Paid"
-                            ? "bg-emerald-400"
-                            : "bg-yellow-400"
-                            }`}
+                          className={`h-2.5 w-2.5 rounded-full ${
+                            b.status === "Paid"
+                              ? "bg-emerald-400"
+                              : "bg-yellow-400"
+                          }`}
                         />
                         <span
-                          className={`font-semibold text-sm ${b.status === "Paid"
-                            ? "text-emerald-300"
-                            : "text-yellow-300"
-                            }`}
+                          className={`font-semibold text-sm ${
+                            b.status === "Paid"
+                              ? "text-emerald-300"
+                              : "text-yellow-300"
+                          }`}
                         >
                           {b.status}
                         </span>
@@ -923,10 +931,11 @@ export function BillingTable() {
                     Type
                   </label>
                   <div
-                    className={`font-semibold ${selectedTransaction.type === "CREDIT"
-                      ? "text-green-400"
-                      : "text-red-400"
-                      }`}
+                    className={`font-semibold ${
+                      selectedTransaction.type === "CREDIT"
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
                   >
                     {selectedTransaction.type}
                   </div>
@@ -937,16 +946,18 @@ export function BillingTable() {
                   </label>
                   <div className="inline-flex items-center gap-2">
                     <span
-                      className={`h-2.5 w-2.5 rounded-full ${selectedTransaction.status === "SUCCESS"
-                        ? "bg-emerald-400"
-                        : "bg-yellow-400"
-                        }`}
+                      className={`h-2.5 w-2.5 rounded-full ${
+                        selectedTransaction.status === "SUCCESS"
+                          ? "bg-emerald-400"
+                          : "bg-yellow-400"
+                      }`}
                     />
                     <span
-                      className={`font-semibold ${selectedTransaction.status === "SUCCESS"
-                        ? "text-emerald-400"
-                        : "text-yellow-400"
-                        }`}
+                      className={`font-semibold ${
+                        selectedTransaction.status === "SUCCESS"
+                          ? "text-emerald-400"
+                          : "text-yellow-400"
+                      }`}
                     >
                       {selectedTransaction.status}
                     </span>
