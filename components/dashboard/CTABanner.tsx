@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 // import FuelCheckoutModal, {
@@ -45,43 +45,8 @@ export function CTABanner({
             </Button>
 
             <div className="w-[180px] lg:w-[262px] absolute inset-0 rounded-lg animate-ring"></div>
-
-            <style jsx>{`
-              @keyframes wiggle {
-                0%,
-                100% {
-                  transform: rotate(0deg);
-                }
-                25% {
-                  transform: rotate(-2deg);
-                }
-                75% {
-                  transform: rotate(2deg);
-                }
-              }
-
-              @keyframes ring {
-                0% {
-                  box-shadow: 0 0 0 0 rgba(255, 138, 0, 0.7);
-                }
-                50% {
-                  box-shadow: 0 0 0 10px rgba(255, 138, 0, 0);
-                }
-                100% {
-                  box-shadow: 0 0 0 0 rgba(255, 138, 0, 0);
-                }
-              }
-
-              .animate-wiggle {
-                animation: wiggle 0.5s ease-in-out infinite;
-              }
-
-              .animate-ring {
-                animation: ring 1s ease-out infinite;
-                pointer-events: none;
-              }
-            `}</style>
           </div>
+
           {/* 
           <Button
             variant="orange"
