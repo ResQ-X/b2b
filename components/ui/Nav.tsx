@@ -150,7 +150,7 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
         <p className="text-[#E2E2E2] text-base font-normal">
           Today PMS Price:{" "}
           <span className="text-[#FF8500] inline-block font-semibold">
-            {pmsPrice ? `₦${pmsPrice}/Ltr` : "Loading..."}
+            {pmsPrice ? `₦${pmsPrice} per liter` : "Loading..."}
           </span>
         </p>
       </div>

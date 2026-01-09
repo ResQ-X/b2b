@@ -220,12 +220,13 @@ export function PaymentInitModal({
               {loading ? "Processing..." : "Pay with Paystack"}
             </button>
             <button
-              // onClick={handleInitPayment}
-              onClick={() => setShowManualPayment(true)}
-              disabled={loading}
+              onClick={() => {
+                setShowManualPayment(true);
+                onClose();
+              }}
               className="flex-1 bg-[#FF8500] hover:bg-[#FF8C1A] disabled:bg-[#775533] disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
             >
-              {loading ? "Processing..." : "Manual Payment"}
+              Manual Payment
             </button>
           </div>
         </div>
