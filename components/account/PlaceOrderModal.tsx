@@ -386,15 +386,6 @@ export default function PlaceOrderModal({
                 <Label htmlFor="timeSlot" className="text-white/90">
                   Time Slot *
                 </Label>
-                {/* <CustomInput
-                  id="timeSlot"
-                  type="datetime-local"
-                  value={timeSlot}
-                  onChange={(e) => setTimeSlot(e.target.value)}
-                  min={formatDateTimeLocal(new Date())}
-                  className="bg-[#1F1E1C] border-white/10 text-white focus:border-white/30"
-                  disabled={isLoading}
-                /> */}
 
                 <CustomInput
                   id="timeSlot"
