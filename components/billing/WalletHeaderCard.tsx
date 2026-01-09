@@ -8,6 +8,8 @@ import TopUpModal from "@/components/billing/TopUpModal";
 import { Button } from "../ui/button";
 import DisburseMoneyModal from "@/components/billing/DisburseMoneyModal";
 import RequestMoneyModal from "@/components/billing/RequestMoneyModal";
+import ManualPaymentModal from "@/components/billing/ManualPaymentModal";
+import PaymentDetailsModal from "@/components/billing/PaymentDetailsModal";
 
 export function WalletHeaderCard({ role }: { role?: string }) {
   type WalletBalance = { balance: number; overdraftBalance: number };
@@ -23,6 +25,9 @@ export function WalletHeaderCard({ role }: { role?: string }) {
 
   const [showDisburse, setShowDisburse] = useState(false);
   const [showRequest, setShowRequest] = useState(false);
+
+  const [showManualPayment, setShowManualPayment] = useState(false);
+  const [showPaymentDetails, setShowPaymentDetails] = useState(false);
 
   const availableBalance = walletBalance?.balance ?? 0.0;
   const overdraftBalance = walletBalance?.overdraftBalance ?? 0.0;
@@ -253,9 +258,16 @@ export function WalletHeaderCard({ role }: { role?: string }) {
               Request Money
             </Button>
           )}
+
+          <Button
+            variant="grey"
+            className="w-full lg:w-[159px] h-[48px] lg:h-[52px]"
+            onClick={() => setShowManualPayment(true)}
+          >
+            Top Up Manually
+          </Button>
         </div>
       </div>
-
       <div className="hidden absolute inset-10 lg:flex justify-end items-end">
         <Image
           src={CardImage}
@@ -264,7 +276,6 @@ export function WalletHeaderCard({ role }: { role?: string }) {
           priority
         />
       </div>
-
       {/* Top-up modal */}
       <TopUpModal
         open={topUpOpen}
@@ -278,7 +289,6 @@ export function WalletHeaderCard({ role }: { role?: string }) {
         onSubmit={handleTopUpInitiate}
       />
 
-      {/* Pass a NUMBER down to the modals */}
       <DisburseMoneyModal
         open={showDisburse}
         availableBalance={availableBalance}
@@ -291,6 +301,19 @@ export function WalletHeaderCard({ role }: { role?: string }) {
         availableBalance={availableBalance}
         onOpenChange={setShowRequest}
         onSubmit={handleRequestSubmit}
+      />
+
+      <ManualPaymentModal
+        open={showManualPayment}
+        onOpenChange={setShowManualPayment}
+        setShowPaymentDetails={setShowPaymentDetails}
+        showPaymentDetails={showPaymentDetails}
+      />
+
+      <PaymentDetailsModal
+        open={showPaymentDetails}
+        onOpenChange={setShowPaymentDetails}
+        availableBalance={availableBalance}
       />
     </div>
   );

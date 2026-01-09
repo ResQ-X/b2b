@@ -7,6 +7,7 @@ import { BillingTable } from "@/components/billing/BillingTable";
 import { OverDraftTable } from "@/components/billing/OverDraftTable";
 import { CurrentPlanCard } from "@/components/billing/CurrentPlanCard";
 import FleetAmount from "@/components/billing/FleetAmount";
+import NeedOverdraft from "@/components/billing/NeedOverdraft";
 
 export const naira = (n: number) =>
   new Intl.NumberFormat("en-NG", {
@@ -33,6 +34,13 @@ export default function BillingPage() {
     "billing"
   );
   const [showPicker, setShowPicker] = useState(false);
+  const [showOverdraftModal, setShowOverdraftModal] = useState(true);
+
+  const handleConfirmOverdraft = () => {
+    setShowOverdraftModal(false);
+    setShowPicker(true);
+    // showRightPane(true)
+  };
 
   console.log("loading", loading);
 
@@ -103,6 +111,14 @@ export default function BillingPage() {
         <div className="w-full">
           <OverDraftTable />
         </div>
+      )}
+
+      {userProfile?.role === "USER" && (
+        <NeedOverdraft
+          isOpen={showOverdraftModal}
+          onClose={() => setShowOverdraftModal(false)}
+          onConfirm={handleConfirmOverdraft}
+        />
       )}
     </div>
   );
