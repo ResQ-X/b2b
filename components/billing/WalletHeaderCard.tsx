@@ -10,6 +10,7 @@ import DisburseMoneyModal from "@/components/billing/DisburseMoneyModal";
 import RequestMoneyModal from "@/components/billing/RequestMoneyModal";
 import ManualPaymentModal from "@/components/billing/ManualPaymentModal";
 import PaymentDetailsModal from "@/components/billing/PaymentDetailsModal";
+import { formatCurrency } from "@/lib/utils";
 
 export function WalletHeaderCard({ role }: { role?: string }) {
   type WalletBalance = { balance: number; overdraftBalance: number };
@@ -202,18 +203,15 @@ export function WalletHeaderCard({ role }: { role?: string }) {
     fetchBalance();
   }, []);
 
-  const formattedBalance = availableBalance.toLocaleString("en-NG", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-
   return (
     <div className="relative w-full h-auto rounded-[28px] overflow-hidden p-6 md:p-7 lg:p-8 flex justify-between items-center bg-gradient-to-r from-[#9A6200] to-[#3B3835] text-white border border-[#A33F00]">
       <div className="relative z-10 min-w-0 text-[#FFFFFF]">
         <p className="text-sm font-medium">Total Balance</p>
 
         <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight mt-3 mb-5">
-          {loading ? "......." : `₦${formattedBalance}`}
+          {loading
+            ? "......."
+            : formatCurrency(availableBalance.toLocaleString())}
         </h2>
 
         {role === "USER" && (
@@ -221,10 +219,7 @@ export function WalletHeaderCard({ role }: { role?: string }) {
             <span className="text-[#E2E2E2] text-[16px]">Overdraft: </span>
             {loading
               ? "......."
-              : `₦ - ${overdraftBalance.toLocaleString("en-NG", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}`}
+              : formatCurrency(overdraftBalance.toLocaleString())}
           </p>
         )}
 
