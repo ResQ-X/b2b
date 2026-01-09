@@ -308,7 +308,6 @@ export function WalletHeaderCard({ role }: { role?: string }) {
       <PaymentDetailsModal
         open={showPaymentDetails}
         onOpenChange={setShowPaymentDetails}
-        availableBalance={availableBalance}
       />
     </div>
   );

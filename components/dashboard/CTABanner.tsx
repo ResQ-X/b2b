@@ -39,12 +39,12 @@ export function CTABanner({
             <Button
               variant="orange"
               onClick={onAction}
-              className="w-[180px] lg:w-[262px] h-[58px] lg:h-[60px] relative z-10 animate-wiggle"
+              className="w-[180px] lg:w-[262px] h-[58px] lg:h-[60px] relative z-10"
             >
               {buttonText}
             </Button>
 
-            <div className="w-[180px] lg:w-[262px] absolute inset-0 rounded-lg animate-ring"></div>
+            {/* <div className="w-[180px] lg:w-[262px] absolute inset-0 rounded-lg"></div> */}
           </div>
 
           {/* 

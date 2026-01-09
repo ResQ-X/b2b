@@ -27,6 +27,8 @@ import {
   DashboardStats,
 } from "@/types/dashboard";
 import RequestMoneyModal from "@/components/billing/RequestMoneyModal";
+import ManualPaymentModal from "@/components/billing/ManualPaymentModal";
+import PaymentDetailsModal from "@/components/billing/PaymentDetailsModal";
 
 type UserProfile = {
   id: string;
@@ -65,6 +67,8 @@ export default function DashboardPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showRequest, setShowRequest] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [showManualPayment, setShowManualPayment] = useState(false);
+  const [showPaymentDetails, setShowPaymentDetails] = useState(false);
 
   const availableBalance = walletBalance?.balance ?? 0.0;
 
@@ -274,8 +278,8 @@ export default function DashboardPage() {
           delivery.status === "COMPLETED"
             ? "Delivered"
             : delivery.status === "PENDING"
-              ? "Pending"
-              : delivery.status,
+            ? "Pending"
+            : delivery.status,
       };
     });
   };
@@ -412,8 +416,6 @@ export default function DashboardPage() {
       };
 
       window.addEventListener("message", messageHandler);
-
-
     } catch (error) {
       console.error("Failed to initiate top-up:", error);
       toast.error("Failed to initiate payment. Please try again.");
@@ -477,6 +479,7 @@ export default function DashboardPage() {
           onTopUp={() => setTopUpOpen(true)}
           role={userProfile?.role}
           setShowRequest={setShowRequest}
+          setShowManualPayment={setShowManualPayment}
         />
       </div>
 
@@ -512,8 +515,9 @@ export default function DashboardPage() {
         <div className="space-y-6">
           <SideCard
             title="Schedule Service"
-            subtitle={`${stats?.pendingMaintenanceServices || 0
-              } vehicles need maintenance`}
+            subtitle={`${
+              stats?.pendingMaintenanceServices || 0
+            } vehicles need maintenance`}
             actionText="View Schedule"
             icon={FuelIcon}
             onAction={() => router.push("/schedule")}
@@ -577,6 +581,20 @@ export default function DashboardPage() {
         availableBalance={availableBalance}
         onOpenChange={setShowRequest}
         onSubmit={handleRequestSubmit}
+      />
+
+      {showManualPayment && (
+        <ManualPaymentModal
+          open={showManualPayment}
+          onOpenChange={setShowManualPayment}
+          setShowPaymentDetails={setShowPaymentDetails}
+          showPaymentDetails={showPaymentDetails}
+        />
+      )}
+
+      <PaymentDetailsModal
+        open={showPaymentDetails}
+        onOpenChange={setShowPaymentDetails}
       />
     </div>
   );
