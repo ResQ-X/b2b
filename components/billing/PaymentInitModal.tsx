@@ -5,10 +5,12 @@ export function PaymentInitModal({
   isOpen,
   onClose,
   estimateData,
+  setShowManualPayment,
 }: {
   isOpen: boolean;
   onClose: () => void;
   estimateData: any;
+  setShowManualPayment: (value: boolean) => void;
 }) {
   const [billingCycle, setBillingCycle] = useState("MONTHLY");
   const [loading, setLoading] = useState(false);
@@ -106,7 +108,7 @@ export function PaymentInitModal({
   return (
     <>
       <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-        <div className="bg-[#3B3835] rounded-2xl max-w-md w-full p-6 border border-[#777777]">
+        <div className="bg-[#3B3835] rounded-2xl max-w-xl w-full p-6 border border-[#777777]">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold text-white">
@@ -160,7 +162,7 @@ export function PaymentInitModal({
             </div>
             <div className="flex justify-between items-center pt-3 mt-3 border-t border-[#777777]">
               <span className="text-white font-semibold">Total Amount:</span>
-              <span className="text-[#FF9933] font-bold text-xl">
+              <span className="text-[#FF8500] font-bold text-xl">
                 {formatCurrency(calculateTotal())}
               </span>
             </div>
@@ -176,8 +178,8 @@ export function PaymentInitModal({
                 onClick={() => setBillingCycle("MONTHLY")}
                 className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
                   billingCycle === "MONTHLY"
-                    ? "bg-[#FF9933] text-white"
-                    : "bg-[#2C2926] text-[#CCC8C4] border border-[#777777] hover:border-[#FF9933]"
+                    ? "bg-[#FF8500] text-white"
+                    : "bg-[#2C2926] text-[#CCC8C4] border border-[#777777] hover:border-[#FF8500]"
                 }`}
               >
                 Monthly
@@ -186,8 +188,8 @@ export function PaymentInitModal({
                 onClick={() => setBillingCycle("ANNUAL")}
                 className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
                   billingCycle === "ANNUAL"
-                    ? "bg-[#FF9933] text-white"
-                    : "bg-[#2C2926] text-[#CCC8C4] border border-[#777777] hover:border-[#FF9933]"
+                    ? "bg-[#FF8500] text-white"
+                    : "bg-[#2C2926] text-[#CCC8C4] border border-[#777777] hover:border-[#FF8500]"
                 }`}
               >
                 Annual
@@ -206,16 +208,24 @@ export function PaymentInitModal({
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 bg-[#2C2926] border border-[#777777] text-white font-semibold py-3 px-6 rounded-lg hover:border-[#FF9933] transition-colors"
+              className="flex-1 bg-[#2C2926] border border-[#777777] text-white font-semibold py-3 px-6 rounded-lg hover:border-[#FF8500] transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleInitPayment}
               disabled={loading}
-              className="flex-1 bg-[#FF9933] hover:bg-[#FF8C1A] disabled:bg-[#775533] disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+              className="flex-1 bg-[#FF8500] hover:bg-[#FF8C1A] disabled:bg-[#775533] disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
             >
-              {loading ? "Processing..." : "Continue to Payment"}
+              {loading ? "Processing..." : "Pay with Paystack"}
+            </button>
+            <button
+              // onClick={handleInitPayment}
+              onClick={() => setShowManualPayment(true)}
+              disabled={loading}
+              className="flex-1 bg-[#FF8500] hover:bg-[#FF8C1A] disabled:bg-[#775533] disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            >
+              {loading ? "Processing..." : "Manual Payment"}
             </button>
           </div>
         </div>

@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import {
   Dialog,
@@ -17,13 +16,16 @@ interface PaymentDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   amount?: string;
+  availableBalance?: number | null;
 }
 
 interface RequestData {
   amount: number;
-  type: "TOP_UP" | "SUBSCRIPTION";
+  type: "SUBSCRIPTION";
   receipt_url: string;
   note?: string;
+  sub_months?: number;
+  sub_category?: "UNLIMITED_CALLOUT" | "CAPPED_CALLOUT";
 }
 
 export default function PaymentDetailsModal({
@@ -33,6 +35,10 @@ export default function PaymentDetailsModal({
   const [amount, setAmount] = useState("");
   const [receipt, setReceipt] = useState<File | null>(null);
   const [note, setNote] = useState("");
+  const [subMonths, setSubMonths] = useState("1");
+  const [subCategory, setSubCategory] = useState<
+    "UNLIMITED_CALLOUT" | "CAPPED_CALLOUT"
+  >("UNLIMITED_CALLOUT");
   const [processing, setProcessing] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -115,9 +121,11 @@ export default function PaymentDetailsModal({
       // Prepare request data
       const requestData: RequestData = {
         amount: numericAmount,
-        type: "TOP_UP",
+        type: "SUBSCRIPTION",
         receipt_url: receiptUrl,
         note: note || undefined,
+        sub_months: parseInt(subMonths),
+        sub_category: subCategory,
       };
 
       // Submit manual fund request
@@ -136,8 +144,8 @@ export default function PaymentDetailsModal({
         setAmount("");
         setNote("");
         setReceipt(null);
-        // setSubMonths("1");
-        // setSubCategory("UNLIMITED_CALLOUT");
+        setSubMonths("1");
+        setSubCategory("UNLIMITED_CALLOUT");
 
         onOpenChange(false);
       } else {
@@ -244,6 +252,82 @@ export default function PaymentDetailsModal({
               className="w-full bg-[#2D2A27] text-white rounded-2xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-orange-500 border border-white/10 min-h-[100px] resize-none"
               placeholder="Add additional Information"
             />
+          </div>
+
+          {/* Sub Months */}
+          <div>
+            <label className="block text-sm text-white/70 mb-2 font-medium">
+              Sub Month
+            </label>
+            <div className="relative">
+              <select
+                value={subMonths}
+                onChange={(e) => setSubMonths(e.target.value)}
+                className="w-full bg-[#2D2A27] text-white rounded-2xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-orange-500 border border-white/10 appearance-none cursor-pointer"
+              >
+                <option value="">Select</option>
+                <option value="1">1 Month</option>
+                <option value="2">2 Months</option>
+                <option value="3">3 Months</option>
+                <option value="6">6 Months</option>
+                <option value="12">12 Months</option>
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4 6L8 10L12 6"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Sub Category */}
+          <div>
+            <label className="block text-sm text-white/70 mb-2 font-medium">
+              Sub Category
+            </label>
+            <div className="relative">
+              <select
+                value={subCategory}
+                onChange={(e) =>
+                  setSubCategory(
+                    e.target.value as "UNLIMITED_CALLOUT" | "CAPPED_CALLOUT"
+                  )
+                }
+                className="w-full bg-[#2D2A27] text-white rounded-2xl px-4 py-4 focus:outline-none focus:ring-2 focus:ring-orange-500 border border-white/10 appearance-none cursor-pointer"
+              >
+                <option value="UNLIMITED_CALLOUT">Unlimited Callout</option>
+                <option value="CAPPED_CALLOUT">Capped Callout</option>
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4 6L8 10L12 6"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
 

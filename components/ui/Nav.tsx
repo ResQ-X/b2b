@@ -147,9 +147,9 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
         <h1 className="text-[#F1F1F1] text-2xl font-semibold">
           Welcome {loading ? "..." : welcomeName || "User"},
         </h1>
-        <p className="text-[#E2E2E2] text-base font-medium">
+        <p className="text-[#E2E2E2] text-base font-normal">
           Today PMS Price:{" "}
-          <span className="text-[#FF8500] animate-bounce inline-block">
+          <span className="text-[#FF8500] inline-block font-semibold">
             {pmsPrice ? `₦${pmsPrice}/Ltr` : "Loading..."}
           </span>
         </p>

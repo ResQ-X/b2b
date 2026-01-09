@@ -7,11 +7,13 @@ export function WalletCard({
   onTopUp,
   role,
   setShowRequest,
+  setShowManualPayment,
 }: {
   balance: number;
   onTopUp?: () => void;
   role?: string;
   setShowRequest: any;
+  setShowManualPayment: any;
 }) {
   return (
     <div className="border border-[#777777] rounded-2xl bg-[#3B3835] text-white">
@@ -36,13 +38,20 @@ export function WalletCard({
       )}
 
       {role !== "SUB" && (
-        <div className="flex justify-center w-[159px] m-auto mt-[13px] mb-5">
+        <div className="flex justify-center m-auto mt-[13px] mb-5 gap-5 mx-5">
           <Button
             onClick={onTopUp}
             variant="orange"
             className="w-[180px] lg:w-[262px] h-[58px] lg:h-[60px]"
           >
             Top Up Wallet
+          </Button>
+          <Button
+            onClick={() => setShowManualPayment(true)}
+            variant="grey"
+            className="w-[180px] lg:w-[262px] h-[58px] lg:h-[60px]"
+          >
+            Manual Top Up
           </Button>
         </div>
       )}

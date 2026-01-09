@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axiosInstance from "@/lib/axios";
 import { PaymentInitModal } from "./PaymentInitModal";
+import ManualPaymentModal from "@/components/billing/ManualPaymentModal";
+import ManualSubModal from "@/components/billing/ManualSubModal";
 
 function FleetAmount() {
   const [assetCount, setAssetCount] = useState("");
@@ -9,6 +11,8 @@ function FleetAmount() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showManualPayment, setShowManualPayment] = useState(false);
+  const [showPaymentDetails, setShowPaymentDetails] = useState(false);
 
   const handleProceed = async () => {
     if (!assetCount || Number(assetCount) <= 0) {
@@ -67,8 +71,8 @@ function FleetAmount() {
               onClick={() => setCategory("UNLIMITED_CALLOUT")}
               className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
                 category === "UNLIMITED_CALLOUT"
-                  ? "bg-[#FF9933] text-white"
-                  : "bg-[#2C2926] text-[#CCC8C4] border border-[#777777] hover:border-[#FF9933]"
+                  ? "bg-[#FF8500] text-white"
+                  : "bg-[#2C2926] text-[#CCC8C4] border border-[#777777] hover:border-[#FF8500]"
               }`}
             >
               <div className="text-center">
@@ -80,8 +84,8 @@ function FleetAmount() {
               onClick={() => setCategory("CAPPED_CALLOUT")}
               className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-colors ${
                 category === "CAPPED_CALLOUT"
-                  ? "bg-[#FF9933] text-white"
-                  : "bg-[#2C2926] text-[#CCC8C4] border border-[#777777] hover:border-[#FF9933]"
+                  ? "bg-[#FF8500] text-white"
+                  : "bg-[#2C2926] text-[#CCC8C4] border border-[#777777] hover:border-[#FF8500]"
               }`}
             >
               <div className="text-center">
@@ -100,7 +104,7 @@ function FleetAmount() {
             value={assetCount}
             onChange={(e) => setAssetCount(e.target.value)}
             placeholder="Enter no of assets"
-            className="w-full bg-[#2C2926] border border-[#777777] rounded-lg px-4 py-3 text-[#FFFFFF] placeholder-[#777777] focus:outline-none focus:border-[#FF9933]"
+            className="w-full bg-[#2C2926] border border-[#777777] rounded-lg px-4 py-3 text-[#FFFFFF] placeholder-[#777777] focus:outline-none focus:border-[#FF8500]"
           />
         </div>
 
@@ -113,7 +117,7 @@ function FleetAmount() {
         <button
           onClick={handleProceed}
           disabled={loading}
-          className="w-full bg-[#FF9933] hover:bg-[#FF8C1A] disabled:bg-[#775533] disabled:cursor-not-allowed text-[#FFFFFF] font-semibold py-3 px-6 rounded-lg transition-colors"
+          className="w-full bg-[#FF8500] hover:bg-[#FF8C1A] disabled:bg-[#775533] disabled:cursor-not-allowed text-[#FFFFFF] font-semibold py-3 px-6 rounded-lg transition-colors"
         >
           {loading ? "Loading..." : "Proceed"}
         </button>
@@ -122,11 +126,24 @@ function FleetAmount() {
       {/* Payment Modal */}
       {pricing && (
         <PaymentInitModal
+          setShowManualPayment={setShowManualPayment}
           isOpen={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
           estimateData={pricing}
         />
       )}
+
+      <ManualPaymentModal
+        open={showManualPayment}
+        onOpenChange={setShowManualPayment}
+        setShowPaymentDetails={setShowPaymentDetails}
+        showPaymentDetails={showPaymentDetails}
+      />
+
+      <ManualSubModal
+        open={showPaymentDetails}
+        onOpenChange={setShowPaymentDetails}
+      />
     </>
   );
 }
