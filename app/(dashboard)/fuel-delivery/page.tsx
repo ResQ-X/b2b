@@ -47,7 +47,6 @@ export default function FuelDeliveryPage() {
     [orders]
   );
 
-
   const tabsWithCounts = TABS.map((t) => ({
     ...t,
     count: counts[t.key as keyof typeof counts],
@@ -139,10 +138,14 @@ export default function FuelDeliveryPage() {
         }
 
         const statusUpper = o.status?.toUpperCase() || "";
-        let mappedStatus: "Completed" | "In Progress" | "Pending" | "Scheduled" = "Scheduled";
+        let mappedStatus:
+          | "Completed"
+          | "In Progress"
+          | "Pending"
+          | "Scheduled" = "Scheduled";
 
         if (statusUpper === "COMPLETED") mappedStatus = "Completed";
-        else if (statusUpper === "IN_PROGRESS") mappedStatus = "In Progress";
+        // else if (statusUpper === "IN_PROGRESS") mappedStatus = "In Progress";
         else if (statusUpper === "PENDING") mappedStatus = "Pending";
         else if (statusUpper === "SCHEDULED") mappedStatus = "Scheduled";
 
@@ -166,8 +169,6 @@ export default function FuelDeliveryPage() {
   useEffect(() => {
     fetchData();
   }, []);
-
-
 
   const tiles = [
     {

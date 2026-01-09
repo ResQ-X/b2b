@@ -178,7 +178,7 @@ input[type="number"] {
   overscroll-behavior: contain;
 }
 
-@keyframes wiggle {
+/* @keyframes wiggle {
   0%,
   100% {
     transform: rotate(0deg);
@@ -189,7 +189,7 @@ input[type="number"] {
   75% {
     transform: rotate(2deg);
   }
-}
+} */
 
 @keyframes ring {
   0% {
@@ -203,9 +203,9 @@ input[type="number"] {
   }
 }
 
-.animate-wiggle {
+/* .animate-wiggle {
   animation: wiggle 0.5s ease-in-out infinite;
-}
+} */
 
 .animate-ring {
   animation: ring 1s ease-out infinite;
