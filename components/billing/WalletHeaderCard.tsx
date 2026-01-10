@@ -247,7 +247,7 @@ export function WalletHeaderCard({ role }: { role?: string }) {
           {role === "SUB" && (
             <Button
               variant="light"
-              className="w-full lg:w-[159px] h-[48px] lg:h-[52px]"
+              className="w-full lg:w-[140px] h-[48px] lg:h-[52px]"
               onClick={() => setShowRequest(true)}
             >
               Request Money
@@ -256,10 +256,10 @@ export function WalletHeaderCard({ role }: { role?: string }) {
 
           <Button
             variant="grey"
-            className="w-full lg:w-[159px] h-[48px] lg:h-[52px]"
+            className="w-full lg:w-[145px] h-[48px] lg:h-[52px]"
             onClick={() => setShowManualPayment(true)}
           >
-            Top Up Manually
+            Manual Top Up
           </Button>
         </div>
       </div>

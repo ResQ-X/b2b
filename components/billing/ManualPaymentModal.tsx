@@ -18,9 +18,9 @@ interface ManualPaymentModalProps {
 }
 
 const BANK_DETAILS = {
-  name: "ResQ-X Technologies Ltd",
-  number: "0123456789",
-  bank: "First Bank of Nigeria",
+  name: "ResQ-X Limited",
+  number: "1305149353",
+  bank: "Providus Bank",
 };
 
 export default function ManualPaymentModal({
