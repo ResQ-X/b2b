@@ -7,7 +7,7 @@ import { BillingTable } from "@/components/billing/BillingTable";
 import { OverDraftTable } from "@/components/billing/OverDraftTable";
 import { CurrentPlanCard } from "@/components/billing/CurrentPlanCard";
 import FleetAmount from "@/components/billing/FleetAmount";
-import NeedOverdraft from "@/components/billing/NeedOverdraft";
+// import NeedOverdraft from "@/components/billing/NeedOverdraft";
 
 export const naira = (n: number) =>
   new Intl.NumberFormat("en-NG", {
@@ -113,13 +113,13 @@ export default function BillingPage() {
         </div>
       )}
 
-      {userProfile?.role === "USER" && (
+      {/* {userProfile?.role === "USER" && (
         <NeedOverdraft
           isOpen={showOverdraftModal}
           onClose={() => setShowOverdraftModal(false)}
           onConfirm={handleConfirmOverdraft}
         />
-      )}
+      )} */}
     </div>
   );
 }

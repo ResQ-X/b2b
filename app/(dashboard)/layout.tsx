@@ -125,6 +125,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         );
         const data = res.data?.data ?? null;
 
+        console.log("Plan check data:", res);
+
         if (!hasActivePlan(data) && alive) setShowPlanModal(true);
       } catch {
         // fail silently
