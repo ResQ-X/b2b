@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Cookies } from "react-cookie";
@@ -41,7 +40,7 @@ interface MeResponse {
 }
 
 /* ————— No-plan modal ————— */
-function PlanNudgeModal({
+export function PlanNudgeModal({
   onClose,
   onGoToPlans,
 }: {
@@ -51,25 +50,36 @@ function PlanNudgeModal({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60">
       <div className="relative w-11/12 lg:w-[547px] rounded-2xl bg-[#3B3835] p-6 text-center text-white shadow-lg">
+        {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute right-6 top-6 flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+          className="absolute top-6 right-6 inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+          aria-label="Close"
         >
           <X className="h-5 w-5 text-white/80" />
         </button>
 
+        {/* Modal content */}
         <h2 className="text-2xl font-semibold">No Active Plan</h2>
-
         <p className="my-9 text-lg font-medium text-white/80">
           You don’t have an active subscription yet. Choose a plan to unlock
           refuel, fleet care, and rescue features.
         </p>
 
-        <div className="my-8 flex flex-col gap-4 lg:flex-row lg:justify-between">
-          <Button variant="grey" onClick={onClose}>
+        {/* Buttons */}
+        <div className="my-8 flex flex-col lg:flex-row justify-between gap-4">
+          <Button
+            variant="grey"
+            onClick={onClose}
+            className="w-full lg:w-[224px] h-[48px] lg:h-[52px]"
+          >
             Not Now
           </Button>
-          <Button variant="orange" onClick={onGoToPlans}>
+          <Button
+            variant="orange"
+            onClick={onGoToPlans}
+            className="w-full lg:w-[224px] h-[48px] lg:h-[52px]"
+          >
             Browse Plans
           </Button>
         </div>

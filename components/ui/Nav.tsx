@@ -145,7 +145,7 @@ export function DashboardNav({ onMenuClick }: DashboardNavProps) {
       {/* Left greeting */}
       <div className="hidden flex-1 md:flex flex-col justify-center md:justify-start">
         <h1 className="text-[#F1F1F1] text-2xl font-semibold">
-          Welcome {loading ? "..." : welcomeName || "User"},
+          Welcome {loading ? "..." : welcomeName || "User"}
         </h1>
         {/* <p className="text-[#E2E2E2] text-base font-normal">
           Today PMS Price:{" "}
