@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Cookies } from "react-cookie";
@@ -9,7 +10,7 @@ import { Sidebar } from "@/components/ui/Sidebar";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-/** ——————— Types for /fleet-subscription/me ——————— */
+/** ——————— Types (MATCH BACKEND EXACTLY) ——————— */
 type PlanType = "REFUEL" | "FLEET" | "RESCUE";
 type BillingCycle = "MONTHLY" | "ANNUAL";
 
@@ -22,15 +23,11 @@ interface MeResponse {
       billing_cycle: BillingCycle;
       expires_at: string;
     } | null;
-    plan: {
-      id: string;
-      name: string;
-    } | null;
   };
 }
 
-/** ——————— Simple "no plan" modal ——————— */
-export function PlanNudgeModal({
+/** ——————— No-plan modal ——————— */
+function PlanNudgeModal({
   onClose,
   onGoToPlans,
 }: {
@@ -40,35 +37,34 @@ export function PlanNudgeModal({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60">
       <div className="relative w-11/12 lg:w-[547px] rounded-2xl bg-[#3B3835] p-6 text-center text-white shadow-lg">
-        {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
+          className="absolute right-6 top-6 flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
           aria-label="Close"
         >
           <X className="h-5 w-5 text-white/80" />
         </button>
 
-        {/* Modal content */}
         <h2 className="text-2xl font-semibold">No Active Plan</h2>
+
         <p className="my-9 text-lg font-medium text-white/80">
           You don’t have an active subscription yet. Choose a plan to unlock
           refuel, fleet care, and rescue features.
         </p>
 
-        {/* Buttons */}
-        <div className="my-8 flex flex-col lg:flex-row justify-between gap-4">
+        <div className="my-8 flex flex-col gap-4 lg:flex-row lg:justify-between">
           <Button
             variant="grey"
             onClick={onClose}
-            className="w-full lg:w-[224px] h-[48px] lg:h-[52px]"
+            className="h-[48px] w-full lg:h-[52px] lg:w-[224px]"
           >
             Not Now
           </Button>
+
           <Button
             variant="orange"
             onClick={onGoToPlans}
-            className="w-full lg:w-[224px] h-[48px] lg:h-[52px]"
+            className="h-[48px] w-full lg:h-[52px] lg:w-[224px]"
           >
             Browse Plans
           </Button>
@@ -78,15 +74,15 @@ export function PlanNudgeModal({
   );
 }
 
-/** ——————— Helper: check active plan ——————— */
-function hasActivePlan(payload: MeResponse["data"] | null): boolean {
-  if (!payload?.subscription || !payload?.plan) return false;
-  const exp = new Date(payload.subscription.expires_at).getTime();
-  const now = Date.now();
-  return Number.isFinite(exp) ? exp > now : true;
+/** ——————— Active-plan check (BACKEND-ALIGNED) ——————— */
+function hasActivePlan(data: MeResponse["data"] | null): boolean {
+  if (!data?.subscription) return false;
+
+  const expiresAt = new Date(data.subscription.expires_at).getTime();
+  return expiresAt > Date.now();
 }
 
-/** ——————— Layout Content (uses useSearchParams) ——————— */
+/** ——————— Layout Content ——————— */
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -95,7 +91,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
 
-  /** ——————— Auth check ——————— */
+  /** ——— Auth check ——— */
   useEffect(() => {
     const cookies = new Cookies();
     const accessToken = cookies.get("access_token");
@@ -107,11 +103,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     }
   }, [router]);
 
-  /** ——————— Plan check ——————— */
+  /** ——— Plan check ——— */
   useEffect(() => {
     if (!isAuthorized) return;
 
     let alive = true;
+
     const checkPlan = async () => {
       try {
         const shouldNudge =
@@ -123,11 +120,14 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         const res = await axiosInstance.get<MeResponse>(
           "/fleet-subscription/me"
         );
+
         const data = res.data?.data ?? null;
 
-        console.log("Plan check data:", res);
+        console.log("Subscription check:", data);
 
-        if (!hasActivePlan(data) && alive) setShowPlanModal(true);
+        if (alive && !hasActivePlan(data)) {
+          setShowPlanModal(true);
+        }
       } catch {
         // fail silently
       } finally {
@@ -136,6 +136,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     };
 
     checkPlan();
+
     return () => {
       alive = false;
     };
@@ -154,26 +155,26 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       </Head>
 
       <div className="flex min-h-screen bg-[#242220]">
-        {/* Sidebar - Fixed on desktop */}
+        {/* Desktop sidebar */}
         <div className="hidden md:block">
           <Sidebar />
         </div>
 
-        {/* Mobile Sidebar Overlay */}
+        {/* Mobile sidebar */}
         {sidebarOpen && (
           <div className="fixed inset-0 z-50 flex md:hidden">
             <div
               className="fixed inset-0 bg-black/50"
               onClick={() => setSidebarOpen(false)}
             />
-            <div className="relative bg-[#3B3835] w-64 z-50">
+            <div className="relative z-50 w-64 bg-[#3B3835]">
               <Sidebar onClose={() => setSidebarOpen(false)} />
             </div>
           </div>
         )}
 
-        {/* Main Content - Add left margin to account for fixed sidebar */}
-        <div className="flex-1 flex flex-col md:ml-[242px]">
+        {/* Main content */}
+        <div className="flex flex-1 flex-col md:ml-[242px]">
           <DashboardNav onMenuClick={() => setSidebarOpen(true)} />
           <main className="flex-1 overflow-y-auto bg-[#242220] p-4 sm:p-8">
             {children}
@@ -181,7 +182,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Plan modal */}
       {showPlanModal && (
         <PlanNudgeModal
           onClose={() => setShowPlanModal(false)}
@@ -195,7 +196,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** ——————— Main Layout with Suspense Boundary ——————— */
+/** ——————— Suspense Wrapper ——————— */
 export default function DashboardLayout({
   children,
 }: {
@@ -205,7 +206,7 @@ export default function DashboardLayout({
     <Suspense
       fallback={
         <div className="flex h-screen items-center justify-center bg-[#242220]">
-          <div className="text-white text-lg">Loading...</div>
+          <div className="text-lg text-white">Loading...</div>
         </div>
       }
     >

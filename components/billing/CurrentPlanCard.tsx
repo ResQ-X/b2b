@@ -26,27 +26,10 @@ interface MeSubscription {
   paystack_email_token: string | null;
 }
 
-interface MePlan {
-  id: string;
-  name: string;
-  plan_type: PlanType;
-  billing_cycle: BillingCycle;
-  min_assets: number | null;
-  max_assets: number | null;
-  price_per_asset: string | null;
-  uses_per_month: number | null;
-  base_fee_per_asset: string | null;
-  services: Array<{ name: string; uses_per_month: number }> | null;
-  created_at: string;
-  updated_at: string;
-  paystack_plan_code: string | null;
-}
-
 interface MeResponse {
   success: boolean;
   data: {
     subscription: MeSubscription | null;
-    plan: MePlan | null;
   };
 }
 
@@ -153,7 +136,7 @@ export function CurrentPlanCard({ onUpgrade }: { onUpgrade: () => void }) {
   const plan = me?.plan ?? null;
 
   // No active subscription
-  if (!subscription || !plan) {
+  if (!subscription) {
     return (
       <div className="mt-6 rounded-2xl bg-[#3B3835] text-white p-5 md:p-6 border border-white/10">
         <div className="flex items-start justify-between gap-6">
@@ -186,14 +169,14 @@ export function CurrentPlanCard({ onUpgrade }: { onUpgrade: () => void }) {
   }
 
   // Active subscription
-  const planBadge = `${plan.plan_type} • ${subscription.billing_cycle}`;
+  const planBadge = `${plan?.plan_type} • ${subscription.billing_cycle}`;
   const renewalDate = formatDate(subscription.expires_at);
 
   // Prefer total price if provided; otherwise compute from price_per_asset * asset_count
   const totalPrice = subscription.price_total
     ? naira(subscription.price_total)
     : naira(
-        (plan.price_per_asset ? Number(plan.price_per_asset) : 0) *
+        (plan?.price_per_asset ? Number(plan?.price_per_asset) : 0) *
           (subscription.asset_count ?? 1)
       );
 
@@ -201,11 +184,12 @@ export function CurrentPlanCard({ onUpgrade }: { onUpgrade: () => void }) {
     <div className="mt-6 rounded-2xl bg-[#3B3835] text-[#FFFFFF] p-5 md:p-6 border border-white/10">
       <div className="flex items-start justify-between gap-6">
         <div>
-          <div className={`text-sm font-medium ${badgeColor(plan.plan_type)}`}>
-            Active Subscription • {planBadge}
+          <div className={`text-sm font-medium ${badgeColor(plan?.plan_type)}`}>
+            Active Subscription
+            {/* Active Subscription • {planBadge} */}
           </div>
 
-          <div className="my-[15px] text-2xl font-semibold">{plan.name}</div>
+          <div className="my-[15px] text-2xl font-semibold">{plan?.name}</div>
 
           <div className="text-[#E2E2E2] text-sm font-medium mb-1">
             Assets:{" "}
