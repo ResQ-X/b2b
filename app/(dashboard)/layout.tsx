@@ -10,23 +10,37 @@ import { Sidebar } from "@/components/ui/Sidebar";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-/** ——————— Types (MATCH BACKEND EXACTLY) ——————— */
+/* ————— Types (MATCH NEW BACKEND EXACTLY) ————— */
 type PlanType = "REFUEL" | "FLEET" | "RESCUE";
 type BillingCycle = "MONTHLY" | "ANNUAL";
 
-interface MeResponse {
-  success: boolean;
-  data: {
-    subscription: {
-      id: string;
-      plan_type: PlanType;
-      billing_cycle: BillingCycle;
-      expires_at: string;
-    } | null;
-  };
+interface Subscription {
+  id: string;
+  business_id: string;
+  plan_type: PlanType;
+  billing_cycle: BillingCycle;
+  category: string;
+  plan_id: string;
+  asset_count: number;
+  price_total: string;
+  starts_at: string;
+  expires_at: string;
+  remaining_uses: number | null;
+  last_reset_at: string | null;
+  created_at: string;
+  updated_at: string;
+  paystack_plan_code: string | null;
+  paystack_subscription_code: string | null;
+  paystack_email_token: string | null;
+  isActive: boolean;
 }
 
-/** ——————— No-plan modal ——————— */
+interface MeResponse {
+  success: boolean;
+  data: Subscription | null;
+}
+
+/* ————— No-plan modal ————— */
 function PlanNudgeModal({
   onClose,
   onGoToPlans,
@@ -40,7 +54,6 @@ function PlanNudgeModal({
         <button
           onClick={onClose}
           className="absolute right-6 top-6 flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10"
-          aria-label="Close"
         >
           <X className="h-5 w-5 text-white/80" />
         </button>
@@ -53,19 +66,10 @@ function PlanNudgeModal({
         </p>
 
         <div className="my-8 flex flex-col gap-4 lg:flex-row lg:justify-between">
-          <Button
-            variant="grey"
-            onClick={onClose}
-            className="h-[48px] w-full lg:h-[52px] lg:w-[224px]"
-          >
+          <Button variant="grey" onClick={onClose}>
             Not Now
           </Button>
-
-          <Button
-            variant="orange"
-            onClick={onGoToPlans}
-            className="h-[48px] w-full lg:h-[52px] lg:w-[224px]"
-          >
+          <Button variant="orange" onClick={onGoToPlans}>
             Browse Plans
           </Button>
         </div>
@@ -74,15 +78,20 @@ function PlanNudgeModal({
   );
 }
 
-/** ——————— Active-plan check (BACKEND-ALIGNED) ——————— */
-function hasActivePlan(data: MeResponse["data"] | null): boolean {
-  if (!data?.subscription) return false;
+/* ————— Active plan check (NEW BACKEND LOGIC) ————— */
+function hasActivePlan(sub: Subscription | null): boolean {
+  if (!sub) return false;
 
-  const expiresAt = new Date(data.subscription.expires_at).getTime();
-  return expiresAt > Date.now();
+  // Prefer backend truth
+  if (typeof sub.isActive === "boolean") {
+    return sub.isActive;
+  }
+
+  // Fallback safety
+  return new Date(sub.expires_at).getTime() > Date.now();
 }
 
-/** ——————— Layout Content ——————— */
+/* ————— Layout Content ————— */
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -91,19 +100,19 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
 
-  /** ——— Auth check ——— */
+  /* ——— Auth check ——— */
   useEffect(() => {
     const cookies = new Cookies();
-    const accessToken = cookies.get("access_token");
+    const token = cookies.get("access_token");
 
-    if (!accessToken) {
+    if (!token) {
       router.replace("/login");
     } else {
       setIsAuthorized(true);
     }
   }, [router]);
 
-  /** ——— Plan check ——— */
+  /* ——— Plan check ——— */
   useEffect(() => {
     if (!isAuthorized) return;
 
@@ -121,15 +130,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           "/fleet-subscription/me"
         );
 
-        const data = res.data?.data ?? null;
+        const subscription = res.data?.data ?? null;
 
-        console.log("Subscription check:", data);
+        console.log("Subscription check:", subscription);
 
-        if (alive && !hasActivePlan(data)) {
+        if (alive && !hasActivePlan(subscription)) {
           setShowPlanModal(true);
         }
       } catch {
-        // fail silently
+        // silent
       } finally {
         localStorage.removeItem("SHOW_PLAN_NUDGE");
       }
@@ -148,19 +157,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     <>
       <Head>
         <title>Dashboard - ResqX Admin</title>
-        <meta
-          name="description"
-          content="ResqX Admin Dashboard - Emergency Response Management System"
-        />
       </Head>
 
       <div className="flex min-h-screen bg-[#242220]">
-        {/* Desktop sidebar */}
         <div className="hidden md:block">
           <Sidebar />
         </div>
 
-        {/* Mobile sidebar */}
         {sidebarOpen && (
           <div className="fixed inset-0 z-50 flex md:hidden">
             <div
@@ -173,7 +176,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        {/* Main content */}
         <div className="flex flex-1 flex-col md:ml-[242px]">
           <DashboardNav onMenuClick={() => setSidebarOpen(true)} />
           <main className="flex-1 overflow-y-auto bg-[#242220] p-4 sm:p-8">
@@ -182,7 +184,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
-      {/* Plan modal */}
       {showPlanModal && (
         <PlanNudgeModal
           onClose={() => setShowPlanModal(false)}
@@ -196,7 +197,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** ——————— Suspense Wrapper ——————— */
+/* ————— Suspense Wrapper ————— */
 export default function DashboardLayout({
   children,
 }: {
@@ -206,7 +207,7 @@ export default function DashboardLayout({
     <Suspense
       fallback={
         <div className="flex h-screen items-center justify-center bg-[#242220]">
-          <div className="text-lg text-white">Loading...</div>
+          <div className="text-white">Loading...</div>
         </div>
       }
     >
