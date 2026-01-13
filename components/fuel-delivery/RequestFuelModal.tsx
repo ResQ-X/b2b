@@ -717,8 +717,8 @@ export default function RequestFuelModal({
       upperFuel === "DIESEL"
         ? prices?.diesel
         : upperFuel === "PETROL"
-          ? prices?.petrol
-          : undefined;
+        ? prices?.petrol
+        : undefined;
 
     if (!perL) return; // no change if unknown
     const naira = Math.max(0, Math.round((litresRaw || 0) * perL));
@@ -1044,10 +1044,10 @@ export default function RequestFuelModal({
         ...(isManualLocation ? {} : { location_id: form.location_id }),
         ...(isManualLocation
           ? {
-            location_address: form.location_address || "",
-            location_longitude: form.location_longitude || "",
-            location_latitude: form.location_latitude || "",
-          }
+              location_address: form.location_address || "",
+              location_longitude: form.location_longitude || "",
+              location_latitude: form.location_latitude || "",
+            }
           : {}),
         time_slot:
           form.time_slot === "NOW" ? new Date().toISOString() : form.time_slot,
@@ -1070,10 +1070,10 @@ export default function RequestFuelModal({
         ...(isManualLocation ? {} : { location_id: form.location_id }),
         ...(isManualLocation
           ? {
-            location_address: form.location_address || "",
-            location_longitude: form.location_longitude || "",
-            location_latitude: form.location_latitude || "",
-          }
+              location_address: form.location_address || "",
+              location_longitude: form.location_longitude || "",
+              location_latitude: form.location_latitude || "",
+            }
           : {}),
         time_slot:
           form.time_slot === "NOW" ? new Date().toISOString() : form.time_slot,
@@ -1175,7 +1175,7 @@ export default function RequestFuelModal({
   useEffect(() => {
     setAmount("");
     if (upperFuel) {
-      ensureUnitPrices().catch(() => { });
+      ensureUnitPrices().catch(() => {});
     }
     if (form.quantity && form.quantity > 0) {
       convertLitresToAmount(form.quantity);
@@ -1205,18 +1205,20 @@ export default function RequestFuelModal({
                   className={`
                     relative h-28 rounded-2xl border-2 transition-all
                     flex flex-col items-center justify-center gap-2 p-4
-                    ${orderMode === "collective"
-                      ? "border-[#FF8500] bg-[#FF8500]/10"
-                      : "border-white/10 bg-[#2D2A27] hover:border-white/20"
+                    ${
+                      orderMode === "collective"
+                        ? "border-[#FF8500] bg-[#FF8500]/10"
+                        : "border-white/10 bg-[#2D2A27] hover:border-white/20"
                     }
                   `}
                 >
                   {/* Icon */}
                   <svg
-                    className={`w-8 h-8 ${orderMode === "collective"
+                    className={`w-8 h-8 ${
+                      orderMode === "collective"
                         ? "text-[#FF8500]"
                         : "text-white/60"
-                      }`}
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1231,15 +1233,16 @@ export default function RequestFuelModal({
                   {/* Text */}
                   <div className="text-center">
                     <div
-                      className={`text-sm font-semibold ${orderMode === "collective"
+                      className={`text-sm font-semibold ${
+                        orderMode === "collective"
                           ? "text-[#FF8500]"
                           : "text-white"
-                        }`}
+                      }`}
                     >
                       Collective Order
                     </div>
                     <div className="text-xs text-white/60 mt-0.5">
-                      Shared by # of assets
+                      Shared by all of assets
                     </div>
                   </div>
                   {/* Selected Indicator */}
@@ -1267,18 +1270,20 @@ export default function RequestFuelModal({
                   className={`
                     relative h-28 rounded-2xl border-2 transition-all
                     flex flex-col items-center justify-center gap-2 p-4
-                    ${orderMode === "per-asset"
-                      ? "border-[#FF8500] bg-[#FF8500]/10"
-                      : "border-white/10 bg-[#2D2A27] hover:border-white/20"
+                    ${
+                      orderMode === "per-asset"
+                        ? "border-[#FF8500] bg-[#FF8500]/10"
+                        : "border-white/10 bg-[#2D2A27] hover:border-white/20"
                     }
                   `}
                 >
                   {/* Icon */}
                   <svg
-                    className={`w-8 h-8 ${orderMode === "per-asset"
+                    className={`w-8 h-8 ${
+                      orderMode === "per-asset"
                         ? "text-[#FF8500]"
                         : "text-white/60"
-                      }`}
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1293,10 +1298,11 @@ export default function RequestFuelModal({
                   {/* Text */}
                   <div className="text-center">
                     <div
-                      className={`text-sm font-semibold ${orderMode === "per-asset"
+                      className={`text-sm font-semibold ${
+                        orderMode === "per-asset"
                           ? "text-[#FF8500]"
                           : "text-white"
-                        }`}
+                      }`}
                     >
                       Per Asset Order
                     </div>
@@ -1375,15 +1381,17 @@ export default function RequestFuelModal({
                     >
                       {selectedVehicles.length === 0
                         ? "Select vehicles"
-                        : `${selectedVehicles.length} vehicle${selectedVehicles.length > 1 ? "s" : ""
-                        } selected`}
+                        : `${selectedVehicles.length} vehicle${
+                            selectedVehicles.length > 1 ? "s" : ""
+                          } selected`}
                     </span>
                     <svg
                       width="16"
                       height="16"
                       viewBox="0 0 20 20"
-                      className={`opacity-80 transition-transform ${vehicleDropdownOpen ? "rotate-180" : ""
-                        }`}
+                      className={`opacity-80 transition-transform ${
+                        vehicleDropdownOpen ? "rotate-180" : ""
+                      }`}
                     >
                       <path
                         fill="currentColor"
@@ -1450,7 +1458,7 @@ export default function RequestFuelModal({
                         <Checkbox
                           checked={
                             selectedVehicles.length ===
-                            filteredVehicles.length &&
+                              filteredVehicles.length &&
                             filteredVehicles.length > 0
                           }
                           onCheckedChange={(checked) => {
@@ -1593,8 +1601,8 @@ export default function RequestFuelModal({
                                         orderMode === "collective"
                                           ? "--"
                                           : vehicleData.litres === 0
-                                            ? ""
-                                            : vehicleData.litres.toLocaleString(
+                                          ? ""
+                                          : vehicleData.litres.toLocaleString(
                                               "en-NG"
                                             )
                                       }
@@ -1607,9 +1615,9 @@ export default function RequestFuelModal({
                                           val === ""
                                             ? 0
                                             : Math.max(
-                                              0,
-                                              parseInt(val, 10) || 0
-                                            );
+                                                0,
+                                                parseInt(val, 10) || 0
+                                              );
 
                                         setPerVehicleData((prev) => ({
                                           ...prev,
@@ -1630,8 +1638,8 @@ export default function RequestFuelModal({
                                             upperFuel === "DIESEL"
                                               ? prices?.diesel
                                               : upperFuel === "PETROL"
-                                                ? prices?.petrol
-                                                : undefined;
+                                              ? prices?.petrol
+                                              : undefined;
 
                                           if (perL) {
                                             const naira = Math.max(
@@ -1679,12 +1687,12 @@ export default function RequestFuelModal({
                                             selectedVehicles.length === 0
                                             ? ""
                                             : Math.floor(
-                                              Number(amount) /
-                                              selectedVehicles.length
-                                            ).toLocaleString("en-NG")
+                                                Number(amount) /
+                                                  selectedVehicles.length
+                                              ).toLocaleString("en-NG")
                                           : vehicleData.amount === ""
-                                            ? ""
-                                            : Number(
+                                          ? ""
+                                          : Number(
                                               vehicleData.amount
                                             ).toLocaleString("en-NG")
                                       }
@@ -1697,9 +1705,9 @@ export default function RequestFuelModal({
                                           val === ""
                                             ? 0
                                             : Math.max(
-                                              0,
-                                              Math.floor(Number(val) || 0)
-                                            );
+                                                0,
+                                                Math.floor(Number(val) || 0)
+                                              );
 
                                         setPerVehicleData((prev) => ({
                                           ...prev,
@@ -1851,8 +1859,8 @@ export default function RequestFuelModal({
                                   upperFuel === "DIESEL"
                                     ? prices?.diesel
                                     : upperFuel === "PETROL"
-                                      ? prices?.petrol
-                                      : undefined;
+                                    ? prices?.petrol
+                                    : undefined;
 
                                 if (perL) {
                                   const litres = Math.max(
@@ -2003,7 +2011,6 @@ export default function RequestFuelModal({
                 placeholder="Select date and time"
               />
             </Field>
-
 
             {/* Notes */}
             <div className="space-y-2">

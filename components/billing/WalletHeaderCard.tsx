@@ -216,7 +216,7 @@ export function WalletHeaderCard({ role }: { role?: string }) {
 
         {role === "USER" && (
           <p className="text-[#FF613E] font-medium text-lg mb-2">
-            <span className="text-[#E2E2E2] text-[16px]">Overdraft: </span>
+            <span className="text-[#E2E2E2] text-sm">Overdraft: </span>
             {loading
               ? "......."
               : formatCurrency(overdraftBalance.toLocaleString())}
