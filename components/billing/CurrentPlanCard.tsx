@@ -185,8 +185,12 @@ export function CurrentPlanCard({ onUpgrade }: { onUpgrade: () => void }) {
             </div>
           )}
 
-          <Button variant="orange" onClick={onUpgrade}>
-            Upgrade Plan
+          <Button
+            variant="orange"
+            onClick={onUpgrade}
+            disabled={isActiveSubscription(subscription)}
+          >
+            Renew Plan
           </Button>
         </div>
 
