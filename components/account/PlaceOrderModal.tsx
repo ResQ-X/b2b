@@ -185,7 +185,9 @@ export default function PlaceOrderModal({
   const fetchAssets = async () => {
     try {
       setLoadingAssets(true);
-      const res = await axiosInstance.get("/fleet-asset/get-asset");
+      const res = await axiosInstance.get(
+        `/fleet-asset/get-asset?subAccountId=${subAccountId}`
+      );
       const list = res.data?.assets || [];
 
       setAssets(
@@ -205,7 +207,9 @@ export default function PlaceOrderModal({
   const fetchLocations = async () => {
     try {
       setLoadingLocations(true);
-      const res = await axiosInstance.get("/fleet-asset/get-locations");
+      const res = await axiosInstance.get(
+        `/fleet-asset/get-locations?subAccountId=${subAccountId}`
+      );
       const list = res.data?.data || [];
 
       setLocations(
@@ -382,15 +386,6 @@ export default function PlaceOrderModal({
                 <Label htmlFor="timeSlot" className="text-white/90">
                   Time Slot *
                 </Label>
-                {/* <CustomInput
-                  id="timeSlot"
-                  type="datetime-local"
-                  value={timeSlot}
-                  onChange={(e) => setTimeSlot(e.target.value)}
-                  min={formatDateTimeLocal(new Date())}
-                  className="bg-[#1F1E1C] border-white/10 text-white focus:border-white/30"
-                  disabled={isLoading}
-                /> */}
 
                 <CustomInput
                   id="timeSlot"

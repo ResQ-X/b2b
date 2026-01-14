@@ -124,7 +124,6 @@ function CompanyInformationContent() {
   return (
     <div className="min-h-screen text-[#FFFFFF]">
       <div className="mx-auto w-full py-6 md:py-10">
-        {/* Header (32px arrow col + 1fr content col) */}
         <div className="grid grid-cols-[32px_1fr] items-center gap-2">
           <Link
             href="/account"
@@ -143,16 +142,15 @@ function CompanyInformationContent() {
         {/* Error message */}
         {error && (
           <div className="mt-4 grid grid-cols-[32px_1fr] gap-2">
-            <div /> {/* spacer */}
+            <div />
             <div className="bg-red-500/10 border border-red-500/20 rounded-md p-3 text-red-400 text-sm">
               {error}
             </div>
           </div>
         )}
 
-        {/* Body aligned under title (skip arrow column with a spacer) */}
         <div className="mt-6 grid grid-cols-[32px_1fr] gap-y-6">
-          <div /> {/* spacer */}
+          <div />
           {/* Company Information Section */}
           <div className="space-y-6">
             <FieldRow
@@ -198,7 +196,7 @@ function CompanyInformationContent() {
               disabled={updating}
             />
           </div>
-          <div /> {/* spacer */}
+          <div />
           {/* Primary Contact Section header + divider (both aligned with title) */}
           <div>
             <h2 className="text-base font-semibold mb-4">
@@ -206,7 +204,7 @@ function CompanyInformationContent() {
             </h2>
             <div className="h-[2px] w-full bg-[#777777] mb-3" />
           </div>
-          <div /> {/* spacer */}
+          <div />
           {/* Primary Contact Fields */}
           <div className="space-y-6">
             <FieldRow
@@ -230,7 +228,7 @@ function CompanyInformationContent() {
               disabled={updating}
             />
           </div>
-          <div /> {/* spacer */}
+          <div />
           {/* CTA */}
           <div className="mt-2 flex gap-3 ">
             {(user as { role?: string } | null)?.role === "SUPER" && (

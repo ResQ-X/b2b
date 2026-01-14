@@ -9,27 +9,37 @@ import { Sidebar } from "@/components/ui/Sidebar";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-/** ——————— Types for /fleet-subscription/me ——————— */
+/* ————— Types (MATCH NEW BACKEND EXACTLY) ————— */
 type PlanType = "REFUEL" | "FLEET" | "RESCUE";
 type BillingCycle = "MONTHLY" | "ANNUAL";
 
-interface MeResponse {
-  success: boolean;
-  data: {
-    subscription: {
-      id: string;
-      plan_type: PlanType;
-      billing_cycle: BillingCycle;
-      expires_at: string;
-    } | null;
-    plan: {
-      id: string;
-      name: string;
-    } | null;
-  };
+interface Subscription {
+  id: string;
+  business_id: string;
+  plan_type: PlanType;
+  billing_cycle: BillingCycle;
+  category: string;
+  plan_id: string;
+  asset_count: number;
+  price_total: string;
+  starts_at: string;
+  expires_at: string;
+  remaining_uses: number | null;
+  last_reset_at: string | null;
+  created_at: string;
+  updated_at: string;
+  paystack_plan_code: string | null;
+  paystack_subscription_code: string | null;
+  paystack_email_token: string | null;
+  isActive: boolean;
 }
 
-/** ——————— Simple "no plan" modal ——————— */
+interface MeResponse {
+  success: boolean;
+  data: Subscription | null;
+}
+
+/* ————— No-plan modal ————— */
 export function PlanNudgeModal({
   onClose,
   onGoToPlans,
@@ -78,15 +88,20 @@ export function PlanNudgeModal({
   );
 }
 
-/** ——————— Helper: check active plan ——————— */
-function hasActivePlan(payload: MeResponse["data"] | null): boolean {
-  if (!payload?.subscription || !payload?.plan) return false;
-  const exp = new Date(payload.subscription.expires_at).getTime();
-  const now = Date.now();
-  return Number.isFinite(exp) ? exp > now : true;
+/* ————— Active plan check (NEW BACKEND LOGIC) ————— */
+function hasActivePlan(sub: Subscription | null): boolean {
+  if (!sub) return false;
+
+  // Prefer backend truth
+  if (typeof sub.isActive === "boolean") {
+    return sub.isActive;
+  }
+
+  // Fallback safety
+  return new Date(sub.expires_at).getTime() > Date.now();
 }
 
-/** ——————— Layout Content (uses useSearchParams) ——————— */
+/* ————— Layout Content ————— */
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -95,23 +110,24 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
 
-  /** ——————— Auth check ——————— */
+  /* ——— Auth check ——— */
   useEffect(() => {
     const cookies = new Cookies();
-    const accessToken = cookies.get("access_token");
+    const token = cookies.get("access_token");
 
-    if (!accessToken) {
+    if (!token) {
       router.replace("/login");
     } else {
       setIsAuthorized(true);
     }
   }, [router]);
 
-  /** ——————— Plan check ——————— */
+  /* ——— Plan check ——— */
   useEffect(() => {
     if (!isAuthorized) return;
 
     let alive = true;
+
     const checkPlan = async () => {
       try {
         const shouldNudge =
@@ -123,17 +139,23 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         const res = await axiosInstance.get<MeResponse>(
           "/fleet-subscription/me"
         );
-        const data = res.data?.data ?? null;
 
-        if (!hasActivePlan(data) && alive) setShowPlanModal(true);
+        const subscription = res.data?.data ?? null;
+
+        console.log("Subscription check:", subscription);
+
+        if (alive && !hasActivePlan(subscription)) {
+          setShowPlanModal(true);
+        }
       } catch {
-        // fail silently
+        // silent
       } finally {
         localStorage.removeItem("SHOW_PLAN_NUDGE");
       }
     };
 
     checkPlan();
+
     return () => {
       alive = false;
     };
@@ -145,33 +167,26 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     <>
       <Head>
         <title>Dashboard - ResqX Admin</title>
-        <meta
-          name="description"
-          content="ResqX Admin Dashboard - Emergency Response Management System"
-        />
       </Head>
 
       <div className="flex min-h-screen bg-[#242220]">
-        {/* Sidebar - Fixed on desktop */}
         <div className="hidden md:block">
           <Sidebar />
         </div>
 
-        {/* Mobile Sidebar Overlay */}
         {sidebarOpen && (
           <div className="fixed inset-0 z-50 flex md:hidden">
             <div
               className="fixed inset-0 bg-black/50"
               onClick={() => setSidebarOpen(false)}
             />
-            <div className="relative bg-[#3B3835] w-64 z-50">
+            <div className="relative z-50 w-64 bg-[#3B3835]">
               <Sidebar onClose={() => setSidebarOpen(false)} />
             </div>
           </div>
         )}
 
-        {/* Main Content - Add left margin to account for fixed sidebar */}
-        <div className="flex-1 flex flex-col md:ml-[242px]">
+        <div className="flex flex-1 flex-col md:ml-[242px]">
           <DashboardNav onMenuClick={() => setSidebarOpen(true)} />
           <main className="flex-1 overflow-y-auto bg-[#242220] p-4 sm:p-8">
             {children}
@@ -179,7 +194,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
-      {/* Modal */}
       {showPlanModal && (
         <PlanNudgeModal
           onClose={() => setShowPlanModal(false)}
@@ -193,7 +207,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** ——————— Main Layout with Suspense Boundary ——————— */
+/* ————— Suspense Wrapper ————— */
 export default function DashboardLayout({
   children,
 }: {
@@ -203,7 +217,7 @@ export default function DashboardLayout({
     <Suspense
       fallback={
         <div className="flex h-screen items-center justify-center bg-[#242220]">
-          <div className="text-white text-lg">Loading...</div>
+          <div className="text-white">Loading...</div>
         </div>
       }
     >

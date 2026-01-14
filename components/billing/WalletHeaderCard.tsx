@@ -8,6 +8,9 @@ import TopUpModal from "@/components/billing/TopUpModal";
 import { Button } from "../ui/button";
 import DisburseMoneyModal from "@/components/billing/DisburseMoneyModal";
 import RequestMoneyModal from "@/components/billing/RequestMoneyModal";
+import ManualPaymentModal from "@/components/billing/ManualPaymentModal";
+import PaymentDetailsModal from "@/components/billing/PaymentDetailsModal";
+import { formatCurrency } from "@/lib/utils";
 
 export function WalletHeaderCard({ role }: { role?: string }) {
   type WalletBalance = { balance: number; overdraftBalance: number };
@@ -23,6 +26,9 @@ export function WalletHeaderCard({ role }: { role?: string }) {
 
   const [showDisburse, setShowDisburse] = useState(false);
   const [showRequest, setShowRequest] = useState(false);
+
+  const [showManualPayment, setShowManualPayment] = useState(false);
+  const [showPaymentDetails, setShowPaymentDetails] = useState(false);
 
   const availableBalance = walletBalance?.balance ?? 0.0;
   const overdraftBalance = walletBalance?.overdraftBalance ?? 0.0;
@@ -145,7 +151,6 @@ export function WalletHeaderCard({ role }: { role?: string }) {
       };
 
       window.addEventListener("message", messageHandler);
-
     } catch (error) {
       console.error("Failed to initiate top-up:", error);
       toast.error("Failed to initiate payment. Please try again.");
@@ -202,26 +207,21 @@ export function WalletHeaderCard({ role }: { role?: string }) {
     <div className="relative w-full h-auto rounded-[28px] overflow-hidden p-6 md:p-7 lg:p-8 flex justify-between items-center bg-gradient-to-r from-[#9A6200] to-[#3B3835] text-white border border-[#A33F00]">
       <div className="relative z-10 min-w-0 text-[#FFFFFF]">
         <p className="text-sm font-medium">Total Balance</p>
-        <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight mt-3 mb-7">
+
+        <h2 className="text-3xl lg:text-[40px] font-bold tracking-tight mt-3 mb-5">
           {loading
             ? "......."
-            : `₦${availableBalance.toLocaleString("en-NG", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}`}
+            : formatCurrency(availableBalance.toLocaleString())}
         </h2>
 
-        {role === "SUPER" || role === "USER" && (
-          <p className="text-[#FF8500] mb-2">
+        {role === "USER" && (
+          <p className="text-[#FF613E] font-medium text-lg mb-2">
+            <span className="text-[#E2E2E2] text-sm">Overdraft: </span>
             {loading
               ? "......."
-              : `₦ - ${overdraftBalance.toLocaleString("en-NG", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}`}
+              : formatCurrency(overdraftBalance.toLocaleString())}
           </p>
         )}
-
 
         <div className="flex gap-4">
           {role !== "SUB" && (
@@ -247,15 +247,22 @@ export function WalletHeaderCard({ role }: { role?: string }) {
           {role === "SUB" && (
             <Button
               variant="light"
-              className="w-full lg:w-[159px] h-[48px] lg:h-[52px]"
+              className="w-full lg:w-[140px] h-[48px] lg:h-[52px]"
               onClick={() => setShowRequest(true)}
             >
               Request Money
             </Button>
           )}
+
+          <Button
+            variant="grey"
+            className="w-full lg:w-[145px] h-[48px] lg:h-[52px]"
+            onClick={() => setShowManualPayment(true)}
+          >
+            Manual Top Up
+          </Button>
         </div>
       </div>
-
       <div className="hidden absolute inset-10 lg:flex justify-end items-end">
         <Image
           src={CardImage}
@@ -264,7 +271,6 @@ export function WalletHeaderCard({ role }: { role?: string }) {
           priority
         />
       </div>
-
       {/* Top-up modal */}
       <TopUpModal
         open={topUpOpen}
@@ -278,7 +284,6 @@ export function WalletHeaderCard({ role }: { role?: string }) {
         onSubmit={handleTopUpInitiate}
       />
 
-      {/* Pass a NUMBER down to the modals */}
       <DisburseMoneyModal
         open={showDisburse}
         availableBalance={availableBalance}
@@ -291,6 +296,18 @@ export function WalletHeaderCard({ role }: { role?: string }) {
         availableBalance={availableBalance}
         onOpenChange={setShowRequest}
         onSubmit={handleRequestSubmit}
+      />
+
+      <ManualPaymentModal
+        open={showManualPayment}
+        onOpenChange={setShowManualPayment}
+        setShowPaymentDetails={setShowPaymentDetails}
+        showPaymentDetails={showPaymentDetails}
+      />
+
+      <PaymentDetailsModal
+        open={showPaymentDetails}
+        onOpenChange={setShowPaymentDetails}
       />
     </div>
   );

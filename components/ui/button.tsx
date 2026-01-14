@@ -1,6 +1,12 @@
 import React from "react";
 
-type ButtonVariant = "orange" | "grey" | "black" | "light" | "transparent" | "link";
+type ButtonVariant =
+  | "orange"
+  | "grey"
+  | "black"
+  | "light"
+  | "transparent"
+  | "link";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -26,9 +32,8 @@ export const Button: React.FC<ButtonProps> = ({
   const variants = {
     orange:
       "bg-[#FF8500] text-[#FFFFFF] hover:bg-[#E67600] active:bg-[#CC6600]",
-    light:
-      "bg-white text-[#FF8500] hover:bg-[#E67600] hover:text-white active:bg-[#CC6600]",
-    grey: "bg-[#ABABAB] text-[#FFFFFF] hover:bg-[#999999] active:bg-[#888888]",
+    light: "bg-white text-[#FF8500] active:bg-[#CC6600]",
+    grey: "bg-[#FFF]/10 text-[#FFFFFF] hover:bg-[#999999] active:bg-[#888888]",
     black:
       "bg-[#242220] text-[#919191] border border-[#777777] hover:bg-[#333333] active:bg-[#1a1a1a]",
     transparent:
