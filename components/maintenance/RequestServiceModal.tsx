@@ -72,6 +72,8 @@ type ValidationErrors = {
 
 type MaintenanceBreakdown = {
   maintenance_type: string;
+  vatAmount: number;
+  totalCostWithoutSubscription: number;
   maintenanceBaseCost: number;
   deliveryFeeAmount: number;
   payAsYouUse: number;
@@ -401,10 +403,20 @@ function MaintenanceCheckoutModal({
                 label="Service Fee"
                 value={formatNaira(breakdown.maintenanceBaseCost)}
               />
+              {/* <Row
+                label="Service Fee"
+                value={formatNaira(breakdown.maintenanceBaseCost)}
+              /> */}
               <Row
                 label="Delivery Fee"
                 value={formatNaira(breakdown.deliveryFeeAmount)}
               />
+              <Row label="VAT 7.5%" value={formatNaira(breakdown.vatAmount)} />
+
+              {/* <Row
+                label="Total Amount before Subscription"
+                value={formatNaira(breakdown.totalCostWithoutSubscription)}
+              /> */}
               {/* <Row
                 label="Pay-as-you-use"
                 value={formatNaira(breakdown.payAsYouUse)}
@@ -745,10 +757,10 @@ export default function RequestServiceModal({
           : undefined,
       ...(isManual
         ? {
-          location_address: form.location_address || "",
-          location_longitude: form.location_longitude || "",
-          location_latitude: form.location_latitude || "",
-        }
+            location_address: form.location_address || "",
+            location_longitude: form.location_longitude || "",
+            location_latitude: form.location_latitude || "",
+          }
         : { location_id: form.location_id }),
       time_slot:
         form.time_slot === "NOW" ? new Date().toISOString() : form.time_slot,
@@ -780,7 +792,7 @@ export default function RequestServiceModal({
       console.error("Init maintenance error:", err);
       toast.error(
         err?.response?.data?.message ||
-        "Failed to initialize maintenance service."
+          "Failed to initialize maintenance service."
       );
     } finally {
       setSubmitting(false);

@@ -81,6 +81,7 @@ type ValidationErrors = {
 type CheckoutBreakdown = {
   fuel_type: string;
   quantity: number;
+  vatAmount: number;
   fuelProductCost: number;
   serviceChargeAmount: number;
   deliveryFeeAmount: number;
@@ -225,6 +226,14 @@ function FuelCheckoutModal({
                 label="Delivery Fee"
                 value={formatNaira(breakdown.deliveryFeeAmount)}
               />
+              <SummaryRow
+                label="VAT 7.5%"
+                value={formatNaira(breakdown.vatAmount)}
+              />
+              {/* <SummaryRow
+                label="Total Amount before Subscription"
+                value={formatNaira(breakdown.totalCostWithoutSubscription)}
+              /> */}
 
               {/* {breakdown.subscriptionApplied &&
                 breakdown.subscriptionCharge && (
@@ -273,7 +282,11 @@ function FuelCheckoutModal({
             disabled={processing}
             className="w-full h-[58px] lg:h-[60px] rounded-xl disabled:opacity-50"
           >
-            {processing ? "Processing..." : "Confirm & Pay"}
+            {/* {processing ? "Processing..." : "Confirm & Pay"} */}
+
+            {breakdown?.deliveryFeeAmount > 0
+              ? "Confirm & Pay"
+              : "Request Service"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1148,6 +1161,7 @@ export default function RequestFuelModal({
         note: "",
         is_scheduled: false,
         apply_quantity_to_all_assets: true,
+        is_fill_up: false,
         per_vehicle_quantities: [],
       });
       setErrors({});
