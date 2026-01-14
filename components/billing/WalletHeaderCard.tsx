@@ -247,20 +247,32 @@ export function WalletHeaderCard({ role }: { role?: string }) {
           {role === "SUB" && (
             <Button
               variant="light"
-              className="w-full lg:w-[140px] h-[48px] lg:h-[52px]"
+              className="w-full lg:w-[150px] h-[48px] lg:h-[52px]"
               onClick={() => setShowRequest(true)}
             >
               Request Money
             </Button>
           )}
 
-          <Button
-            variant="grey"
-            className="w-full lg:w-[145px] h-[48px] lg:h-[52px]"
-            onClick={() => setShowManualPayment(true)}
-          >
-            Manual Top Up
-          </Button>
+          {role !== "SUB" && (
+            <Button
+              variant="grey"
+              className="w-full lg:w-[145px] h-[48px] lg:h-[52px]"
+              onClick={() => setShowManualPayment(true)}
+            >
+              Manual Top Up
+            </Button>
+          )}
+
+          {/* {ROLE_PERMISSIONS[role].canManualTopUp && (
+            <Button
+              variant="grey"
+              className="w-full lg:w-[145px] h-[48px] lg:h-[52px]"
+              onClick={() => setShowManualPayment(true)}
+            >
+              Manual Top Up
+            </Button>
+          )} */}
         </div>
       </div>
       <div className="hidden absolute inset-10 lg:flex justify-end items-end">
