@@ -22,6 +22,9 @@ import {
   Calendar,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import { toCSV, downloadText } from "@/lib/export";
+import Image from "next/image";
+import ExportIcon from "@/public/export.svg";
 
 type SubAdmin = {
   id: string;
@@ -32,7 +35,7 @@ type SubAdmin = {
 type Activity = {
   type: "transaction" | "fund_request";
   id: string;
-  amount: number;
+  amount: string | number;
   reference?: string;
   status: string;
   transactionType?: "CREDIT" | "DEBIT";
@@ -72,25 +75,34 @@ export default function SubAdminActivityPage() {
   const [endDate, setEndDate] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(50);
+  const [appliedFilters, setAppliedFilters] = useState({
+    type: "all",
+    startDate: "",
+    endDate: "",
+  });
+  const [exporting, setExporting] = useState(false);
 
-  const fetchActivities = async () => {
+  const fetchActivities = async (
+    page = currentPage,
+    filters = appliedFilters
+  ) => {
     try {
       setLoading(true);
       setError(null);
 
       const params = new URLSearchParams({
-        page: currentPage.toString(),
+        page: page.toString(),
         limit: limit.toString(),
       });
 
-      if (filterType && filterType !== "all") {
-        params.append("type", filterType);
+      if (filters.type && filters.type !== "all") {
+        params.append("type", filters.type);
       }
-      if (startDate) {
-        params.append("startDate", startDate);
+      if (filters.startDate) {
+        params.append("startDate", filters.startDate);
       }
-      if (endDate) {
-        params.append("endDate", endDate);
+      if (filters.endDate) {
+        params.append("endDate", filters.endDate);
       }
 
       const res = await axiosInstance.get<ActivityResponse>(
@@ -98,11 +110,14 @@ export default function SubAdminActivityPage() {
       );
 
       setData(res.data);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Failed to load activities:", e);
+      const err = e as {
+        response?: { data?: { message?: string; error?: string } };
+      };
       const msg =
-        e?.response?.data?.message ||
-        e?.response?.data?.error ||
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
         "Failed to load activities.";
       setError(msg);
       toast.error(msg);
@@ -113,25 +128,186 @@ export default function SubAdminActivityPage() {
 
   useEffect(() => {
     if (subAdminId) {
-      fetchActivities();
+      fetchActivities(currentPage, appliedFilters);
     }
-  }, [subAdminId, currentPage, filterType, startDate, endDate]);
+    // NOTE: fetchActivities intentionally omitted from deps to avoid
+    // recreating the function on every render and causing refetch loops.
+    // The lint rule is disabled at the file level instead.
+  }, [subAdminId, currentPage, appliedFilters]);
 
   const handleApplyFilters = () => {
+    const newFilters = {
+      type: filterType,
+      startDate: startDate,
+      endDate: endDate,
+    };
     setCurrentPage(1);
-    fetchActivities();
+    setAppliedFilters(newFilters);
   };
 
   const handleResetFilters = () => {
     setFilterType("all");
     setStartDate("");
     setEndDate("");
+    const resetFilters = {
+      type: "all",
+      startDate: "",
+      endDate: "",
+    };
+    setAppliedFilters(resetFilters);
     setCurrentPage(1);
+  };
+
+  const handleExport = async () => {
+    try {
+      setExporting(true);
+
+      // Fetch all activities with current filters (no pagination limit)
+      const params = new URLSearchParams({
+        page: "1",
+        limit: "10000", // Large limit to get all records
+      });
+
+      if (appliedFilters.type && appliedFilters.type !== "all") {
+        params.append("type", appliedFilters.type);
+      }
+      if (appliedFilters.startDate) {
+        params.append("startDate", appliedFilters.startDate);
+      }
+      if (appliedFilters.endDate) {
+        params.append("endDate", appliedFilters.endDate);
+      }
+
+      const res = await axiosInstance.get<ActivityResponse>(
+        `/super/team/${subAdminId}/activities?${params.toString()}`
+      );
+
+      const allActivities = res.data.activities || [];
+
+      // Apply the same filters on the client to guarantee the export
+      // matches what the user sees on screen, even if the backend
+      // ignores some filter params.
+      const activities = allActivities.filter((activity) => {
+        if (
+          appliedFilters.type &&
+          appliedFilters.type !== "all" &&
+          activity.type !== appliedFilters.type
+        ) {
+          return false;
+        }
+
+        if (appliedFilters.startDate) {
+          const activityTime = new Date(activity.timestamp).getTime();
+          const startTime = new Date(appliedFilters.startDate).setHours(
+            0,
+            0,
+            0,
+            0
+          );
+          if (activityTime < startTime) return false;
+        }
+
+        if (appliedFilters.endDate) {
+          const activityTime = new Date(activity.timestamp).getTime();
+          const endTime = new Date(appliedFilters.endDate).setHours(
+            23,
+            59,
+            59,
+            999
+          );
+          if (activityTime > endTime) return false;
+        }
+
+        return true;
+      });
+
+      if (activities.length === 0) {
+        toast.info("No activities to export");
+        return;
+      }
+
+      const rows = activities.map((activity) => {
+        const amount =
+          typeof activity.amount === "string"
+            ? parseFloat(activity.amount)
+            : activity.amount;
+
+        return {
+          "Activity ID": activity.id,
+          Type: activity.type.replace("_", " ").toUpperCase(),
+          "Amount (NGN)": amount.toFixed(2),
+          "Reference/Note": activity.reference || activity.note || "",
+          Status: activity.status,
+          Description: activity.description || "",
+          "Transaction Type": activity.transactionType || "",
+          "Date & Time": formatDate(activity.timestamp),
+        };
+      });
+
+      const csv = toCSV(rows);
+      const filename = `activities-${
+        data?.subAdmin.name || "export"
+      }-${new Date().toISOString().slice(0, 10)}.csv`;
+      downloadText(filename, csv);
+
+      toast.success(`Exported ${activities.length} activities successfully`);
+    } catch (e: unknown) {
+      console.error("Failed to export activities:", e);
+      const err = e as {
+        response?: { data?: { message?: string; error?: string } };
+      };
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Failed to export activities.";
+      toast.error(msg);
+    } finally {
+      setExporting(false);
+    }
   };
 
   const totalPages = data
     ? Math.ceil(data.pagination.total / data.pagination.limit)
     : 0;
+
+  // Apply filters on the client as well, so that the Activity Type and
+  // date filters always work visually, even if the backend ignores them.
+  const filteredActivities =
+    data?.activities && data.activities.length > 0
+      ? data.activities.filter((activity) => {
+          if (
+            appliedFilters.type &&
+            appliedFilters.type !== "all" &&
+            activity.type !== appliedFilters.type
+          ) {
+            return false;
+          }
+
+          if (appliedFilters.startDate) {
+            const activityTime = new Date(activity.timestamp).getTime();
+            const startTime = new Date(appliedFilters.startDate).setHours(
+              0,
+              0,
+              0,
+              0
+            );
+            if (activityTime < startTime) return false;
+          }
+
+          if (appliedFilters.endDate) {
+            const activityTime = new Date(activity.timestamp).getTime();
+            const endTime = new Date(appliedFilters.endDate).setHours(
+              23,
+              59,
+              59,
+              999
+            );
+            if (activityTime > endTime) return false;
+          }
+
+          return true;
+        })
+      : [];
 
   const getStatusColor = (status: string) => {
     const statusUpper = status.toUpperCase();
@@ -162,8 +338,9 @@ export default function SubAdminActivityPage() {
     return <FileText className="w-5 h-5 text-blue-400" />;
   };
 
-  const formatCurrency = (amount: number) => {
-    return `₦${amount.toLocaleString("en-NG", {
+  const formatCurrency = (amount: string | number) => {
+    const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
+    return `₦${numAmount.toLocaleString("en-NG", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
@@ -221,8 +398,20 @@ export default function SubAdminActivityPage() {
             <p className="text-white/60 text-sm mt-1">{data?.subAdmin.email}</p>
           </div>
         </div>
-        <div className="text-white/60 text-sm">
-          Total Activities: {data?.pagination.total || 0}
+        <div className="flex items-center gap-4">
+          <div className="text-white/60 text-sm">
+            Total Activities: {data?.pagination.total || 0}
+          </div>
+          {filteredActivities.length > 0 && (
+            <Button
+              onClick={handleExport}
+              disabled={exporting}
+              className="bg-transparent border-white/10 text-white hover:bg-white/5 flex items-center gap-2"
+            >
+              <Image src={ExportIcon} alt="Export" className="h-5 w-5" />
+              {/* {exporting ? "Exporting..." : "Export"} */}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -230,7 +419,10 @@ export default function SubAdminActivityPage() {
       <div className="mb-6 p-4 rounded-xl border border-white/10 bg-[#2D2A27]">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="space-y-2">
-            <label className="text-white/80 text-sm">Activity Type</label>
+            <label className="text-white/80 text-sm flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Activity Type
+            </label>
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="bg-[#1F1E1C] border-white/10 text-white">
                 <SelectValue placeholder="All Types" />
@@ -293,7 +485,7 @@ export default function SubAdminActivityPage() {
       </div>
 
       {/* Activities Table */}
-      {!data?.activities || data.activities.length === 0 ? (
+      {!data || filteredActivities.length === 0 ? (
         <div className="p-8 text-white/80 text-center rounded-xl border border-white/10 bg-[#2D2A27]">
           No activities found for the selected filters.
         </div>
@@ -314,7 +506,7 @@ export default function SubAdminActivityPage() {
                 </thead>
 
                 <tbody>
-                  {data.activities.map((activity) => (
+                  {filteredActivities.map((activity) => (
                     <tr
                       key={activity.id}
                       className="border-t border-white/10 hover:bg-white/5 transition"
@@ -368,68 +560,74 @@ export default function SubAdminActivityPage() {
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-6 flex items-center justify-between">
+          {data && data.pagination.total > 0 && (
+            <div className="mt-6 flex items-center justify-between flex-wrap gap-4">
               <div className="text-white/60 text-sm">
-                Page {currentPage} of {totalPages} ({data.pagination.total}{" "}
-                total activities)
+                Showing {(currentPage - 1) * data.pagination.limit + 1} to{" "}
+                {Math.min(
+                  currentPage * data.pagination.limit,
+                  data.pagination.total
+                )}{" "}
+                of {data.pagination.total} activities
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  //   variant="outline"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1 || loading}
-                  className="bg-transparent border-white/10 text-white hover:bg-white/5 disabled:opacity-50"
-                >
-                  <ChevronLeft className="w-4 h-4 mr-1" />
-                  Previous
-                </Button>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    //   variant="outline"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1 || loading}
+                    className="bg-transparent border-white/10 text-white hover:bg-white/5 disabled:opacity-50"
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-1" />
+                    Previous
+                  </Button>
 
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+
+                      return (
+                        <Button
+                          key={pageNum}
+                          // variant={
+                          //   currentPage === pageNum ? "default" : "outline"
+                          // }
+                          onClick={() => setCurrentPage(pageNum)}
+                          disabled={loading}
+                          className={`w-10 h-10 p-0 ${
+                            currentPage === pageNum
+                              ? "bg-white text-black"
+                              : "bg-transparent border-white/10 text-white hover:bg-white/5"
+                          }`}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+
+                  <Button
+                    //   variant="outline"
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
                     }
-
-                    return (
-                      <Button
-                        key={pageNum}
-                        // variant={
-                        //   currentPage === pageNum ? "default" : "outline"
-                        // }
-                        onClick={() => setCurrentPage(pageNum)}
-                        disabled={loading}
-                        className={`w-10 h-10 p-0 ${
-                          currentPage === pageNum
-                            ? "bg-white text-black"
-                            : "bg-transparent border-white/10 text-white hover:bg-white/5"
-                        }`}
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
+                    disabled={currentPage === totalPages || loading}
+                    className="bg-transparent border-white/10 text-white hover:bg-white/5 disabled:opacity-50"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
                 </div>
-
-                <Button
-                  //   variant="outline"
-                  onClick={() =>
-                    setCurrentPage((p) => Math.min(totalPages, p + 1))
-                  }
-                  disabled={currentPage === totalPages || loading}
-                  className="bg-transparent border-white/10 text-white hover:bg-white/5 disabled:opacity-50"
-                >
-                  Next
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </div>
+              )}
             </div>
           )}
         </>
