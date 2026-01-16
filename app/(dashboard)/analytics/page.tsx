@@ -11,6 +11,8 @@ import {
   Users,
 } from "lucide-react";
 import { StatTile } from "@/components/dashboard/StatTile";
+import { TransactionDetailsModal } from "@/components/dashboard/TransactionDetailsModal";
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -23,6 +25,8 @@ import {
   Pie,
   Cell,
   Legend,
+  LineChart,
+  Line,
 } from "recharts";
 
 // Helper function to format period for chart display
@@ -64,11 +68,15 @@ export default function AnalyticsPage() {
   const [chartView, setChartView] = useState<"day" | "week" | "month">("month");
   const [analysisData, setAnalysisData] = useState<any>(null);
   const [summaryData, setSummaryData] = useState<any>(null);
-  const [topAssetsData, setTopAssetsData] = useState<any>(null);
+
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [chartAnalytics, setChartAnalytics] = useState<any>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [transactionsLoading, setTransactionsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchChartData = async () => {
@@ -106,12 +114,11 @@ export default function AnalyticsPage() {
   const totalSpending = summary.total_spent || 0;
   const totalOrders = summary.total_orders || 0;
 
-  // Get highest spender from top assets
-  const topAssets = topAssetsData?.top_assets || [];
-  const highestSpender = topAssets[0];
-  const highestSpenderName = highestSpender?.asset_name || "N/A";
-  const highestSpenderAmount = highestSpender?.total_amount || 0;
-  const highestSpenderPlate = highestSpender?.plate_number || "";
+  // Get highest spender from summary
+  const highestSpender = summary.highest_spender || {};
+  const highestSpenderName = highestSpender.asset_name || "N/A";
+  const highestSpenderAmount = highestSpender.amount || 0;
+  const highestSpenderPlate = highestSpender.plate_number || "";
 
   const statTiles = [
     {
@@ -136,7 +143,7 @@ export default function AnalyticsPage() {
     },
   ];
 
-  // Fetch vehicles list for filter dropdown and top assets for stat tiles
+  // Fetch vehicles list for filter dropdown
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
@@ -145,7 +152,6 @@ export default function AnalyticsPage() {
           { params: { type: "top-assets" } }
         );
         const topAssetsResponse = response.data.data;
-        setTopAssetsData(topAssetsResponse);
         setVehicles(topAssetsResponse.top_assets || []);
       } catch (error) {
         console.error("Failed to fetch vehicles:", error);
@@ -155,15 +161,29 @@ export default function AnalyticsPage() {
     fetchVehicles();
   }, []);
 
+  // Reset pagination when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterVehicle]);
+
   // Fetch transactions separately
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
         setTransactionsLoading(true);
-        const response = await axiosInstance.get("/fleet-wallet/transactions", {
-          params: { page: 1, limit: 20, sort: "DESC" },
+
+        const endpoint =
+          filterVehicle && filterVehicle !== ""
+            ? `/fleet-order-logging/asset/${filterVehicle}`
+            : "/fleet-order-logging/my";
+
+        const response = await axiosInstance.get(endpoint, {
+          params: { page: currentPage, limit: 40 },
         });
         setTransactions(response.data.data || []);
+        if (response.data.totalPages) {
+          setTotalPages(response.data.totalPages);
+        }
       } catch (error) {
         console.error("Failed to fetch transactions:", error);
       } finally {
@@ -172,7 +192,7 @@ export default function AnalyticsPage() {
     };
 
     fetchTransactions();
-  }, []);
+  }, [currentPage, filterVehicle]);
 
   // Fetch analytics data based on filters
   useEffect(() => {
@@ -212,13 +232,192 @@ export default function AnalyticsPage() {
     fetchAllData();
   }, [filterVehicle, filterType]);
 
-  // Determine if we should show chart or cards based on data type
   const shouldShowChart = filterType === "trends" && chartData.length > 0;
-  const shouldShowPieChart =
-    (filterType === "service-breakdown" || filterType === "payment-methods") &&
-    analysisData &&
-    (analysisData.service_breakdown?.length > 0 ||
-      analysisData.payment_methods?.length > 0);
+
+  // Render Chart Content based on filter type
+  const renderChartContent = () => {
+    if (!analysisData) {
+      if (filterType === "summary") return null;
+      // return <div className="text-white/50 py-4">Loading chart data...</div>;
+    }
+
+    if (filterType === "summary") return null;
+
+    let chartTitle = "Analytics";
+    let ChartComponent = null;
+
+    switch (filterType) {
+      case "trends":
+        chartTitle = "Spending Trends";
+        ChartComponent = (
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={chartData} barGap={8}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+              <XAxis
+                dataKey="period"
+                stroke="#ffffff50"
+                tick={{ fill: "#ffffff70", fontSize: 12 }}
+              />
+              <YAxis
+                stroke="#ffffff50"
+                tick={{ fill: "#ffffff70", fontSize: 12 }}
+                tickFormatter={(value) => `₦${value / 1000}k`}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#3B3835",
+                  border: "1px solid #ffffff20",
+                  borderRadius: "8px",
+                  color: "#fff",
+                }}
+                formatter={(value: number) => formatCurrency(value)}
+              />
+              <Bar
+                dataKey="amount"
+                fill="#FF8500"
+                radius={[4, 4, 0, 0]}
+                name="Total Amount"
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+        break;
+
+      case "top-assets":
+        chartTitle = "Top Assets by Spending";
+        const topAssetsChartData = analysisData?.top_assets?.slice(0, 10).map((item: any) => ({
+          name: item.asset_name,
+          value: item.total_amount,
+        })) || [];
+
+        ChartComponent = (
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={topAssetsChartData} layout="vertical" margin={{ left: 40 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+              <XAxis type="number" stroke="#ffffff50" tick={{ fill: "#ffffff70", fontSize: 12 }} tickFormatter={(value) => `₦${value / 1000}k`} />
+              <YAxis dataKey="name" type="category" width={100} stroke="#ffffff50" tick={{ fill: "#ffffff70", fontSize: 12 }} />
+              <Tooltip
+                contentStyle={{ backgroundColor: "#3B3835", border: "1px solid #ffffff20", borderRadius: "8px", color: "#fff" }}
+                formatter={(value: number) => formatCurrency(value)}
+              />
+              <Bar dataKey="value" fill="#FF8500" radius={[0, 4, 4, 0]} name="Total Amount" />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+        break;
+
+      case "top-locations":
+        chartTitle = "Top Locations by Visits";
+        const topLocationsChartData = analysisData?.top_locations?.slice(0, 10).map((item: any) => ({
+          name: item.location_name?.split(',')[0] || "Unknown", // Truncate long addresses
+          value: item.visit_count,
+        })) || [];
+
+        ChartComponent = (
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={topLocationsChartData} layout="vertical" margin={{ left: 40 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+              <XAxis type="number" stroke="#ffffff50" tick={{ fill: "#ffffff70", fontSize: 12 }} />
+              <YAxis dataKey="name" type="category" width={120} stroke="#ffffff50" tick={{ fill: "#ffffff70", fontSize: 12 }} />
+              <Tooltip
+                contentStyle={{ backgroundColor: "#3B3835", border: "1px solid #ffffff20", borderRadius: "8px", color: "#fff" }}
+              />
+              <Bar dataKey="value" fill="#FF8500" radius={[0, 4, 4, 0]} name="Visits" />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+        break;
+
+      case "odometer-trends":
+        chartTitle = "Odometer Trends";
+        const odoTrendsData = analysisData?.trends?.map((item: any) => ({
+          period: formatPeriodForChart(item.period, chartView),
+          value: item.avg_reading || item.reading || 0
+        })) || []; // Assuming structure, adjust as needed
+
+        if (odoTrendsData.length === 0) return null;
+
+        ChartComponent = (
+          <ResponsiveContainer width="100%" height={320}>
+            <LineChart data={odoTrendsData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+              <XAxis dataKey="period" stroke="#ffffff50" tick={{ fill: "#ffffff70", fontSize: 12 }} />
+              <YAxis stroke="#ffffff50" tick={{ fill: "#ffffff70", fontSize: 12 }} />
+              <Tooltip
+                contentStyle={{ backgroundColor: "#3B3835", border: "1px solid #ffffff20", borderRadius: "8px", color: "#fff" }}
+              />
+              <Line type="monotone" dataKey="value" stroke="#FF8500" strokeWidth={2} name="Reading" />
+            </LineChart>
+          </ResponsiveContainer>
+        );
+        break;
+
+      case "service-breakdown":
+      case "payment-methods":
+        chartTitle = filterType === "service-breakdown" ? "Service Distribution" : "Payment Methods";
+        const pieData = filterType === "service-breakdown"
+          ? analysisData?.service_breakdown?.map((item: any) => ({
+            name: item.service_type || "Unknown",
+            value: item.order_count,
+          }))
+          : analysisData?.payment_methods?.map((item: any) => ({
+            name: item.payment_method || "Unknown",
+            value: item.usage_count,
+          }));
+
+        if (!pieData || pieData.length === 0) return null;
+
+        ChartComponent = (
+          <ResponsiveContainer width="100%" height={320}>
+            <PieChart>
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={(entry) => `${entry.name} (${entry.value})`}
+                outerRadius={100}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {pieData.map((_: any, index: number) => (
+                  <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                ))}
+              </Pie>
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        );
+        break;
+
+      default:
+        return null;
+    }
+
+    return (
+      <div className="bg-[#2B2A28] rounded-2xl p-6 border border-white/10 mb-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold">{chartTitle}</h2>
+          {filterType === "trends" && (
+            <div className="flex items-center gap-3">
+              <select
+                value={chartView}
+                onChange={(e) =>
+                  setChartView(e.target.value as "day" | "week" | "month")
+                }
+                className="bg-[#3B3835] text-white rounded-lg px-3 py-1.5 text-sm border border-white/10 focus:outline-none focus:border-[#FF8500]"
+              >
+                <option value="month">Monthly</option>
+                <option value="week">Weekly</option>
+                <option value="day">Daily</option>
+              </select>
+            </div>
+          )}
+        </div>
+        {ChartComponent}
+      </div>
+    );
+  };
 
   function renderCellValue(key: string, row: any) {
     if (
@@ -258,152 +457,69 @@ export default function AnalyticsPage() {
 
           {/* Filters Bar */}
           <div className="bg-[#2B2A28] rounded-2xl p-4 border border-white/10 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-10">
               <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-white/70" />
-                <span className="text-sm text-white/70">View</span>
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-white/70" />
+                  <span className="text-sm text-white/70">View</span>
+                </div>
+                <div className="relative">
+                  <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className="bg-[#3B3835] text-white rounded-lg pl-4 pr-10 py-2 text-sm border border-white/10 focus:outline-none focus:border-[#FF8500] appearance-none"
+                  >
+                    <option value="summary">Summary</option>
+                    <option value="trends">Trends</option>
+                    <option value="top-assets">Top Assets</option>
+                    <option value="top-locations">Top Locations</option>
+                    <option value="service-breakdown">Service Breakdown</option>
+                    <option value="driver-stats">Driver Stats</option>
+                    <option value="odometer-stats">Odometer Stats</option>
+                    <option value="odometer-trends">Odometer Trends</option>
+                    <option value="payment-methods">Payment Methods</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50 pointer-events-none" />
+                </div>
               </div>
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="bg-[#3B3835] text-white rounded-lg px-4 py-2 text-sm border border-white/10 focus:outline-none focus:border-[#FF8500]"
-              >
-                <option value="summary">Summary</option>
-                <option value="trends">Trends</option>
-                <option value="top-assets">Top Assets</option>
-                <option value="top-locations">Top Locations</option>
-                <option value="service-breakdown">Service Breakdown</option>
-                <option value="driver-stats">Driver Stats</option>
-                <option value="payment-methods">Payment Methods</option>
-              </select>
+              <div className="flex items-center gap-2">
 
-              <div className="flex items-center gap-2">
-                <Car className="h-4 w-4 text-white/70" />
-                <span className="text-sm text-white/70">Vehicle</span>
+                <div className="flex items-center gap-2">
+                  <Car className="h-4 w-4 text-white/70" />
+                  <span className="text-sm text-white/70">Vehicle</span>
+                </div>
+                <div className="relative">
+                  <select
+                    value={filterVehicle}
+                    onChange={(e) => setFilterVehicle(e.target.value)}
+                    className="bg-[#3B3835] text-white rounded-lg pl-4 pr-10 py-2 text-sm border border-white/10 focus:outline-none focus:border-[#FF8500] appearance-none"
+                  >
+                    <option value="">All Vehicles</option>
+                    {vehicles.map((vehicle) => (
+                      <option key={vehicle.asset_id} value={vehicle.asset_id}>
+                        {vehicle.asset_name} ({vehicle.plate_number})
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50 pointer-events-none" />
+                </div>
               </div>
-              <select
-                value={filterVehicle}
-                onChange={(e) => setFilterVehicle(e.target.value)}
-                className="bg-[#3B3835] text-white rounded-lg px-4 py-2 text-sm border border-white/10 focus:outline-none focus:border-[#FF8500]"
-              >
-                <option value="">All Vehicles</option>
-                {vehicles.map((vehicle) => (
-                  <option key={vehicle.asset_id} value={vehicle.asset_id}>
-                    {vehicle.asset_name} ({vehicle.plate_number})
-                  </option>
-                ))}
-              </select>
             </div>
 
             <button className="p-2 hover:bg-white/5 rounded-lg transition-colors">
-              <ExternalLink className="h-5 w-5 text-white/70" />
+              {/* <ExternalLink className="h-5 w-5 text-white/70" /> */}
             </button>
           </div>
 
           {/* Conditional Chart/Visualization */}
-          {shouldShowChart && (
-            <div className="bg-[#2B2A28] rounded-2xl p-6 border border-white/10">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">Spending Trends</h2>
-                <div className="flex items-center gap-3">
-                  <select
-                    value={chartView}
-                    onChange={(e) =>
-                      setChartView(e.target.value as "day" | "week" | "month")
-                    }
-                    className="bg-[#3B3835] text-white rounded-lg px-3 py-1.5 text-sm border border-white/10 focus:outline-none focus:border-[#FF8500]"
-                  >
-                    <option value="month">Monthly</option>
-                    <option value="week">Weekly</option>
-                    <option value="day">Daily</option>
-                  </select>
-                </div>
-              </div>
-
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={chartData} barGap={8}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
-                  <XAxis
-                    dataKey="period"
-                    stroke="#ffffff50"
-                    tick={{ fill: "#ffffff70", fontSize: 12 }}
-                  />
-                  <YAxis
-                    stroke="#ffffff50"
-                    tick={{ fill: "#ffffff70", fontSize: 12 }}
-                    tickFormatter={(value) => `₦${value / 1000}k`}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#3B3835",
-                      border: "1px solid #ffffff20",
-                      borderRadius: "8px",
-                      color: "#fff",
-                    }}
-                    formatter={(value: number) => formatCurrency(value)}
-                  />
-                  <Bar
-                    dataKey="amount"
-                    fill="#FF8500"
-                    radius={[4, 4, 0, 0]}
-                    name="Total Amount"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-
-          {shouldShowPieChart && (
-            <div className="bg-[#2B2A28] rounded-2xl p-6 border border-white/10">
-              <h2 className="text-xl font-semibold mb-6">
-                {filterType === "service-breakdown"
-                  ? "Service Distribution"
-                  : "Payment Methods"}
-              </h2>
-              <ResponsiveContainer width="100%" height={320}>
-                <PieChart>
-                  <Pie
-                    data={
-                      filterType === "service-breakdown"
-                        ? analysisData.service_breakdown?.map((item: any) => ({
-                            name: item.service_type || "Unknown",
-                            value: item.order_count,
-                          }))
-                        : analysisData.payment_methods?.map((item: any) => ({
-                            name: item.payment_method || "Unknown",
-                            value: item.usage_count,
-                          }))
-                    }
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={(entry) => `${entry.name}: ${entry.value}`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {(filterType === "service-breakdown"
-                      ? analysisData.service_breakdown
-                      : analysisData.payment_methods
-                    )?.map((_: any, index: number) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={CHART_COLORS[index % CHART_COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          )}
+          {renderChartContent()}
 
           {/* Data Display */}
           {renderDataView(filterType, analysisData, renderCellValue)}
 
           {/* Transaction History - Always visible */}
           <div className="bg-[#2B2A28] rounded-2xl border border-white/10 overflow-hidden mt-6">
-            <div className="p-6 border-b border-white/10">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center">
               <h2 className="text-xl font-semibold">Recent Transactions</h2>
             </div>
 
@@ -418,13 +534,11 @@ export default function AnalyticsPage() {
             ) : (
               <>
                 <div className="px-6 py-4 bg-[#262422]">
-                  <div className="grid grid-cols-6 gap-4 text-sm font-semibold text-white/70">
+                  <div className="grid grid-cols-5 gap-4 text-sm font-semibold text-white/70">
                     <div>Date</div>
-                    <div>Type</div>
-                    <div>Description</div>
-                    <div>Status</div>
+                    <div>Service</div>
+                    <div className="col-span-2">Location</div>
                     <div className="text-right">Amount</div>
-                    <div className="text-right">Balance</div>
                   </div>
                 </div>
 
@@ -432,60 +546,76 @@ export default function AnalyticsPage() {
                   {transactions.map((txn: any) => (
                     <div
                       key={txn.id}
-                      className="px-6 py-5 hover:bg-white/5 transition-colors"
+                      onClick={() => {
+                        setSelectedTransaction(txn);
+                        setIsModalOpen(true);
+                      }}
+                      className="px-6 py-5 hover:bg-white/5 transition-colors cursor-pointer"
                     >
-                      <div className="grid grid-cols-6 gap-4 items-center">
+                      <div className="grid grid-cols-5 gap-4 items-center">
                         <div className="text-sm text-white/90">
-                          {new Date(txn.createdAt).toLocaleDateString("en-GB", {
+                          {new Date(
+                            txn.fulfilled_at || txn.created_at
+                          ).toLocaleDateString("en-GB", {
                             day: "2-digit",
                             month: "short",
                             year: "numeric",
                           })}
+                          <div className="text-xs text-white/50 mt-1">
+                            {txn.status}
+                          </div>
                         </div>
                         <div className="text-sm font-medium">
-                          {txn.type || "—"}
+                          {txn.service_type || "—"}
                         </div>
-                        <div className="text-sm text-white/80 truncate">
-                          {txn.description || txn.reference || "—"}
+                        <div className="text-sm text-white/80 col-span-2 truncate">
+                          {txn.location_name || "—"}
                         </div>
-                        <div className="text-sm">
-                          <span
-                            className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                              txn.status === "COMPLETED" ||
-                              txn.status === "SUCCESS"
-                                ? "bg-green-500/20 text-green-400"
-                                : txn.status === "PENDING"
-                                ? "bg-yellow-500/20 text-yellow-400"
-                                : "bg-red-500/20 text-red-400"
-                            }`}
-                          >
-                            {txn.status || "—"}
-                          </span>
-                        </div>
-                        <div
-                          className={`text-sm font-semibold text-right ${
-                            txn.type === "CREDIT" || txn.type === "TOP_UP"
-                              ? "text-green-400"
-                              : "text-red-400"
-                          }`}
-                        >
-                          {txn.type === "CREDIT" || txn.type === "TOP_UP"
-                            ? "+"
-                            : "-"}
-                          {formatCurrency(Math.abs(txn.amount || 0))}
-                        </div>
-                        <div className="text-sm text-white/80 text-right">
-                          {formatCurrency(txn.balanceAfter || 0)}
+                        <div className="text-sm font-semibold text-right">
+                          {formatCurrency(Number(txn.amount) || 0)}
                         </div>
                       </div>
                     </div>
                   ))}
+                </div>
+
+                {/* Pagination */}
+                <div className="p-4 border-t border-white/10 flex items-center justify-between">
+                  <div className="text-sm text-white/50">
+                    Page {currentPage} of {totalPages}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() =>
+                        setCurrentPage((p) => Math.max(1, p - 1))
+                      }
+                      disabled={currentPage === 1}
+                      className="p-2 rounded-lg bg-[#3B3835] text-white/70 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() =>
+                        setCurrentPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      disabled={currentPage === totalPages}
+                      className="p-2 rounded-lg bg-[#3B3835] text-white/70 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                  </div>
                 </div>
               </>
             )}
           </div>
         </>
       )}
+
+      <TransactionDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        transaction={selectedTransaction}
+      />
     </div>
   );
 }
@@ -520,6 +650,16 @@ function renderDataView(
         analysisData?.driver_stats || [],
         renderCellValue
       );
+    case "odometer-stats":
+      return renderOdometerStatsTable(
+        analysisData?.odometer_stats || [],
+        renderCellValue
+      );
+    case "odometer-trends":
+      return renderOdometerTrendsTable(
+        analysisData?.trends || [],
+        renderCellValue
+      );
     case "payment-methods":
       return renderPaymentMethodsTable(
         analysisData?.payment_methods || [],
@@ -528,6 +668,102 @@ function renderDataView(
     default:
       return null;
   }
+}
+
+function renderOdometerStatsTable(data: any[], renderCellValue: any) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="bg-[#2B2A28] rounded-2xl p-6 border border-white/10">
+        <p className="text-white/50 text-center">No odometer stats available</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-[#2B2A28] rounded-2xl border border-white/10 overflow-hidden">
+      <div className="p-6 border-b border-white/10">
+        <h2 className="text-xl font-semibold">Odometer Stats</h2>
+      </div>
+
+      <div className="px-6 py-4 bg-[#262422]">
+        <div className="grid grid-cols-4 gap-4 text-sm font-semibold text-white/70">
+          <div>Asset ID</div>
+          <div>Reading</div>
+          <div>Date</div>
+          <div className="text-right">Total Distance</div>
+        </div>
+      </div>
+
+      <div className="divide-y divide-white/5">
+        {data.map((item: any, index: number) => (
+          <div
+            key={index}
+            className="px-6 py-5 hover:bg-white/5 transition-colors"
+          >
+            <div className="grid grid-cols-4 gap-4 items-center">
+              <div className="text-sm font-medium">{item.asset_id || "—"}</div>
+              <div className="text-sm text-white/80">
+                {item.reading ? `${item.reading} km` : "—"}
+              </div>
+              <div className="text-sm text-white/80">
+                {renderCellValue("period", item)}
+              </div>
+              <div className="text-sm font-semibold text-right">
+                {item.distance ? `${item.distance} km` : "—"}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function renderOdometerTrendsTable(data: any[], renderCellValue: any) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="bg-[#2B2A28] rounded-2xl p-6 border border-white/10">
+        <p className="text-white/50 text-center">No odometer trends data available</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-[#2B2A28] rounded-2xl border border-white/10 overflow-hidden">
+      <div className="p-6 border-b border-white/10">
+        <h2 className="text-xl font-semibold">Odometer History</h2>
+      </div>
+
+      <div className="px-6 py-4 bg-[#262422]">
+        <div className="grid grid-cols-3 gap-4 text-sm font-semibold text-white/70">
+          <div>Period</div>
+          <div>Reading</div>
+          <div className="text-right">Change</div>
+        </div>
+      </div>
+
+      <div className="divide-y divide-white/5">
+        {data.map((item: any, index: number) => (
+          <div
+            key={index}
+            className="px-6 py-5 hover:bg-white/5 transition-colors"
+          >
+            <div className="grid grid-cols-3 gap-4 items-center">
+              <div className="text-sm text-white/90">
+                {renderCellValue("period", item)}
+              </div>
+              <div className="text-sm font-medium">
+                {item.reading ? `${item.reading} km` : "—"}
+              </div>
+              <div className="text-sm text-white/80 text-right">
+                {item.change ? `${item.change > 0 ? '+' : ''}${item.change} km` : "—"}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function renderSummaryCards(summary: any) {
@@ -563,6 +799,26 @@ function renderSummaryCards(summary: any) {
     {
       label: "Active Assets",
       value: summary.active_assets || 0,
+      icon: Car,
+    },
+    {
+      label: "Odometer Records",
+      value: summary.odometer_records || 0,
+      icon: Car,
+    },
+    {
+      label: "Avg Odometer",
+      value: summary.avg_odometer || 0,
+      icon: Car,
+    },
+    {
+      label: "Max Odometer",
+      value: summary.max_odometer || 0,
+      icon: Car,
+    },
+    {
+      label: "Min Odometer",
+      value: summary.min_odometer || 0,
       icon: Car,
     },
     {
